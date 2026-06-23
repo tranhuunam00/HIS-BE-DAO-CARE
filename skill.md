@@ -6,6 +6,7 @@ Tài liệu này định nghĩa các nguyên tắc phát triển, cấu trúc th
 
 ## 1. Công Nghệ & Kiến Trúc Cốt Lõi
 
+*   **Framework chính**: NestJS.
 *   **Ngôn ngữ**: TypeScript (TS).
 *   **Mô hình thiết kế**: Domain-Driven Design (DDD) kết hợp với Clean Architecture.
 *   **Quy trình kiểm thử**: Bắt buộc viết Unit Test cho 100% Use Cases.
@@ -37,12 +38,11 @@ src/modules/<module_name>/
 │   ├── repositories/          # Implement chi tiết của Domain Repositories
 │   └── services/              # Tích hợp cổng thanh toán, SMS, PACS/LIS...
 │
-└── presentation/              # 4. Lớp Giao Diện (Controllers, REST API, GraphQL, WebSockets)
-    ├── http/
-    │   ├── controllers/       # Xử lý HTTP Request/Response
-    │   ├── middlewares/       # Rate limiting, Auth, Validate inputs
-    │   └── routes.ts          # Định nghĩa Route cho Express/NestJS
-    └── swagger/               # Tài liệu OpenAPI của module
+    │   ├── guards/            # NestJS Guards (Auth, Permissions)
+    │   ├── pipes/             # NestJS Pipes (Validation, Transformation)
+    │   ├── <module>.controller.ts # NestJS Controller
+    │   └── <module>.module.ts # NestJS Module
+    └── swagger/               # Tài liệu OpenAPI của module (Swagger Decorators)
 ```
 
 ---
