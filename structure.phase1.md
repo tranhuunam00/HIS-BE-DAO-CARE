@@ -38,12 +38,15 @@ colorFreezeLevel: 2
 * Ngôn ngữ
 * Múi giờ
 * Quốc gia
+* Tiền tệ mặc định
 
 #### Định dạng
 
 * Định dạng ngày
 * Định dạng giờ
 * Định dạng tiền tệ
+* Cấu hình thời gian hết hạn OTP
+* Cấu hình thời gian cho phép hủy/đổi lịch hẹn
 
 #### Mã định danh
 
@@ -70,6 +73,9 @@ colorFreezeLevel: 2
 * Tên cơ sở
 * Mã cơ sở
 * Loại cơ sở
+* Người chịu trách nhiệm chuyên môn kỹ thuật
+* Giấy phép hoạt động chi nhánh
+* Trạng thái hoạt động
 
 #### Liên hệ
 
@@ -82,6 +88,7 @@ colorFreezeLevel: 2
 * Tỉnh thành
 * Quận huyện
 * Địa chỉ chi tiết
+* Tọa độ GPS (Kinh độ, Vĩ độ)
 
 ### Giờ hoạt động
 
@@ -247,6 +254,8 @@ colorFreezeLevel: 2
 * Ngày cấp
 * Ngày hết hạn
 * Nơi cấp
+* Phạm vi hoạt động chuyên môn
+* Chữ ký số / Hình ảnh chữ ký scan
 
 ### Phân công công tác
 
@@ -345,6 +354,8 @@ colorFreezeLevel: 2
 * 10 phút
 * 15 phút
 * 30 phút
+* Cấu hình linh hoạt theo dịch vụ/bác sĩ
+* Giới hạn đặt quá tải (Overbook limit)
 
 ### Lịch bác sĩ
 
@@ -398,6 +409,8 @@ colorFreezeLevel: 2
 * Hoạt chất
 * Hàm lượng
 * Đơn vị
+* Mã liên thông quốc gia
+* Đơn vị quy đổi
 
 #### Cấu hình sử dụng
 
@@ -750,6 +763,8 @@ colorFreezeLevel: 2
 * Giá niêm yết
 * Giá BHYT
 * Giá VIP
+* Thuế suất (VAT)
+* Lịch sử thay đổi giá
 
 #### Trạng thái
 
@@ -787,6 +802,11 @@ colorFreezeLevel: 2
 ### Prescription Template
 
 #### Mẫu đơn thuốc
+
+### Tính năng kỹ thuật
+
+* Quản lý phiên bản (Versioning)
+* Hỗ trợ vẽ/đánh dấu tổn thương (Canvas Drawing)
 
 ---
 
@@ -869,3 +889,44 @@ colorFreezeLevel: 2
 
 * Cấp quyền
 * Thu hồi quyền
+
+---
+
+## 16. CẤU HÌNH TÍCH HỢP
+
+### Cổng thanh toán
+
+* VietQR (Dynamic QR code)
+* VNPay
+* MoMo
+
+### Kênh thông báo
+
+* SMS Brandname
+* Zalo Cloud Connector (ZNS)
+* Email Service (SMTP/SendGrid)
+
+### Thiết bị y tế & PACS
+
+* Cấu hình kết nối LIS (Máy xét nghiệm)
+* Cấu hình kết nối PACS (Hình ảnh y khoa)
+
+---
+
+## 17. QUẢN LÝ BIỂU MẪU IN
+
+### Thiết lập chung
+
+* Thông tin Header (Logo, chi nhánh)
+* Thông tin Footer
+
+### Mẫu biểu chuyên môn
+
+* Phiếu chỉ định cận lâm sàng / thủ thuật
+* Phiếu kết quả cận lâm sàng
+* Mẫu đơn thuốc y tế
+
+### Mẫu biểu tài chính
+
+* Hóa đơn / Biên lai thu tiền
+* Phiếu thu / Phiếu chi
