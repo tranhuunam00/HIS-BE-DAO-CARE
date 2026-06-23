@@ -10,6 +10,8 @@ Tài liệu này định nghĩa các nguyên tắc phát triển, cấu trúc th
 *   **Mô hình thiết kế**: Domain-Driven Design (DDD) kết hợp với Clean Architecture.
 *   **Quy trình kiểm thử**: Bắt buộc viết Unit Test cho 100% Use Cases.
 *   **Tài liệu hóa**: 100% API endpoints phải có tài liệu Swagger/OpenAPI.
+*   **Cơ sở dữ liệu chính**: PostgreSQL.
+*   **Lưu trữ tệp tin**: MinIO (sử dụng cho toàn bộ ảnh, video, tài liệu và tệp tin đính kèm).
 
 ---
 
