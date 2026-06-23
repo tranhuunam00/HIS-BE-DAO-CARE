@@ -1,12 +1,15 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppDataSource } from '../../../../../infrastructure/database/data-source';
+import { DataSource } from 'typeorm';
 import { RoleOrmEntity } from '../../../infrastructure/database/role.entity';
 import { REQUIRE_PERMISSIONS_KEY } from '../decorators/require-permissions.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly dataSource: DataSource
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
@@ -25,7 +28,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     // Load role và permissions của người dùng từ Database
-    const roleRepository = AppDataSource.getRepository(RoleOrmEntity);
+    const roleRepository = this.dataSource.getRepository(RoleOrmEntity);
     const role = await roleRepository.findOne({
       where: { id: userPayload.roleId },
       relations: { permissions: true },

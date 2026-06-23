@@ -2,6 +2,8 @@ import { AppDataSource } from '../data-source';
 import { PermissionOrmEntity } from '../../../modules/auth/infrastructure/database/permission.entity';
 import { RoleOrmEntity } from '../../../modules/auth/infrastructure/database/role.entity';
 import { UserOrmEntity } from '../../../modules/auth/infrastructure/database/user.entity';
+import { OrganizationOrmEntity } from '../../../modules/org/infrastructure/database/organization.entity';
+import { BranchOrmEntity } from '../../../modules/org/infrastructure/database/branch.entity';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -11,6 +13,8 @@ async function seed() {
   const permissionRepository = AppDataSource.getRepository(PermissionOrmEntity);
   const roleRepository = AppDataSource.getRepository(RoleOrmEntity);
   const userRepository = AppDataSource.getRepository(UserOrmEntity);
+  const orgRepository = AppDataSource.getRepository(OrganizationOrmEntity);
+  const branchRepository = AppDataSource.getRepository(BranchOrmEntity);
 
   // 1. Seed Permissions
   const permissionsList = [
@@ -88,6 +92,57 @@ async function seed() {
     console.log(`+ Created default Admin User: ${adminEmail} / Admin@HIS2026!`);
   } else {
     console.log(`~ Admin user ${adminEmail} already exists.`);
+  }
+
+  // 4. Seed Default Organization
+  const orgCode = 'DAO_CARE';
+  let org = await orgRepository.findOneBy({ code: orgCode });
+  if (!org) {
+    org = orgRepository.create({
+      name: 'Hệ thống Phòng khám DAO CARE',
+      shortName: 'DAO CARE',
+      code: orgCode,
+      taxCode: '0102030405',
+      legalRepresentative: 'Trần Hữu Nam',
+      hotline: '19001234',
+      email: 'contact@daocare.vn',
+      address: 'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội',
+      language: 'vi',
+      timezone: 'Asia/Ho_Chi_Minh',
+      country: 'VN',
+      defaultCurrency: 'VND',
+    });
+    org = await orgRepository.save(org);
+    console.log(`+ Created default Organization: ${org.name}`);
+  } else {
+    console.log(`~ Organization ${orgCode} already exists.`);
+  }
+
+  // 5. Seed Default Branch
+  const branchCode = 'CN_HBT_HN';
+  let branch = await branchRepository.findOneBy({ code: branchCode });
+  if (!branch) {
+    branch = branchRepository.create({
+      organizationId: org.id,
+      name: 'Cơ sở Hà Nội - Hai Bà Trưng',
+      code: branchCode,
+      type: 'CLINIC',
+      technicalDirector: 'BS. Trần Hữu Nam',
+      hotline: '024777888',
+      email: 'hbt@daocare.vn',
+      province: 'Hà Nội',
+      district: 'Hai Bà Trưng',
+      addressDetail: 'Số 1 Đại Cồ Việt',
+      latitude: 21.006326,
+      longitude: 105.843132,
+      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      openTime: '08:00',
+      closeTime: '20:00',
+    });
+    await branchRepository.save(branch);
+    console.log(`+ Created default Branch: ${branch.name}`);
+  } else {
+    console.log(`~ Branch ${branchCode} already exists.`);
   }
 
   await AppDataSource.destroy();

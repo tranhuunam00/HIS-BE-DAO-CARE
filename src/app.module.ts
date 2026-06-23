@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppDataSource } from './infrastructure/database/data-source';
 import { AuthModule } from './modules/auth/presentation/http/auth.module';
+import { OrgModule } from './modules/org/presentation/http/org.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './modules/auth/presentation/http/auth.module';
       autoLoadEntities: true,
     }),
     AuthModule,
+    OrgModule,
   ],
   controllers: [AppController],
   providers: [AppService],
