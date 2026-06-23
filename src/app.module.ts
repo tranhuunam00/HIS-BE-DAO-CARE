@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AppDataSource } from './infrastructure/database/data-source';
 import { AuthModule } from './modules/auth/presentation/http/auth.module';
 import { OrgModule } from './modules/org/presentation/http/org.module';
+import { MedicalModule } from './modules/medical/presentation/http/medical.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OrgModule } from './modules/org/presentation/http/org.module';
     }),
     AuthModule,
     OrgModule,
+    MedicalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
