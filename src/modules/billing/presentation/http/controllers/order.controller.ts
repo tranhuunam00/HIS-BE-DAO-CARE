@@ -8,7 +8,8 @@ import { GetOrderByVisitUseCase } from '../../../application/use-cases/get-order
 import { AddOrderItemUseCase } from '../../../application/use-cases/add-order-item.use-case';
 import { UpdateOrderItemUseCase } from '../../../application/use-cases/update-order-item.use-case';
 import { DeleteOrderItemUseCase } from '../../../application/use-cases/delete-order-item.use-case';
-import { AddOrderItemDto, UpdateOrderItemDto, OrderResponseDto } from '../../../application/dtos/order.dto';
+import { RefundOrderUseCase } from '../../../application/use-cases/refund-order.use-case';
+import { AddOrderItemDto, UpdateOrderItemDto, RefundOrderDto, OrderResponseDto } from '../../../application/dtos/order.dto';
 
 @ApiTags('Billing - Orders')
 @Controller('orders')
@@ -21,6 +22,7 @@ export class OrderController {
     private readonly addOrderItemUseCase: AddOrderItemUseCase,
     private readonly updateOrderItemUseCase: UpdateOrderItemUseCase,
     private readonly deleteOrderItemUseCase: DeleteOrderItemUseCase,
+    private readonly refundOrderUseCase: RefundOrderUseCase,
   ) {}
 
   @Get()
@@ -76,5 +78,16 @@ export class OrderController {
     @Param('itemId') itemId: string,
   ): Promise<OrderResponseDto> {
     return await this.deleteOrderItemUseCase.execute(id, itemId);
+  }
+
+  @Post(':id/refund')
+  @RequirePermissions('org:write')
+  @ApiOperation({ summary: 'Hoàn trả & Hủy dịch vụ trong hóa đơn đã thanh toán' })
+  @ApiResponse({ status: 200, type: OrderResponseDto })
+  async refund(
+    @Param('id') id: string,
+    @Body() dto: RefundOrderDto,
+  ): Promise<OrderResponseDto> {
+    return await this.refundOrderUseCase.execute(id, dto);
   }
 }

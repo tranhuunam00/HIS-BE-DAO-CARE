@@ -19,6 +19,7 @@ import { UpdateOrderItemUseCase } from '../../application/use-cases/update-order
 import { DeleteOrderItemUseCase } from '../../application/use-cases/delete-order-item.use-case';
 import { IPaymentRepositoryToken, CreatePaymentUseCase } from '../../application/use-cases/create-payment.use-case';
 import { GetPaymentsByOrderUseCase } from '../../application/use-cases/get-payments-by-order.use-case';
+import { RefundOrderUseCase } from '../../application/use-cases/refund-order.use-case';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { GetPaymentsByOrderUseCase } from '../../application/use-cases/get-payme
     AddOrderItemUseCase,
     UpdateOrderItemUseCase,
     DeleteOrderItemUseCase,
+    RefundOrderUseCase,
     // Payment Use Cases
     CreatePaymentUseCase,
     GetPaymentsByOrderUseCase,

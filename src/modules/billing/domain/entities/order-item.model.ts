@@ -9,5 +9,7 @@ export class OrderItem {
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
     public readonly service?: any,
+    public readonly resultNotes?: string | null,
+    public readonly resultStatus?: string, // 'NONE' | 'PENDING' | 'COMPLETED'
   ) {}
 }

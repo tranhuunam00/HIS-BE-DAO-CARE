@@ -90,6 +90,8 @@ export class AddOrderItemUseCase {
         quantity: item.quantity,
         price: item.price,
         status: item.status,
+        resultNotes: item.resultNotes,
+        resultStatus: item.resultStatus,
         createdAt: item.createdAt!,
         updatedAt: item.updatedAt!,
         service: item.service,

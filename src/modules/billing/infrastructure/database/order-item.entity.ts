@@ -38,6 +38,12 @@ export class OrderItemOrmEntity {
   @Column({ default: 'PENDING' })
   status: string; // 'PENDING' | 'COMPLETED' | 'CANCELLED'
 
+  @Column({ name: 'result_notes', type: 'text', nullable: true })
+  resultNotes: string | null;
+
+  @Column({ name: 'result_status', type: 'varchar', default: 'NONE' })
+  resultStatus: string; // 'NONE' | 'PENDING' | 'COMPLETED'
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

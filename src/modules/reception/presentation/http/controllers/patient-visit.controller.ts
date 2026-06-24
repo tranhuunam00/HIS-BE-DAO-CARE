@@ -10,6 +10,8 @@ import {
   UpdateVitalSignsUseCase,
   TransferRoomUseCase,
   ConfirmResultsWaitUseCase,
+  AcceptPatientUseCase,
+  CompletePatientUseCase,
 } from '../../../application/use-cases/patient-visit.use-cases';
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../../../application/dtos/patient-visit.dto';
 
@@ -25,6 +27,8 @@ export class PatientVisitController {
     private readonly updateVitalSignsUseCase: UpdateVitalSignsUseCase,
     private readonly transferRoomUseCase: TransferRoomUseCase,
     private readonly confirmResultsWaitUseCase: ConfirmResultsWaitUseCase,
+    private readonly acceptPatientUseCase: AcceptPatientUseCase,
+    private readonly completePatientUseCase: CompletePatientUseCase,
   ) {}
 
   @Get()
@@ -82,5 +86,21 @@ export class PatientVisitController {
   @ApiResponse({ status: 200, type: PatientVisitResponseDto })
   async confirmResultsWait(@Param('id') id: string): Promise<PatientVisitResponseDto> {
     return await this.confirmResultsWaitUseCase.execute(id);
+  }
+
+  @Patch(':id/accept')
+  @RequirePermissions('org:write')
+  @ApiOperation({ summary: 'Bác sĩ tiếp nhận bệnh nhân vào phòng khám/CLS' })
+  @ApiResponse({ status: 200, type: PatientVisitResponseDto })
+  async acceptPatient(@Param('id') id: string): Promise<PatientVisitResponseDto> {
+    return await this.acceptPatientUseCase.execute(id);
+  }
+
+  @Patch(':id/complete')
+  @RequirePermissions('org:write')
+  @ApiOperation({ summary: 'Bác sĩ kết thúc khám / kết luận lượt khám' })
+  @ApiResponse({ status: 200, type: PatientVisitResponseDto })
+  async completePatient(@Param('id') id: string): Promise<PatientVisitResponseDto> {
+    return await this.completePatientUseCase.execute(id);
   }
 }

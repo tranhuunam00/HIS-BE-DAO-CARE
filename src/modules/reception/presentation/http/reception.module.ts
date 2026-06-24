@@ -15,7 +15,7 @@ import { PatientVisitController } from './controllers/patient-visit.controller';
 
 import { IPatientRepositoryToken, ListPatientsUseCase, GetPatientUseCase, CreatePatientUseCase, UpdatePatientUseCase } from '../../application/use-cases/patient.use-cases';
 import { IAppointmentRepositoryToken, ListAppointmentsUseCase, GetAppointmentUseCase, CreateAppointmentUseCase, UpdateAppointmentUseCase } from '../../application/use-cases/appointment.use-cases';
-import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase } from '../../application/use-cases/patient-visit.use-cases';
+import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase, AcceptPatientUseCase, CompletePatientUseCase } from '../../application/use-cases/patient-visit.use-cases';
 
 @Module({
   imports: [
@@ -62,6 +62,8 @@ import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisit
     UpdateVitalSignsUseCase,
     TransferRoomUseCase,
     ConfirmResultsWaitUseCase,
+    AcceptPatientUseCase,
+    CompletePatientUseCase,
   ],
   exports: [
     IPatientRepositoryToken,

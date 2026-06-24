@@ -31,6 +31,8 @@ export class UpdateOrderItemUseCase {
     await this.orderRepository.saveItem({
       ...item,
       status: dto.status,
+      resultNotes: dto.resultNotes !== undefined ? dto.resultNotes : item.resultNotes,
+      resultStatus: dto.resultStatus !== undefined ? dto.resultStatus : item.resultStatus,
     });
 
     const savedOrder = await this.orderRepository.findById(orderId);
@@ -75,6 +77,8 @@ export class UpdateOrderItemUseCase {
         quantity: i.quantity,
         price: i.price,
         status: i.status,
+        resultNotes: i.resultNotes,
+        resultStatus: i.resultStatus,
         createdAt: i.createdAt!,
         updatedAt: i.updatedAt!,
         service: i.service,

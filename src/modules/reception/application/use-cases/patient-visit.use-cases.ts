@@ -7,6 +7,8 @@ import type { IAppointmentRepository } from '../../domain/repositories/appointme
 import { StaffAttendanceOrmEntity } from '../../../engine/infrastructure/database/staff-attendance.entity';
 import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../dtos/patient-visit.dto';
+import type { IOrderRepository } from '../../../billing/domain/repositories/order.repository.interface';
+import { IOrderRepositoryToken } from '../../../billing/application/use-cases/list-orders.use-case';
 
 export const IPatientVisitRepositoryToken = 'IPatientVisitRepository';
 export const IAppointmentRepositoryToken = 'IAppointmentRepository';
@@ -446,6 +448,138 @@ export class ConfirmResultsWaitUseCase {
     const updated = await this.repository.save({
       ...visit,
       status: 'WAITING_RESULTS',
+    });
+
+    return this.mapToDto(updated);
+  }
+
+  private mapToDto(model: PatientVisit): PatientVisitResponseDto {
+    return {
+      id: model.id,
+      visitCode: model.visitCode,
+      patientId: model.patientId,
+      patient: model.patient,
+      branchId: model.branchId,
+      branch: model.branch,
+      appointmentId: model.appointmentId,
+      currentRoomId: model.currentRoomId,
+      currentRoom: model.currentRoom,
+      currentDoctorId: model.currentDoctorId,
+      currentDoctor: model.currentDoctor,
+      currentNurseId: model.currentNurseId,
+      currentNurse: model.currentNurse,
+      queueNumber: model.queueNumber,
+      status: model.status,
+      reason: model.reason,
+      pulse: model.pulse,
+      bloodPressure: model.bloodPressure,
+      temperature: model.temperature,
+      weight: model.weight,
+      height: model.height,
+      createdAt: model.createdAt!,
+      updatedAt: model.updatedAt!,
+    };
+  }
+}
+
+@Injectable()
+export class AcceptPatientUseCase {
+  constructor(
+    @Inject(IPatientVisitRepositoryToken)
+    private readonly repository: IPatientVisitRepository,
+  ) {}
+
+  async execute(id: string): Promise<PatientVisitResponseDto> {
+    const visit = await this.repository.findById(id);
+    if (!visit) {
+      throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
+    }
+
+    let newStatus = visit.status;
+    if (visit.status === 'WAITING_CLINICAL_EXAM') {
+      newStatus = 'IN_CLINICAL_EXAM';
+    } else if (visit.status === 'WAITING_CONCLUSION') {
+      newStatus = 'IN_CONCLUSION';
+    } else if (visit.status === 'WAITING_SERVICE') {
+      newStatus = 'IN_SERVICE';
+    } else {
+      throw new BadRequestException(`Bệnh nhân đang ở trạng thái ${visit.status}, không thể tiếp nhận vào khám.`);
+    }
+
+    const updated = await this.repository.save({
+      ...visit,
+      status: newStatus,
+    });
+
+    return this.mapToDto(updated);
+  }
+
+  private mapToDto(model: PatientVisit): PatientVisitResponseDto {
+    return {
+      id: model.id,
+      visitCode: model.visitCode,
+      patientId: model.patientId,
+      patient: model.patient,
+      branchId: model.branchId,
+      branch: model.branch,
+      appointmentId: model.appointmentId,
+      currentRoomId: model.currentRoomId,
+      currentRoom: model.currentRoom,
+      currentDoctorId: model.currentDoctorId,
+      currentDoctor: model.currentDoctor,
+      currentNurseId: model.currentNurseId,
+      currentNurse: model.currentNurse,
+      queueNumber: model.queueNumber,
+      status: model.status,
+      reason: model.reason,
+      pulse: model.pulse,
+      bloodPressure: model.bloodPressure,
+      temperature: model.temperature,
+      weight: model.weight,
+      height: model.height,
+      createdAt: model.createdAt!,
+      updatedAt: model.updatedAt!,
+    };
+  }
+}
+
+@Injectable()
+export class CompletePatientUseCase {
+  constructor(
+    @Inject(IPatientVisitRepositoryToken)
+    private readonly repository: IPatientVisitRepository,
+    @Inject(IOrderRepositoryToken)
+    private readonly orderRepository: IOrderRepository,
+  ) {}
+
+  async execute(id: string): Promise<PatientVisitResponseDto> {
+    const visit = await this.repository.findById(id);
+    if (!visit) {
+      throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
+    }
+
+    let newStatus = visit.status;
+    if (visit.status === 'IN_CLINICAL_EXAM') {
+      // Check if they ordered any service items that are PENDING
+      const order = await this.orderRepository.findByVisitId(id);
+      const hasPendingItems = order && order.items && order.items.some(
+        (item) => item.status === 'PENDING'
+      );
+
+      if (hasPendingItems) {
+        newStatus = 'CLINICAL_EXAM_DONE';
+      } else {
+        newStatus = 'COMPLETED';
+      }
+    } else if (visit.status === 'IN_CONCLUSION') {
+      newStatus = 'COMPLETED';
+    } else {
+      throw new BadRequestException(`Bệnh nhân đang ở trạng thái ${visit.status}, không thể kết thúc.`);
+    }
+
+    const updated = await this.repository.save({
+      ...visit,
+      status: newStatus,
     });
 
     return this.mapToDto(updated);

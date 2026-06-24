@@ -43,6 +43,8 @@ export class OrderRepository implements IOrderRepository {
       entity.createdAt,
       entity.updatedAt,
       entity.service,
+      entity.resultNotes,
+      entity.resultStatus,
     );
   }
 
