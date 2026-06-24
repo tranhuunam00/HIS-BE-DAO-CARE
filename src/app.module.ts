@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/presentation/http/auth.module';
 import { OrgModule } from './modules/org/presentation/http/org.module';
 import { MedicalModule } from './modules/medical/presentation/http/medical.module';
 import { EngineModule } from './modules/engine/presentation/http/engine.module';
+import { FormsModule } from './modules/forms/presentation/http/forms.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { EngineModule } from './modules/engine/presentation/http/engine.module';
     OrgModule,
     MedicalModule,
     EngineModule,
+    FormsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
