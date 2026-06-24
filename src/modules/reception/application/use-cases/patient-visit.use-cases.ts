@@ -1,11 +1,12 @@
 import { Inject, Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Like } from 'typeorm';
 import { PatientVisit } from '../../domain/entities/patient-visit.model';
 import type { IPatientVisitRepository } from '../../domain/repositories/patient-visit.repository.interface';
 import type { IAppointmentRepository } from '../../domain/repositories/appointment.repository.interface';
 import { StaffAttendanceOrmEntity } from '../../../engine/infrastructure/database/staff-attendance.entity';
 import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../dtos/patient-visit.dto';
 import type { IOrderRepository } from '../../../billing/domain/repositories/order.repository.interface';
 import { IOrderRepositoryToken } from '../../../billing/application/use-cases/list-orders.use-case';
@@ -550,6 +551,8 @@ export class CompletePatientUseCase {
     private readonly repository: IPatientVisitRepository,
     @Inject(IOrderRepositoryToken)
     private readonly orderRepository: IOrderRepository,
+    @InjectRepository(RoomOrmEntity)
+    private readonly roomRepository: Repository<RoomOrmEntity>,
   ) {}
 
   async execute(id: string): Promise<PatientVisitResponseDto> {
@@ -559,6 +562,9 @@ export class CompletePatientUseCase {
     }
 
     let newStatus = visit.status;
+    let nextRoomId = visit.currentRoomId;
+    let nextDoctorId = visit.currentDoctorId;
+
     if (visit.status === 'IN_CLINICAL_EXAM') {
       // Check if they ordered any service items that are PENDING
       const order = await this.orderRepository.findByVisitId(id);
@@ -568,6 +574,19 @@ export class CompletePatientUseCase {
 
       if (hasPendingItems) {
         newStatus = 'CLINICAL_EXAM_DONE';
+        // Transfer to coordination/reception room
+        const coordRoom = await this.roomRepository.findOne({
+          where: [
+            { branchId: visit.branchId, code: 'PK105' },
+            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Tiếp Đón%') },
+            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Lễ Tân%') },
+            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Điều phối%') }
+          ]
+        });
+        if (coordRoom) {
+          nextRoomId = coordRoom.id;
+          nextDoctorId = null;
+        }
       } else {
         newStatus = 'COMPLETED';
       }
@@ -580,6 +599,8 @@ export class CompletePatientUseCase {
     const updated = await this.repository.save({
       ...visit,
       status: newStatus,
+      currentRoomId: nextRoomId,
+      currentDoctorId: nextDoctorId,
     });
 
     return this.mapToDto(updated);
