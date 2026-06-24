@@ -9,6 +9,7 @@ import {
   CheckInUseCase,
   UpdateVitalSignsUseCase,
   TransferRoomUseCase,
+  ConfirmResultsWaitUseCase,
 } from '../../../application/use-cases/patient-visit.use-cases';
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../../../application/dtos/patient-visit.dto';
 
@@ -23,6 +24,7 @@ export class PatientVisitController {
     private readonly checkInUseCase: CheckInUseCase,
     private readonly updateVitalSignsUseCase: UpdateVitalSignsUseCase,
     private readonly transferRoomUseCase: TransferRoomUseCase,
+    private readonly confirmResultsWaitUseCase: ConfirmResultsWaitUseCase,
   ) {}
 
   @Get()
@@ -72,5 +74,13 @@ export class PatientVisitController {
   @ApiResponse({ status: 200, type: PatientVisitResponseDto })
   async transferRoom(@Param('id') id: string, @Body() dto: TransferRoomDto): Promise<PatientVisitResponseDto> {
     return await this.transferRoomUseCase.execute(id, dto);
+  }
+
+  @Patch(':id/confirm-results-wait')
+  @RequirePermissions('org:write')
+  @ApiOperation({ summary: 'Xác nhận chờ kết quả khi đã xong hết dịch vụ' })
+  @ApiResponse({ status: 200, type: PatientVisitResponseDto })
+  async confirmResultsWait(@Param('id') id: string): Promise<PatientVisitResponseDto> {
+    return await this.confirmResultsWaitUseCase.execute(id);
   }
 }

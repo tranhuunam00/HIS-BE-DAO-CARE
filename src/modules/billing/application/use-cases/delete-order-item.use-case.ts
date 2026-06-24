@@ -1,5 +1,8 @@
 import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { OrderResponseDto } from '../dtos/order.dto';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
@@ -9,6 +12,8 @@ export class DeleteOrderItemUseCase {
   constructor(
     @Inject(IOrderRepositoryToken)
     private readonly orderRepository: IOrderRepository,
+    @InjectRepository(PatientVisitOrmEntity)
+    private readonly visitRepository: Repository<PatientVisitOrmEntity>,
   ) {}
 
   async execute(orderId: string, itemId: string): Promise<OrderResponseDto> {
@@ -41,6 +46,22 @@ export class DeleteOrderItemUseCase {
       ...updatedOrder,
       totalAmount,
     });
+
+    // Update patient visit status
+    if (savedOrder && savedOrder.items) {
+      const allCompleted = savedOrder.items.length > 0 && savedOrder.items.every(
+        (i) => i.status === 'COMPLETED' || i.status === 'CANCELLED',
+      );
+      const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
+      if (visit) {
+        if (allCompleted) {
+          if (visit.status !== 'ALL_SERVICES_DONE') {
+            visit.status = 'ALL_SERVICES_DONE';
+            await this.visitRepository.save(visit);
+          }
+        }
+      }
+    }
 
     return {
       id: savedOrder.id,

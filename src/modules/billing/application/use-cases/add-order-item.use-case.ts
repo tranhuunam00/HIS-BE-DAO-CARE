@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { ServiceOrmEntity } from '../../../medical/infrastructure/database/service.entity';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { AddOrderItemDto, OrderResponseDto } from '../dtos/order.dto';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
@@ -14,6 +15,8 @@ export class AddOrderItemUseCase {
     private readonly orderRepository: IOrderRepository,
     @InjectRepository(ServiceOrmEntity)
     private readonly serviceRepository: Repository<ServiceOrmEntity>,
+    @InjectRepository(PatientVisitOrmEntity)
+    private readonly visitRepository: Repository<PatientVisitOrmEntity>,
   ) {}
 
   async execute(orderId: string, dto: AddOrderItemDto): Promise<OrderResponseDto> {
@@ -61,6 +64,13 @@ export class AddOrderItemUseCase {
       ...updatedOrder,
       totalAmount,
     });
+
+    // Update patient visit status to PENDING_PAYMENT
+    const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
+    if (visit) {
+      visit.status = 'PENDING_PAYMENT';
+      await this.visitRepository.save(visit);
+    }
 
     return {
       id: savedOrder.id,

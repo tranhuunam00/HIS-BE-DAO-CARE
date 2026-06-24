@@ -1,5 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { UpdateOrderItemDto, OrderResponseDto } from '../dtos/order.dto';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
@@ -9,6 +12,8 @@ export class UpdateOrderItemUseCase {
   constructor(
     @Inject(IOrderRepositoryToken)
     private readonly orderRepository: IOrderRepository,
+    @InjectRepository(PatientVisitOrmEntity)
+    private readonly visitRepository: Repository<PatientVisitOrmEntity>,
   ) {}
 
   async execute(orderId: string, itemId: string, dto: UpdateOrderItemDto): Promise<OrderResponseDto> {
@@ -29,6 +34,29 @@ export class UpdateOrderItemUseCase {
     });
 
     const savedOrder = await this.orderRepository.findById(orderId);
+
+    // Update patient visit status
+    if (savedOrder && savedOrder.items) {
+      const allCompleted = savedOrder.items.length > 0 && savedOrder.items.every(
+        (i) => i.status === 'COMPLETED' || i.status === 'CANCELLED',
+      );
+      const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
+      if (visit) {
+        if (allCompleted) {
+          if (visit.status !== 'ALL_SERVICES_DONE') {
+            visit.status = 'ALL_SERVICES_DONE';
+            await this.visitRepository.save(visit);
+          }
+        } else {
+          // If some items are completed (or executing), set visit status to IN_SERVICE
+          const hasCompleted = savedOrder.items.some((i) => i.status === 'COMPLETED');
+          if (hasCompleted && visit.status === 'WAITING_SERVICE') {
+            visit.status = 'IN_SERVICE';
+            await this.visitRepository.save(visit);
+          }
+        }
+      }
+    }
     return {
       id: savedOrder!.id,
       orderCode: savedOrder!.orderCode,

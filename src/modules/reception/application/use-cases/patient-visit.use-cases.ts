@@ -1,7 +1,11 @@
-import { Inject, Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { PatientVisit } from '../../domain/entities/patient-visit.model';
 import type { IPatientVisitRepository } from '../../domain/repositories/patient-visit.repository.interface';
 import type { IAppointmentRepository } from '../../domain/repositories/appointment.repository.interface';
+import { StaffAttendanceOrmEntity } from '../../../engine/infrastructure/database/staff-attendance.entity';
+import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../dtos/patient-visit.dto';
 
 export const IPatientVisitRepositoryToken = 'IPatientVisitRepository';
@@ -99,10 +103,71 @@ export class CheckInUseCase {
     private readonly visitRepository: IPatientVisitRepository,
     @Inject(IAppointmentRepositoryToken)
     private readonly appointmentRepository: IAppointmentRepository,
+    @InjectRepository(StaffAttendanceOrmEntity)
+    private readonly attendanceRepository: Repository<StaffAttendanceOrmEntity>,
+    @InjectRepository(StaffAssignmentOrmEntity)
+    private readonly staffAssignmentRepository: Repository<StaffAssignmentOrmEntity>,
   ) {}
+
+  private async validateRoomAndDoctor(
+    branchId: string,
+    roomId?: string,
+    doctorId?: string,
+  ): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (doctorId) {
+      const docAttendance = await this.attendanceRepository.findOne({
+        where: {
+          staffId: doctorId,
+          branchId,
+          date: today,
+          status: 'CHECKED_IN',
+        },
+        relations: { staff: true },
+      });
+      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
+        throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
+      }
+    }
+
+    if (roomId) {
+      const assignments = await this.staffAssignmentRepository.find({
+        where: { roomId, branchId },
+      });
+      const staffIds = assignments.map((a) => a.staffId);
+
+      if (staffIds.length === 0) {
+        throw new BadRequestException('Phòng khám này hiện chưa được phân công nhân sự nào');
+      }
+
+      const activeAttendances = await this.attendanceRepository.find({
+        where: {
+          staffId: In(staffIds),
+          branchId,
+          date: today,
+          status: 'CHECKED_IN',
+        },
+        relations: { staff: true },
+      });
+
+      const hasActiveDoctor = activeAttendances.some(
+        (a) => a.staff && a.staff.title === 'DOCTOR',
+      );
+
+      if (!hasActiveDoctor) {
+        throw new BadRequestException('Phòng khám được chọn hiện không có bác sĩ nào đang hoạt động (chưa check-in hoặc đã check-out)');
+      }
+    }
+  }
 
   async execute(dto: CheckInDto): Promise<PatientVisitResponseDto> {
     const today = new Date().toISOString().split('T')[0];
+
+    // 0. Validate Room and Doctor checked-in status
+    if (dto.currentRoomId || dto.currentDoctorId) {
+      await this.validateRoomAndDoctor(dto.branchId, dto.currentRoomId, dto.currentDoctorId);
+    }
 
     // 1. Get next sequential Queue Number for this branch today
     const queueNumber = await this.visitRepository.getNextQueueNumber(dto.branchId, today);
@@ -134,7 +199,7 @@ export class CheckInUseCase {
       currentDoctorId: dto.currentDoctorId || null,
       currentNurseId: null,
       queueNumber,
-      status: 'WAITING',
+      status: dto.currentRoomId ? 'WAITING_CLINICAL_EXAM' : 'ADMITTED',
       reason: dto.reason || null,
       pulse: dto.pulse || null,
       bloodPressure: dto.bloodPressure || null,
@@ -230,12 +295,73 @@ export class TransferRoomUseCase {
   constructor(
     @Inject(IPatientVisitRepositoryToken)
     private readonly repository: IPatientVisitRepository,
+    @InjectRepository(StaffAttendanceOrmEntity)
+    private readonly attendanceRepository: Repository<StaffAttendanceOrmEntity>,
+    @InjectRepository(StaffAssignmentOrmEntity)
+    private readonly staffAssignmentRepository: Repository<StaffAssignmentOrmEntity>,
   ) {}
+
+  private async validateRoomAndDoctor(
+    branchId: string,
+    roomId?: string,
+    doctorId?: string,
+  ): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (doctorId) {
+      const docAttendance = await this.attendanceRepository.findOne({
+        where: {
+          staffId: doctorId,
+          branchId,
+          date: today,
+          status: 'CHECKED_IN',
+        },
+        relations: { staff: true },
+      });
+      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
+        throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
+      }
+    }
+
+    if (roomId) {
+      const assignments = await this.staffAssignmentRepository.find({
+        where: { roomId, branchId },
+      });
+      const staffIds = assignments.map((a) => a.staffId);
+
+      if (staffIds.length === 0) {
+        throw new BadRequestException('Phòng khám này hiện chưa được phân công nhân sự nào');
+      }
+
+      const activeAttendances = await this.attendanceRepository.find({
+        where: {
+          staffId: In(staffIds),
+          branchId,
+          date: today,
+          status: 'CHECKED_IN',
+        },
+        relations: { staff: true },
+      });
+
+      const hasActiveDoctor = activeAttendances.some(
+        (a) => a.staff && a.staff.title === 'DOCTOR',
+      );
+
+      if (!hasActiveDoctor) {
+        throw new BadRequestException('Phòng khám được chọn hiện không có bác sĩ nào đang hoạt động (chưa check-in hoặc đã check-out)');
+      }
+    }
+  }
 
   async execute(id: string, dto: TransferRoomDto): Promise<PatientVisitResponseDto> {
     const visit = await this.repository.findById(id);
     if (!visit) {
       throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
+    }
+
+    // Validate Room and Doctor checked-in status
+    if (dto.roomId || dto.doctorId) {
+      await this.validateRoomAndDoctor(visit.branchId, dto.roomId, dto.doctorId);
     }
 
     const updated = await this.repository.save({
@@ -277,3 +403,58 @@ export class TransferRoomUseCase {
     };
   }
 }
+
+@Injectable()
+export class ConfirmResultsWaitUseCase {
+  constructor(
+    @Inject(IPatientVisitRepositoryToken)
+    private readonly repository: IPatientVisitRepository,
+  ) {}
+
+  async execute(id: string): Promise<PatientVisitResponseDto> {
+    const visit = await this.repository.findById(id);
+    if (!visit) {
+      throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
+    }
+
+    if (visit.status !== 'ALL_SERVICES_DONE') {
+      throw new BadRequestException('Lượt khám chưa ở trạng thái hoàn thành tất cả dịch vụ (ALL_SERVICES_DONE)');
+    }
+
+    const updated = await this.repository.save({
+      ...visit,
+      status: 'WAITING_RESULTS',
+    });
+
+    return this.mapToDto(updated);
+  }
+
+  private mapToDto(model: PatientVisit): PatientVisitResponseDto {
+    return {
+      id: model.id,
+      visitCode: model.visitCode,
+      patientId: model.patientId,
+      patient: model.patient,
+      branchId: model.branchId,
+      branch: model.branch,
+      appointmentId: model.appointmentId,
+      currentRoomId: model.currentRoomId,
+      currentRoom: model.currentRoom,
+      currentDoctorId: model.currentDoctorId,
+      currentDoctor: model.currentDoctor,
+      currentNurseId: model.currentNurseId,
+      currentNurse: model.currentNurse,
+      queueNumber: model.queueNumber,
+      status: model.status,
+      reason: model.reason,
+      pulse: model.pulse,
+      bloodPressure: model.bloodPressure,
+      temperature: model.temperature,
+      weight: model.weight,
+      height: model.height,
+      createdAt: model.createdAt!,
+      updatedAt: model.updatedAt!,
+    };
+  }
+}
+

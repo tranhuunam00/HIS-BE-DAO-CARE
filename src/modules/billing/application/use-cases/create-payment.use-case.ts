@@ -1,6 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { CreatePaymentDto, PaymentResponseDto } from '../dtos/payment.dto';
 
 export const IPaymentRepositoryToken = 'IPaymentRepository';
@@ -13,6 +16,8 @@ export class CreatePaymentUseCase {
     private readonly paymentRepository: IPaymentRepository,
     @Inject(IOrderRepositoryToken)
     private readonly orderRepository: IOrderRepository,
+    @InjectRepository(PatientVisitOrmEntity)
+    private readonly visitRepository: Repository<PatientVisitOrmEntity>,
   ) {}
 
   async execute(dto: CreatePaymentDto): Promise<PaymentResponseDto> {
@@ -37,6 +42,13 @@ export class CreatePaymentUseCase {
       status: 'PAID',
     });
 
+    // Update patient visit status to WAITING_SERVICE
+    const visit = await this.visitRepository.findOne({ where: { id: order.visitId } });
+    if (visit) {
+      visit.status = 'WAITING_SERVICE';
+      await this.visitRepository.save(visit);
+    }
+
     return {
       id: payment.id,
       paymentCode: payment.paymentCode,
@@ -51,3 +63,4 @@ export class CreatePaymentUseCase {
     };
   }
 }
+

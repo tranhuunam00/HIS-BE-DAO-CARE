@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PatientOrmEntity } from '../../infrastructure/database/patient.entity';
 import { AppointmentOrmEntity } from '../../infrastructure/database/appointment.entity';
 import { PatientVisitOrmEntity } from '../../infrastructure/database/patient-visit.entity';
+import { StaffAttendanceOrmEntity } from '../../../engine/infrastructure/database/staff-attendance.entity';
+import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
 import { PatientRepository } from '../../infrastructure/repositories/patient.repository';
 import { AppointmentRepository } from '../../infrastructure/repositories/appointment.repository';
 import { PatientVisitRepository } from '../../infrastructure/repositories/patient-visit.repository';
@@ -13,7 +15,7 @@ import { PatientVisitController } from './controllers/patient-visit.controller';
 
 import { IPatientRepositoryToken, ListPatientsUseCase, GetPatientUseCase, CreatePatientUseCase, UpdatePatientUseCase } from '../../application/use-cases/patient.use-cases';
 import { IAppointmentRepositoryToken, ListAppointmentsUseCase, GetAppointmentUseCase, CreateAppointmentUseCase, UpdateAppointmentUseCase } from '../../application/use-cases/appointment.use-cases';
-import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase } from '../../application/use-cases/patient-visit.use-cases';
+import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase } from '../../application/use-cases/patient-visit.use-cases';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisit
       PatientOrmEntity,
       AppointmentOrmEntity,
       PatientVisitOrmEntity,
+      StaffAttendanceOrmEntity,
+      StaffAssignmentOrmEntity,
     ]),
   ],
   controllers: [
@@ -57,6 +61,7 @@ import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisit
     CheckInUseCase,
     UpdateVitalSignsUseCase,
     TransferRoomUseCase,
+    ConfirmResultsWaitUseCase,
   ],
   exports: [
     IPatientRepositoryToken,
