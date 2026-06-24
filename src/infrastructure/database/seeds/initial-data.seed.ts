@@ -352,6 +352,8 @@ async function seed() {
     { code: 'TMH', name: 'Tai Mũi Họng' },
     { code: 'RANGHAM', name: 'Răng Hàm Mặt' },
     { code: 'TIMMACH', name: 'Tim mạch' },
+    { code: 'HOHAP', name: 'Hô hấp' },
+    { code: 'NOITIET', name: 'Nội tiết' },
   ];
 
   const dbSpecialties: Record<string, SpecialtyOrmEntity> = {};
@@ -367,11 +369,58 @@ async function seed() {
 
   // ─── 10. Seed Services ─────────────────────────────────────────────────────
   const servicesList = [
-    { code: 'DV_KN_NOI', name: 'Khám Nội tổng quát', category: 'EXAMINATION', specialty: 'NOI', duration: 20, insuranceCode: '01.105' },
-    { code: 'DV_KN_TIMMACH', name: 'Khám Tim mạch', category: 'EXAMINATION', specialty: 'TIMMACH', duration: 30, insuranceCode: '01.201' },
-    { code: 'DV_SIEAM_BNG', name: 'Siêu âm bụng tổng quát', category: 'IMAGING', specialty: 'NOI', duration: 20, insuranceCode: '35.01' },
-    { code: 'DV_XN_MAUCT', name: 'Xét nghiệm máu tổng quát', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.001' },
-    { code: 'DV_KN_NHI', name: 'Khám Nhi khoa', category: 'EXAMINATION', specialty: 'NHI', duration: 20, insuranceCode: '01.301' },
+    { code: 'DV_KN_NOI', name: 'Khám Nội tổng quát', category: 'EXAMINATION', specialty: 'NOI', duration: 20, insuranceCode: '01.105', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KN_TIMMACH', name: 'Khám Tim mạch', category: 'EXAMINATION', specialty: 'TIMMACH', duration: 30, insuranceCode: '01.201', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_SIEAM_BNG', name: 'Siêu âm bụng tổng quát', category: 'IMAGING', specialty: 'NOI', duration: 20, insuranceCode: '35.01', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_XN_MAUCT', name: 'Xét nghiệm máu tổng quát', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.001', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KN_NHI', name: 'Khám Nhi khoa', category: 'EXAMINATION', specialty: 'NHI', duration: 20, insuranceCode: '01.301', listedPrice: 200000, insurancePrice: 150000 },
+    
+    // Expanded Examination services
+    { code: 'DV_KSK_TQ', name: 'Khám sức khỏe tổng quát', category: 'EXAMINATION', specialty: 'NOI', duration: 30, insuranceCode: '01.001', listedPrice: 300000, insurancePrice: 220000 },
+    { code: 'DV_KDK', name: 'Khám định kỳ', category: 'EXAMINATION', specialty: 'NOI', duration: 20, insuranceCode: '01.002', listedPrice: 150000, insurancePrice: 100000 },
+    { code: 'DV_KN_NHI_TQ', name: 'Khám nhi tổng quát', category: 'EXAMINATION', specialty: 'NHI', duration: 20, insuranceCode: '01.302', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KTT_NHI', name: 'Khám tăng trưởng trẻ em', category: 'EXAMINATION', specialty: 'NHI', duration: 30, insuranceCode: '01.303', listedPrice: 250000, insurancePrice: 180000 },
+    { code: 'DV_KN_HOHAP', name: 'Khám Hô hấp', category: 'EXAMINATION', specialty: 'HOHAP', duration: 20, insuranceCode: '01.202', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KN_NOITIET', name: 'Khám Nội tiết', category: 'EXAMINATION', specialty: 'NOITIET', duration: 20, insuranceCode: '01.203', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KN_NGOAI_TQ', name: 'Khám Ngoại tổng quát', category: 'EXAMINATION', specialty: 'NGOAI', duration: 20, insuranceCode: '01.106', listedPrice: 150000, insurancePrice: 100000 },
+    { code: 'DV_KN_CHINH_HINH', name: 'Khám Chấn thương chỉnh hình', category: 'EXAMINATION', specialty: 'NGOAI', duration: 20, insuranceCode: '01.107', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_KN_NHA_TQ', name: 'Khám nha tổng quát', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 20, insuranceCode: '01.401', listedPrice: 100000, insurancePrice: 70000 },
+    { code: 'DV_NHA_CHINH', name: 'Chỉnh nha', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 40, insuranceCode: '01.402', listedPrice: 500000, insurancePrice: 400000 },
+    { code: 'DV_NHA_IMPLANT', name: 'Cấy ghép Implant', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 60, insuranceCode: '01.403', listedPrice: 1500000, insurancePrice: 1200000 },
+    
+    // Expanded Lab Test services
+    { code: 'DV_XN_CBC', name: 'Tổng phân tích tế bào máu ngoại vi - CBC', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.002', listedPrice: 80000, insurancePrice: 60000 },
+    { code: 'DV_XN_DONGMAU', name: 'Đông máu cơ bản PT/APTT/INR', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.003', listedPrice: 120000, insurancePrice: 90000 },
+    { code: 'DV_XN_GAN_AST', name: 'Định lượng AST - SGOT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.004', listedPrice: 50000, insurancePrice: 40000 },
+    { code: 'DV_XN_GAN_ALT', name: 'Định lượng ALT - SGPT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.005', listedPrice: 50000, insurancePrice: 40000 },
+    { code: 'DV_XN_GAN_GGT', name: 'Định lượng GGT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.006', listedPrice: 60000, insurancePrice: 45000 },
+    { code: 'DV_XN_GAN_BILI', name: 'Định lượng Bilirubin toàn phần', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.007', listedPrice: 50000, insurancePrice: 38000 },
+    { code: 'DV_XN_URE', name: 'Định lượng Ure', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.008', listedPrice: 45000, insurancePrice: 35000 },
+    { code: 'DV_XN_CREATININ', name: 'Định lượng Creatinin', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.009', listedPrice: 45000, insurancePrice: 35000 },
+    { code: 'DV_XN_GLUCOSE', name: 'Định lượng Glucose máu', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.010', listedPrice: 40000, insurancePrice: 30000 },
+    { code: 'DV_XN_HBA1C', name: 'Định lượng HbA1c', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.011', listedPrice: 150000, insurancePrice: 120000 },
+    { code: 'DV_XN_CHOL', name: 'Định lượng Cholesterol toàn phần', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.012', listedPrice: 50000, insurancePrice: 40000 },
+    { code: 'DV_XN_TRIGLY', name: 'Định lượng Triglycerid', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.013', listedPrice: 50000, insurancePrice: 40000 },
+    { code: 'DV_XN_URIC', name: 'Định lượng Acid Uric', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.014', listedPrice: 50000, insurancePrice: 40000 },
+    { code: 'DV_XN_NUOCTIEU_10', name: 'Tổng phân tích nước tiểu 10 thông số', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.015', listedPrice: 60000, insurancePrice: 45000 },
+    
+    // Expanded Imaging services
+    { code: 'DV_SA_GIAP', name: 'Siêu âm tuyến giáp', category: 'IMAGING', specialty: 'NOI', duration: 15, insuranceCode: 'SA.001', listedPrice: 150000, insurancePrice: 110000 },
+    { code: 'DV_SA_VU', name: 'Siêu âm vú hai bên', category: 'IMAGING', specialty: 'SAN', duration: 15, insuranceCode: 'SA.002', listedPrice: 180000, insurancePrice: 130000 },
+    { code: 'DV_SA_TIM', name: 'Siêu âm tim Doppler màu', category: 'IMAGING', specialty: 'TIMMACH', duration: 30, insuranceCode: 'SA.003', listedPrice: 350000, insurancePrice: 280000 },
+    { code: 'DV_XQ_NGUC', name: 'X-quang ngực thẳng', category: 'IMAGING', specialty: 'NOI', duration: 10, insuranceCode: 'XQ.001', listedPrice: 120000, insurancePrice: 90000 },
+    { code: 'DV_XQ_COTSONG_CO', name: 'X-quang cột sống cổ', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.002', listedPrice: 140000, insurancePrice: 110000 },
+    { code: 'DV_XQ_COTSONG_TL', name: 'X-quang cột sống thắt lưng', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.003', listedPrice: 140000, insurancePrice: 110000 },
+
+    // Expanded Procedure services
+    { code: 'DV_TT_LAYCAORANG', name: 'Lấy cao răng và đánh bóng', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 30, insuranceCode: 'TT.001', listedPrice: 150000, insurancePrice: 100000 },
+    { code: 'DV_TT_NHORANG_SUA', name: 'Nhổ răng sữa bôi/tê', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 15, insuranceCode: 'TT.002', listedPrice: 50000, insurancePrice: 30000 },
+    { code: 'DV_TT_NHORANG_KHON', name: 'Nhổ răng khôn mọc lệch', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 45, insuranceCode: 'TT.003', listedPrice: 1000000, insurancePrice: 800000 },
+    { code: 'DV_TT_TRAMRANG', name: 'Trám răng thẩm mỹ Composite', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 20, insuranceCode: 'TT.004', listedPrice: 200000, insurancePrice: 150000 },
+    { code: 'DV_TT_NOISOI_TMH', name: 'Nội soi Tai Mũi Họng ống cứng', category: 'PROCEDURE', specialty: 'TMH', duration: 15, insuranceCode: 'TT.005', listedPrice: 200000, insurancePrice: 160000 },
+    { code: 'DV_TT_HUTDICH_MUI', name: 'Hút dịch mũi bằng máy', category: 'PROCEDURE', specialty: 'TMH', duration: 10, insuranceCode: 'TT.006', listedPrice: 50000, insurancePrice: 35000 },
+    { code: 'DV_TT_KHAUVT', name: 'Khâu vết thương phần mềm dưới 5cm', category: 'PROCEDURE', specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.007', listedPrice: 300000, insurancePrice: 220000 },
+    { code: 'DV_TT_CATCHI', name: 'Cắt chỉ vết thương', category: 'PROCEDURE', specialty: 'NGOAI', duration: 10, insuranceCode: 'TT.008', listedPrice: 50000, insurancePrice: 30000 },
   ];
 
   for (const sv of servicesList) {
@@ -393,7 +442,7 @@ async function seed() {
       const listedPrice = servicePriceRepository.create({
         serviceId: service.id,
         priceType: 'LISTED',
-        amount: 200000,
+        amount: sv.listedPrice ?? 200000,
         vatRate: 5,
         effectiveDate: new Date('2026-01-01'),
       });
@@ -402,7 +451,7 @@ async function seed() {
       const insurancePrice = servicePriceRepository.create({
         serviceId: service.id,
         priceType: 'INSURANCE',
-        amount: 150000,
+        amount: sv.insurancePrice ?? 150000,
         vatRate: 0,
         effectiveDate: new Date('2026-01-01'),
       });
@@ -423,6 +472,14 @@ async function seed() {
     { code: 'P07', name: 'Rối loạn liên quan đến thai kỳ ngắn và trọng lượng thấp khi sinh', nameEn: 'Disorders related to short gestation', specialty: 'SAN' },
     { code: 'A09', name: 'Tiêu chảy và viêm dạ dày ruột', nameEn: 'Diarrhoea and gastroenteritis', specialty: 'NHI' },
     { code: 'G43', name: 'Đau nửa đầu', nameEn: 'Migraine', specialty: 'NOI' },
+    
+    // Expanded ICD-10 Codes
+    { code: 'Z00', name: 'Khám sức khỏe tổng quát', nameEn: 'General examination and investigation of persons without complaint or reported diagnosis', specialty: 'NOI' },
+    { code: 'Z01', name: 'Khám chuyên khoa định kỳ', nameEn: 'Other special examinations and investigations of persons without complaint or reported diagnosis', specialty: 'NOI' },
+    { code: 'M17', name: 'Thoái hóa khớp gối', nameEn: 'Gonarthrosis [arthrosis of knee]', specialty: 'NGOAI' },
+    { code: 'K05', name: 'Viêm lợi và bệnh nha chu', nameEn: 'Gingivitis and periodontal diseases', specialty: 'RANGHAM' },
+    { code: 'J30', name: 'Viêm mũi dị ứng và vận mạch', nameEn: 'Vasomotor and allergic rhinitis', specialty: 'TMH' },
+    { code: 'I15', name: 'Tăng huyết áp thứ phát', nameEn: 'Secondary hypertension', specialty: 'TIMMACH' },
   ];
 
   for (const icd of icd10List) {
@@ -500,6 +557,116 @@ async function seed() {
       usageUnit: 'mg',
       routeOfAdministration: 'ORAL',
       maxDosePerDay: '2000mg/ngày',
+      groupName: 'Nội tiết - Đái tháo đường',
+    },
+
+    // Expanded Medications
+    {
+      code: 'TH_CEFU_500',
+      nationalCode: 'VD-67890-18',
+      name: 'Cefuroxime 500mg',
+      activeIngredient: 'Cefuroxime',
+      concentration: '500mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '1000mg/ngày',
+      groupName: 'Kháng sinh',
+    },
+    {
+      code: 'TH_AUG_1G',
+      nationalCode: 'VN-12345-20',
+      name: 'Augmentin 1g',
+      activeIngredient: 'Amoxicillin + Clavulanic acid',
+      concentration: '1000mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '2000mg/ngày',
+      groupName: 'Kháng sinh',
+    },
+    {
+      code: 'TH_IBU_400',
+      nationalCode: 'VD-78901-19',
+      name: 'Ibuprofen 400mg',
+      activeIngredient: 'Ibuprofen',
+      concentration: '400mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '1200mg/ngày',
+      groupName: 'Giảm đau - Kháng viêm',
+    },
+    {
+      code: 'TH_PARACET_SUI',
+      nationalCode: 'VD-89012-20',
+      name: 'Efferalgan 500mg (Sủi)',
+      activeIngredient: 'Paracetamol',
+      concentration: '500mg',
+      unit: 'Viên sủi',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '4000mg/ngày',
+      groupName: 'Giảm đau - Hạ sốt',
+    },
+    {
+      code: 'TH_PRED_5',
+      nationalCode: 'VD-90123-21',
+      name: 'Prednisolone 5mg',
+      activeIngredient: 'Prednisolone',
+      concentration: '5mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '60mg/ngày',
+      groupName: 'Kháng viêm Steroid',
+    },
+    {
+      code: 'TH_METH_16',
+      nationalCode: 'VD-01234-22',
+      name: 'Medrol 16mg',
+      activeIngredient: 'Methylprednisolone',
+      concentration: '16mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '64mg/ngày',
+      groupName: 'Kháng viêm Steroid',
+    },
+    {
+      code: 'TH_ESO_40',
+      nationalCode: 'VN-23456-22',
+      name: 'Nexium 40mg',
+      activeIngredient: 'Esomeprazole',
+      concentration: '40mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '40mg/ngày',
+      groupName: 'Tiêu hóa - Dạ dày',
+    },
+    {
+      code: 'TH_ENA_5',
+      nationalCode: 'VD-34567-23',
+      name: 'Enalapril 5mg',
+      activeIngredient: 'Enalapril',
+      concentration: '5mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '40mg/ngày',
+      groupName: 'Tim mạch - Huyết áp',
+    },
+    {
+      code: 'TH_GLI_60',
+      nationalCode: 'VN-45678-24',
+      name: 'Diamicron MR 60mg',
+      activeIngredient: 'Gliclazide',
+      concentration: '60mg',
+      unit: 'Viên',
+      usageUnit: 'mg',
+      routeOfAdministration: 'ORAL',
+      maxDosePerDay: '120mg/ngày',
       groupName: 'Nội tiết - Đái tháo đường',
     },
   ];
