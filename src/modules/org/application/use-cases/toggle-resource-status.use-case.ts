@@ -24,6 +24,7 @@ export class ToggleResourceStatusUseCase {
       resource.code,
       resource.type,
       isActive,
+      resource.isOccupied,
       resource.createdAt,
       new Date()
     );
@@ -36,6 +37,7 @@ export class ToggleResourceStatusUseCase {
       code: saved.code,
       type: saved.type,
       isActive: saved.isActive,
+      isOccupied: saved.isOccupied,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

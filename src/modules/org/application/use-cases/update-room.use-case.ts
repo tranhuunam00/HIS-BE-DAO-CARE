@@ -49,6 +49,7 @@ export class UpdateRoomUseCase {
         code: r.code,
         type: r.type,
         isActive: r.isActive,
+        isOccupied: r.isOccupied,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt
       })) : [],

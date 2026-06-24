@@ -37,6 +37,9 @@ export class DeactivateBranchUseCase {
       existing.workingDays,
       existing.openTime,
       existing.closeTime,
+      existing.bankName,
+      existing.bankAccountNo,
+      existing.bankAccountName,
       existing.createdAt,
       new Date()
     );
@@ -62,6 +65,9 @@ export class DeactivateBranchUseCase {
       workingDays: saved.workingDays,
       openTime: saved.openTime,
       closeTime: saved.closeTime,
+      bankName: saved.bankName,
+      bankAccountNo: saved.bankAccountNo,
+      bankAccountName: saved.bankAccountName,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

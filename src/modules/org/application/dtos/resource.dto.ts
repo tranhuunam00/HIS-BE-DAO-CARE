@@ -55,6 +55,9 @@ export class ResourceResponseDto {
   isActive: boolean;
 
   @ApiProperty()
+  isOccupied: boolean;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()

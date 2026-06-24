@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { UserOrmEntity } from '../../../auth/infrastructure/database/user.entity';
 import { PracticingCertificateOrmEntity } from './practicing-certificate.entity';
 import { StaffAssignmentOrmEntity } from './staff-assignment.entity';
+import { DepartmentOrmEntity } from './department.entity';
 
 @Entity({ name: 'staff' })
 export class StaffOrmEntity {
@@ -43,6 +44,16 @@ export class StaffOrmEntity {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  nickname: string | null;
+
+  @Column({ name: 'department_id', type: 'uuid', nullable: true })
+  departmentId: string | null;
+
+  @ManyToOne(() => DepartmentOrmEntity, (dept) => dept.staff, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'department_id' })
+  department: DepartmentOrmEntity | null;
 
   @Column({ name: 'user_id', type: 'uuid', nullable: true, unique: true })
   userId: string | null;

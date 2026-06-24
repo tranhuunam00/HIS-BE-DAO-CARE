@@ -62,6 +62,15 @@ export class BranchOrmEntity {
   @Column({ name: 'close_time', default: '20:00' })
   closeTime: string;
 
+  @Column({ name: 'bank_name', type: 'varchar', nullable: true })
+  bankName: string | null;
+
+  @Column({ name: 'bank_account_no', type: 'varchar', nullable: true })
+  bankAccountNo: string | null;
+
+  @Column({ name: 'bank_account_name', type: 'varchar', nullable: true })
+  bankAccountName: string | null;
+
   @ManyToOne(() => OrganizationOrmEntity, (org) => org.branches, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'organization_id' })
   organization: OrganizationOrmEntity;

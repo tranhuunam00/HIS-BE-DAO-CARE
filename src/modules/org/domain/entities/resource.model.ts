@@ -6,6 +6,7 @@ export class Resource {
     public readonly code: string,
     public readonly type: string, // CHAIR, BED, EQUIPMENT
     public readonly isActive: boolean,
+    public readonly isOccupied: boolean,
     public readonly createdAt: Date,
     public readonly updatedAt: Date
   ) {}

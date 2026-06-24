@@ -49,6 +49,8 @@ export class ListStaffUseCase {
         createdAt: a.createdAt,
         updatedAt: a.updatedAt
       })) : [],
+      nickname: staff.nickname,
+      departmentId: staff.departmentId,
       createdAt: staff.createdAt,
       updatedAt: staff.updatedAt,
     }));

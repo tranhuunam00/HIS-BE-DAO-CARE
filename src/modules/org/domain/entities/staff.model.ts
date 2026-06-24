@@ -17,6 +17,8 @@ export class Staff {
     public readonly isClinical: boolean,
     public readonly isActive: boolean,
     public readonly userId: string | null,
+    public readonly nickname: string | null,
+    public readonly departmentId: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
     public readonly certificate?: PracticingCertificate | null,

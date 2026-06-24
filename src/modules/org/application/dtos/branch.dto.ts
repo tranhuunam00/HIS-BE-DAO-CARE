@@ -82,6 +82,21 @@ export class CreateBranchDto {
   @IsOptional()
   @IsString()
   closeTime?: string;
+
+  @ApiProperty({ example: 'Vietcombank', required: false })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiProperty({ example: '1234567890', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountNo?: string;
+
+  @ApiProperty({ example: 'CONG TY DAO CARE', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountName?: string;
 }
 
 export class UpdateBranchDto {
@@ -160,6 +175,21 @@ export class UpdateBranchDto {
   @IsOptional()
   @IsString()
   closeTime?: string;
+
+  @ApiProperty({ example: 'Vietcombank', required: false })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiProperty({ example: '1234567890', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountNo?: string;
+
+  @ApiProperty({ example: 'CONG TY DAO CARE', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountName?: string;
 }
 
 export class BranchResponseDto {
@@ -219,6 +249,15 @@ export class BranchResponseDto {
 
   @ApiProperty()
   closeTime: string;
+
+  @ApiProperty()
+  bankName: string | null;
+
+  @ApiProperty()
+  bankAccountNo: string | null;
+
+  @ApiProperty()
+  bankAccountName: string | null;
 
   @ApiProperty()
   createdAt: Date;

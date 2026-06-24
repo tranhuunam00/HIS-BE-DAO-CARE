@@ -32,6 +32,8 @@ export class ToggleStaffStatusUseCase {
       staff.isClinical,
       isActive,
       staff.userId,
+      staff.nickname,
+      staff.departmentId,
       staff.createdAt,
       new Date(),
       staff.certificate,
@@ -76,6 +78,8 @@ export class ToggleStaffStatusUseCase {
         createdAt: a.createdAt,
         updatedAt: a.updatedAt
       })) : [],
+      nickname: saved.nickname,
+      departmentId: saved.departmentId,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

@@ -19,6 +19,9 @@ export class Branch {
     public readonly workingDays: string[] | null,
     public readonly openTime: string,
     public readonly closeTime: string,
+    public readonly bankName: string | null,
+    public readonly bankAccountNo: string | null,
+    public readonly bankAccountName: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date
   ) {}
@@ -39,7 +42,10 @@ export class Branch {
     longitude?: number,
     workingDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
     openTime = '08:00',
-    closeTime = '20:00'
+    closeTime = '20:00',
+    bankName?: string,
+    bankAccountNo?: string,
+    bankAccountName?: string
   ): Branch {
     const now = new Date();
     return new Branch(
@@ -62,6 +68,9 @@ export class Branch {
       workingDays,
       openTime,
       closeTime,
+      bankName || null,
+      bankAccountNo || null,
+      bankAccountName || null,
       now,
       now
     );

@@ -62,6 +62,16 @@ export class CreateStaffDto {
   @IsOptional()
   @IsUUID()
   userId?: string;
+
+  @ApiProperty({ example: 'Nam TH', required: false })
+  @IsOptional()
+  @IsString()
+  nickname?: string;
+
+  @ApiProperty({ example: 'a0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
+  @IsOptional()
+  @IsUUID()
+  departmentId?: string;
 }
 
 export class UpdateStaffDto {
@@ -114,6 +124,16 @@ export class UpdateStaffDto {
   @IsOptional()
   @IsUUID()
   userId?: string;
+
+  @ApiProperty({ example: 'Nam TH', required: false })
+  @IsOptional()
+  @IsString()
+  nickname?: string;
+
+  @ApiProperty({ example: 'a0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
+  @IsOptional()
+  @IsUUID()
+  departmentId?: string;
 }
 
 export class UpdatePracticingCertificateDto {
@@ -276,6 +296,12 @@ export class StaffResponseDto {
 
   @ApiProperty({ type: [StaffAssignmentResponseDto], required: false })
   assignments: StaffAssignmentResponseDto[];
+
+  @ApiProperty()
+  nickname: string | null;
+
+  @ApiProperty()
+  departmentId: string | null;
 
   @ApiProperty()
   createdAt: Date;

@@ -60,6 +60,9 @@ export class BranchRepository implements IBranchRepository {
       orm.workingDays,
       orm.openTime,
       orm.closeTime,
+      orm.bankName,
+      orm.bankAccountNo,
+      orm.bankAccountName,
       orm.createdAt,
       orm.updatedAt
     );
@@ -86,6 +89,9 @@ export class BranchRepository implements IBranchRepository {
     orm.workingDays = domain.workingDays;
     orm.openTime = domain.openTime;
     orm.closeTime = domain.closeTime;
+    orm.bankName = domain.bankName;
+    orm.bankAccountNo = domain.bankAccountNo;
+    orm.bankAccountName = domain.bankAccountName;
     if (domain.createdAt) orm.createdAt = domain.createdAt;
     if (domain.updatedAt) orm.updatedAt = domain.updatedAt;
     return orm;

@@ -86,3 +86,24 @@ src/modules/<module_name>/
 ### 4.5. Quản lý Lỗi (Error Handling)
 *   Không bao giờ hiển thị trực tiếp stack trace của hệ thống ra ngoài API Client ở môi trường production.
 *   Phân biệt rõ **Domain Error** (Lỗi nghiệp vụ - trả về 4xx kèm mã lỗi tự định nghĩa) và **System Error** (Lỗi hệ thống - ghi log kèm trace ID và trả về 500 cho khách hàng).
+
+---
+
+## 5. Quy Trình Mô Phỏng Nghiệp Vụ VTTECH (VTTech Emulation Guidelines)
+
+### 5.1. Nguyên tắc đọc tài liệu và phản hồi
+*   **Bắt buộc nghiên cứu trước**: Trước khi làm bất kỳ tính năng hoặc sửa đổi nào, Agent phải đọc kỹ tài liệu nghiệp vụ tương ứng từ cổng tài liệu của VTTech (`https://vttechsolution.com/documentation`).
+*   **Review trước khi code**: Trình bày rõ ràng giải pháp, luồng đi và thiết kế API/Giao diện cho USER duyệt. **Không tự ý thực hiện code khi chưa có sự xác nhận.**
+*   **Hỏi ý kiến từng chặng**: Đến mỗi bước có sự lựa chọn thiết kế hoặc cấu trúc dữ liệu, phải dừng lại hỏi ý kiến USER.
+
+### 5.2. Phân chia Agent chi tiết cho từng phần việc tiếp theo
+*   **Phần 1: Chi nhánh & Phòng/Giường (Branch & Rooms Card Grid)**
+    *   **Backend Agent**: `be-agent-org` chịu trách nhiệm mở rộng schema/API (cập nhật thông tin ngân hàng VietQR cho chi nhánh, cấu hình trạng thái phòng/giường).
+    *   **Frontend Agent**: `fe-agent-org` chịu trách nhiệm thiết kế giao diện đổi chi nhánh trên Header, và sơ đồ lưới phòng theo Tầng -> Thẻ Phòng -> Danh sách Giường/Ghế.
+*   **Phần 2: Nhân viên & Phòng ban (Staff & Departments)**
+    *   **Backend Agent**: `be-agent-org` (quản lý nhân viên, hồ sơ, Nickname bác sĩ) kết hợp với `be-agent-auth` (quản lý phân quyền theo Bộ phận/Phòng ban).
+    *   **Frontend Agent**: `fe-agent-org` (UI thêm/sửa nhân sự có Nickname, quản lý danh mục phòng ban) và `fe-agent-auth` (UI gán vai trò theo Phòng ban).
+*   **Phần 3: Lịch làm việc & Ca trực (Schedules & Shifts)**
+    *   **Backend Agent**: `be-agent-engine`.
+    *   **Frontend Agent**: `fe-agent-engine`.
+

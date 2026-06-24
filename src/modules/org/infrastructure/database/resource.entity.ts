@@ -21,6 +21,9 @@ export class ResourceOrmEntity {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'is_occupied', default: false })
+  isOccupied: boolean;
+
   @ManyToOne(() => RoomOrmEntity, (room) => room.resources, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'room_id' })
   room: RoomOrmEntity;

@@ -7,6 +7,7 @@ import { ListResourcesUseCase } from '../../../application/use-cases/list-resour
 import { CreateResourceUseCase } from '../../../application/use-cases/create-resource.use-case';
 import { UpdateResourceUseCase } from '../../../application/use-cases/update-resource.use-case';
 import { ToggleResourceStatusUseCase } from '../../../application/use-cases/toggle-resource-status.use-case';
+import { ToggleResourceOccupancyUseCase } from '../../../application/use-cases/toggle-resource-occupancy.use-case';
 import { CreateResourceDto, UpdateResourceDto, ResourceResponseDto } from '../../../application/dtos/resource.dto';
 
 @ApiTags('Resource Management')
@@ -18,7 +19,8 @@ export class ResourceController {
     private readonly listResourcesUseCase: ListResourcesUseCase,
     private readonly createResourceUseCase: CreateResourceUseCase,
     private readonly updateResourceUseCase: UpdateResourceUseCase,
-    private readonly toggleResourceStatusUseCase: ToggleResourceStatusUseCase
+    private readonly toggleResourceStatusUseCase: ToggleResourceStatusUseCase,
+    private readonly toggleResourceOccupancyUseCase: ToggleResourceOccupancyUseCase
   ) {}
 
   @Get()
@@ -59,5 +61,17 @@ export class ResourceController {
     @Body('isActive') isActive: boolean
   ): Promise<ResourceResponseDto> {
     return await this.toggleResourceStatusUseCase.execute(id, isActive);
+  }
+
+  @Patch(':id/occupancy')
+  @RequirePermissions('resource:write')
+  @ApiOperation({ summary: 'Cập nhật trạng thái bận/trống (occupancy) của tài nguyên' })
+  @ApiResponse({ status: 200, type: ResourceResponseDto, description: 'Cập nhật trạng thái bận/trống thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy tài nguyên' })
+  async toggleOccupancy(
+    @Param('id') id: string,
+    @Body('isOccupied') isOccupied: boolean
+  ): Promise<ResourceResponseDto> {
+    return await this.toggleResourceOccupancyUseCase.execute(id, isOccupied);
   }
 }

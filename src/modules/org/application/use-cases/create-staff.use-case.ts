@@ -45,6 +45,8 @@ export class CreateStaffUseCase {
       dto.isClinical !== undefined ? dto.isClinical : false,
       true,
       dto.userId || null,
+      dto.nickname || null,
+      dto.departmentId || null,
       now,
       now,
       null,
@@ -69,6 +71,8 @@ export class CreateStaffUseCase {
       userId: saved.userId,
       certificate: null,
       assignments: [],
+      nickname: saved.nickname,
+      departmentId: saved.departmentId,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

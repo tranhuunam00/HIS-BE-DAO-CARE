@@ -35,6 +35,9 @@ export class GetBranchUseCase {
       workingDays: b.workingDays,
       openTime: b.openTime,
       closeTime: b.closeTime,
+      bankName: b.bankName,
+      bankAccountNo: b.bankAccountNo,
+      bankAccountName: b.bankAccountName,
       createdAt: b.createdAt,
       updatedAt: b.updatedAt,
     };

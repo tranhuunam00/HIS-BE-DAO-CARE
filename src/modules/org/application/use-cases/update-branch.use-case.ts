@@ -37,6 +37,9 @@ export class UpdateBranchUseCase {
       dto.workingDays !== undefined ? dto.workingDays : existing.workingDays,
       dto.openTime !== undefined ? dto.openTime : existing.openTime,
       dto.closeTime !== undefined ? dto.closeTime : existing.closeTime,
+      dto.bankName !== undefined ? dto.bankName : existing.bankName,
+      dto.bankAccountNo !== undefined ? dto.bankAccountNo : existing.bankAccountNo,
+      dto.bankAccountName !== undefined ? dto.bankAccountName : existing.bankAccountName,
       existing.createdAt,
       new Date()
     );
@@ -62,6 +65,9 @@ export class UpdateBranchUseCase {
       workingDays: saved.workingDays,
       openTime: saved.openTime,
       closeTime: saved.closeTime,
+      bankName: saved.bankName,
+      bankAccountNo: saved.bankAccountNo,
+      bankAccountName: saved.bankAccountName,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

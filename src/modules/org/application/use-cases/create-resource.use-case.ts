@@ -36,6 +36,7 @@ export class CreateResourceUseCase {
       dto.code,
       dto.type,
       true,
+      false, // isOccupied defaults to false
       now,
       now
     );
@@ -48,6 +49,7 @@ export class CreateResourceUseCase {
       code: saved.code,
       type: saved.type,
       isActive: saved.isActive,
+      isOccupied: saved.isOccupied,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

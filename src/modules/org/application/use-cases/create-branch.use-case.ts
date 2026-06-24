@@ -44,7 +44,10 @@ export class CreateBranchUseCase {
       dto.longitude,
       dto.workingDays,
       dto.openTime,
-      dto.closeTime
+      dto.closeTime,
+      dto.bankName,
+      dto.bankAccountNo,
+      dto.bankAccountName
     );
 
     const saved = await this.branchRepository.save(branch);
@@ -68,6 +71,9 @@ export class CreateBranchUseCase {
       workingDays: saved.workingDays,
       openTime: saved.openTime,
       closeTime: saved.closeTime,
+      bankName: saved.bankName,
+      bankAccountNo: saved.bankAccountNo,
+      bankAccountName: saved.bankAccountName,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

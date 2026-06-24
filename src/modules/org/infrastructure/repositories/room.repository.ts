@@ -59,6 +59,7 @@ export class RoomRepository implements IRoomRepository {
               r.code,
               r.type,
               r.isActive,
+              r.isOccupied,
               r.createdAt,
               r.updatedAt
             )
