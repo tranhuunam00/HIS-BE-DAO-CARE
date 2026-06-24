@@ -18,6 +18,7 @@ import { IAppointmentRepositoryToken, ListAppointmentsUseCase, GetAppointmentUse
 import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase, AcceptPatientUseCase, CompletePatientUseCase } from '../../application/use-cases/patient-visit.use-cases';
 
 import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
+import { BillingModule } from '../../../billing/presentation/http/billing.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity'
       StaffAssignmentOrmEntity,
       RoomOrmEntity,
     ]),
+    BillingModule,
   ],
   controllers: [
     PatientController,
