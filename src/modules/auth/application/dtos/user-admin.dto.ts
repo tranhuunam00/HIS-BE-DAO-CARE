@@ -21,6 +21,13 @@ export class CreateManagedUserDto {
   @IsUUID()
   staffId: string;
 
+  @ApiProperty({ example: '037090123456' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(9)
+  @MaxLength(12)
+  identityNumber: string;
+
   @ApiProperty({ example: 'TranQuyen' })
   @IsString()
   @IsNotEmpty()
@@ -79,6 +86,13 @@ export class UpdateManagedUserDto {
   @IsOptional()
   @IsUUID()
   staffId?: string;
+
+  @ApiProperty({ example: '037090123456', required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(9)
+  @MaxLength(12)
+  identityNumber?: string;
 
   @ApiProperty({ example: 'TranQuyen', required: false })
   @IsOptional()
@@ -250,6 +264,9 @@ export class ManagedUserResponseDto {
 
   @ApiProperty({ nullable: true })
   staffName: string | null;
+
+  @ApiProperty({ nullable: true })
+  staffIdentityNumber: string | null;
 
   @ApiProperty({ nullable: true })
   defaultBranchId: string | null;

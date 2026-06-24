@@ -13,6 +13,7 @@ import {
   ensureUsernameAvailable,
   normalizeBranchScope,
   replaceUserBranchScopes,
+  ensureIdentityNumberAvailable,
 } from './managed-user-policy';
 import { mapManagedUserResponse } from './user-admin.mapper';
 
@@ -24,6 +25,7 @@ export class CreateManagedUserUseCase {
     const staff = await ensureStaffCanUseAccount(this.dataSource, dto.staffId);
     await ensureRoleExists(this.dataSource, dto.roleId);
     await ensureUsernameAvailable(this.dataSource, dto.username);
+    await ensureIdentityNumberAvailable(this.dataSource, dto.identityNumber, dto.staffId);
 
     const email = dto.email || staff.email;
     await ensureEmailAvailable(this.dataSource, email);
@@ -53,7 +55,10 @@ export class CreateManagedUserUseCase {
     });
 
     const savedUser = await userRepository.save(user);
-    await this.dataSource.getRepository(StaffOrmEntity).update(staff.id, { userId: savedUser.id });
+    await this.dataSource.getRepository(StaffOrmEntity).update(staff.id, {
+      userId: savedUser.id,
+      identityNumber: dto.identityNumber,
+    });
     await replaceUserBranchScopes(this.dataSource, savedUser.id, scope.branchIds);
 
     const hydrated = await userRepository.findOneOrFail({
@@ -65,6 +70,10 @@ export class CreateManagedUserUseCase {
         branchScopes: { branch: true },
       },
     });
-    return mapManagedUserResponse(hydrated, { ...staff, userId: savedUser.id });
+    return mapManagedUserResponse(hydrated, {
+      ...staff,
+      userId: savedUser.id,
+      identityNumber: dto.identityNumber,
+    });
   }
 }

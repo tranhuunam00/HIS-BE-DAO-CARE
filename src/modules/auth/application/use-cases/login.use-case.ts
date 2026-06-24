@@ -117,6 +117,11 @@ export class LoginUseCase {
       where: { branchId: defaultBranchId, isActive: true },
     });
 
+    const hasWildcard = configuredIps.some((item) => item.ipAddress.trim() === '*');
+    if (hasWildcard) {
+      return;
+    }
+
     if (configuredIps.length === 0 || !clientIp) {
       throw new UnauthorizedException('IP đăng nhập không thuộc chi nhánh được cấu hình');
     }
@@ -153,6 +158,9 @@ export class LoginUseCase {
   }
 
   private ipMatches(clientIp: string, configuredIp: string): boolean {
+    if (configuredIp.trim() === '*') {
+      return true;
+    }
     const normalized = this.normalizeIp(configuredIp);
     if (!normalized.includes('/')) {
       return clientIp === normalized;

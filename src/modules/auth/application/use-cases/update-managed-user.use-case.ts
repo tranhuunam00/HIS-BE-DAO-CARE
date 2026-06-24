@@ -11,6 +11,7 @@ import {
   ensureUsernameAvailable,
   normalizeBranchScope,
   replaceUserBranchScopes,
+  ensureIdentityNumberAvailable,
 } from './managed-user-policy';
 import { mapManagedUserResponse } from './user-admin.mapper';
 
@@ -36,6 +37,15 @@ export class UpdateManagedUserUseCase {
         await this.dataSource.getRepository(StaffOrmEntity).update(currentStaff.id, { userId: null });
       }
       await this.dataSource.getRepository(StaffOrmEntity).update(staff.id, { userId: id });
+    }
+
+    if (dto.identityNumber) {
+      if (!staff) {
+        throw new NotFoundException('Không tìm thấy nhân viên liên kết với tài khoản này');
+      }
+      await ensureIdentityNumberAvailable(this.dataSource, dto.identityNumber, staff.id);
+      await this.dataSource.getRepository(StaffOrmEntity).update(staff.id, { identityNumber: dto.identityNumber });
+      staff.identityNumber = dto.identityNumber;
     }
 
     if (dto.roleId) {

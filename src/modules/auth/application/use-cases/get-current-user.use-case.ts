@@ -36,6 +36,14 @@ export class GetCurrentUserUseCase {
 
     return {
       ...mapManagedUserResponse(user, staff),
+      staff: staff ? {
+        id: staff.id,
+        fullName: staff.fullName,
+        title: staff.title,
+        email: staff.email,
+        staffCode: staff.staffCode,
+        identityNumber: staff.identityNumber,
+      } : null,
       allowedBranches: allowedBranches.map((branch) => ({
         id: branch.id,
         name: branch.name,

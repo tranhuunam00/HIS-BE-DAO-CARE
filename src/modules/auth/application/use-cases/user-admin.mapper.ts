@@ -22,6 +22,7 @@ export function mapManagedUserResponse(
     staffId: staff?.id ?? null,
     staffCode: staff?.staffCode ?? null,
     staffName: staff?.fullName ?? null,
+    staffIdentityNumber: staff?.identityNumber ?? null,
     defaultBranchId: user.defaultBranchId,
     defaultBranchName,
     branchScopeMode: user.branchScopeMode,

@@ -104,3 +104,16 @@ export async function replaceUserBranchScopes(
 
   await scopeRepository.save(branchIds.map((branchId) => scopeRepository.create({ userId, branchId })));
 }
+
+export async function ensureIdentityNumberAvailable(
+  dataSource: DataSource,
+  identityNumber: string,
+  staffId: string
+): Promise<void> {
+  const existing = await dataSource.getRepository(StaffOrmEntity).findOne({
+    where: { identityNumber, id: Not(staffId) },
+  });
+  if (existing) {
+    throw new ConflictException('Số CCCD đã được sử dụng bởi nhân sự khác');
+  }
+}
