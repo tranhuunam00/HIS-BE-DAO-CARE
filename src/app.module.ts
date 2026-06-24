@@ -10,6 +10,7 @@ import { MedicalModule } from './modules/medical/presentation/http/medical.modul
 import { EngineModule } from './modules/engine/presentation/http/engine.module';
 import { FormsModule } from './modules/forms/presentation/http/forms.module';
 import { ReceptionModule } from './modules/reception/presentation/http/reception.module';
+import { BillingModule } from './modules/billing/presentation/http/billing.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReceptionModule } from './modules/reception/presentation/http/reception
     EngineModule,
     FormsModule,
     ReceptionModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
