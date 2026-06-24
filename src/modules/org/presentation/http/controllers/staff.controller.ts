@@ -33,13 +33,17 @@ export class StaffController {
   @ApiQuery({ name: 'branchId', required: false, description: 'Lọc nhân viên theo ID chi nhánh' })
   @ApiQuery({ name: 'title', required: false, description: 'Lọc theo chức danh (DOCTOR, NURSE, etc.)' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Lọc trạng thái hoạt động' })
+  @ApiQuery({ name: 'roomId', required: false, description: 'Lọc bác sĩ được phân công cho phòng khám cụ thể' })
+  @ApiQuery({ name: 'specialtyId', required: false, description: 'Lọc bác sĩ theo chuyên khoa phân công' })
   @ApiResponse({ status: 200, type: [StaffResponseDto], description: 'Trả về danh sách hồ sơ' })
   async getAll(
     @Query('branchId') branchId?: string,
     @Query('title') title?: string,
-    @Query('isActive') isActive?: boolean
+    @Query('isActive') isActive?: boolean,
+    @Query('roomId') roomId?: string,
+    @Query('specialtyId') specialtyId?: string,
   ): Promise<StaffResponseDto[]> {
-    return await this.listStaffUseCase.execute({ branchId, title, isActive });
+    return await this.listStaffUseCase.execute({ branchId, title, isActive, roomId, specialtyId });
   }
 
   @Get(':id')

@@ -10,7 +10,7 @@ export class ListStaffUseCase {
     private readonly staffRepository: IStaffRepository
   ) {}
 
-  async execute(filters?: { branchId?: string; title?: string; isActive?: boolean }): Promise<StaffResponseDto[]> {
+  async execute(filters?: { branchId?: string; title?: string; isActive?: boolean; roomId?: string; specialtyId?: string }): Promise<StaffResponseDto[]> {
     const staffList = await this.staffRepository.findAll(filters);
     return staffList.map((staff) => ({
       id: staff.id,

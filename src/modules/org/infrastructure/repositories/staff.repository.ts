@@ -17,7 +17,7 @@ export class StaffRepository implements IStaffRepository {
     private readonly certOrmRepository: Repository<PracticingCertificateOrmEntity>
   ) {}
 
-  async findAll(filters?: { branchId?: string; title?: string; isActive?: boolean }): Promise<Staff[]> {
+  async findAll(filters?: { branchId?: string; title?: string; isActive?: boolean; roomId?: string; specialtyId?: string }): Promise<Staff[]> {
     const query = this.ormRepository.createQueryBuilder('staff')
       .leftJoinAndSelect('staff.certificate', 'certificate')
       .leftJoinAndSelect('staff.assignments', 'assignments');
@@ -30,6 +30,14 @@ export class StaffRepository implements IStaffRepository {
     }
     if (filters?.isActive !== undefined) {
       query.andWhere('staff.isActive = :isActive', { isActive: filters.isActive });
+    }
+    // Filter doctors assigned to a specific room via staff_assignments
+    if (filters?.roomId) {
+      query.andWhere('assignments.roomId = :roomId', { roomId: filters.roomId });
+    }
+    // Filter doctors assigned to a specific specialty via staff_assignments
+    if (filters?.specialtyId) {
+      query.andWhere('assignments.specialtyId = :specialtyId', { specialtyId: filters.specialtyId });
     }
 
     query.orderBy('staff.createdAt', 'ASC');
