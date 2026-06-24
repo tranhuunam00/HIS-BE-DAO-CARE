@@ -6,6 +6,7 @@ import { LogoutUseCase } from '../logout.use-case';
 import { IUserRepositoryToken } from '../../../domain/repositories/user.repository.interface';
 import { User } from '../../../domain/entities/user.entity';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 describe('Auth Use Cases', () => {
@@ -16,6 +17,7 @@ describe('Auth Use Cases', () => {
   const mockUser = User.create(
     '10000000-0000-4000-8000-000000000001',
     'admin@hisdaocare.com',
+    'admin',
     bcrypt.hashSync('Admin@HIS2026!', 10),
     'admin-role-id'
   );
@@ -26,6 +28,18 @@ describe('Auth Use Cases', () => {
     findByEmail: jest.fn(async (email: string) => {
       for (const u of usersDb.values()) {
         if (u.email === email) return u;
+      }
+      return null;
+    }),
+    findByUsername: jest.fn(async (username: string) => {
+      for (const u of usersDb.values()) {
+        if (u.username === username) return u;
+      }
+      return null;
+    }),
+    findByLoginIdentity: jest.fn(async (identity: string) => {
+      for (const u of usersDb.values()) {
+        if (u.email === identity || u.username === identity) return u;
       }
       return null;
     }),
@@ -44,6 +58,13 @@ describe('Auth Use Cases', () => {
     }),
   };
 
+  const mockDataSource = {
+    getRepository: jest.fn(() => ({
+      findOneBy: jest.fn(),
+      find: jest.fn(async () => []),
+    })),
+  };
+
   beforeEach(async () => {
     usersDb = new Map();
     usersDb.set(mockUser.id, mockUser);
@@ -60,6 +81,10 @@ describe('Auth Use Cases', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
         },
       ],
     }).compile();
@@ -100,6 +125,7 @@ describe('Auth Use Cases', () => {
           password: 'WrongPassword',
         })
       ).rejects.toThrow(UnauthorizedException);
+      expect(usersDb.get(mockUser.id)?.failedLoginCount).toBe(1);
     });
   });
 

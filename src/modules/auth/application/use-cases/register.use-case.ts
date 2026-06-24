@@ -31,7 +31,7 @@ export class RegisterUseCase {
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const userId = randomUUID();
 
-    const user = User.create(userId, dto.email, passwordHash, role.id, true);
+    const user = User.create(userId, dto.email, null, passwordHash, role.id, true);
     return await this.userRepository.save(user);
   }
 }

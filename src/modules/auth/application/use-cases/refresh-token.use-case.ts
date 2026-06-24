@@ -15,7 +15,7 @@ export class RefreshTokenUseCase {
 
   async execute(userId: string, refreshToken: string): Promise<TokenResponseDto> {
     const user = await this.userRepository.findById(userId);
-    if (!user || !user.isActive || !user.refreshTokenHash) {
+    if (!user || !user.isActive || user.lockedAt || !user.refreshTokenHash) {
       throw new UnauthorizedException('Phiên đăng nhập không hợp lệ hoặc đã hết hạn');
     }
 
@@ -26,7 +26,15 @@ export class RefreshTokenUseCase {
     }
 
     // Tạo payload mới
-    const payload = { sub: user.id, email: user.email, roleId: user.roleId };
+    const activeBranchId = user.defaultBranchId ?? user.branchScopeIds[0] ?? null;
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      roleId: user.roleId,
+      activeBranchId,
+      branchScopeMode: user.branchScopeMode,
+    };
 
     // Sinh Access Token mới (15 phút)
     const newAccessToken = await this.jwtService.signAsync(payload, {
@@ -46,6 +54,17 @@ export class RefreshTokenUseCase {
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        roleId: user.roleId,
+        defaultBranchId: user.defaultBranchId,
+        activeBranchId,
+        branchScopeMode: user.branchScopeMode,
+        branchScopeIds: user.branchScopeIds,
+        bypassIpRestriction: user.bypassIpRestriction,
+      },
     };
   }
 }

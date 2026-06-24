@@ -2,6 +2,8 @@ import { AppDataSource } from '../data-source';
 import { PermissionOrmEntity } from '../../../modules/auth/infrastructure/database/permission.entity';
 import { RoleOrmEntity } from '../../../modules/auth/infrastructure/database/role.entity';
 import { UserOrmEntity } from '../../../modules/auth/infrastructure/database/user.entity';
+import { LoginTimeWindowOrmEntity } from '../../../modules/auth/infrastructure/database/login-time-window.entity';
+import { UserBranchScopeOrmEntity } from '../../../modules/auth/infrastructure/database/user-branch-scope.entity';
 import { OrganizationOrmEntity } from '../../../modules/org/infrastructure/database/organization.entity';
 import { BranchOrmEntity } from '../../../modules/org/infrastructure/database/branch.entity';
 import { RoomOrmEntity } from '../../../modules/org/infrastructure/database/room.entity';
@@ -23,6 +25,8 @@ async function seed() {
   const permissionRepository = AppDataSource.getRepository(PermissionOrmEntity);
   const roleRepository = AppDataSource.getRepository(RoleOrmEntity);
   const userRepository = AppDataSource.getRepository(UserOrmEntity);
+  const loginTimeWindowRepository = AppDataSource.getRepository(LoginTimeWindowOrmEntity);
+  const userBranchScopeRepository = AppDataSource.getRepository(UserBranchScopeOrmEntity);
   const orgRepository = AppDataSource.getRepository(OrganizationOrmEntity);
   const branchRepository = AppDataSource.getRepository(BranchOrmEntity);
   const roomRepository = AppDataSource.getRepository(RoomOrmEntity);
@@ -132,9 +136,12 @@ async function seed() {
     const passwordHash = await bcrypt.hash('Admin@HIS2026!', 10);
     adminUser = userRepository.create({
       email: adminEmail,
+      username: 'admin',
       passwordHash: passwordHash,
       isActive: true,
       roleId: dbRoles['ADMIN'].id,
+      bypassIpRestriction: true,
+      failedLoginCount: 0,
     });
     adminUser = await userRepository.save(adminUser);
     console.log(`+ Created default Admin User: ${adminEmail} / Admin@HIS2026!`);
@@ -191,6 +198,37 @@ async function seed() {
     console.log(`+ Created default Branch: ${branch.name}`);
   } else {
     console.log(`~ Branch ${branchCode} already exists.`);
+  }
+
+  let defaultWindow = await loginTimeWindowRepository.findOneBy({ name: '6 AM - 9 PM' });
+  if (!defaultWindow) {
+    defaultWindow = loginTimeWindowRepository.create({
+      name: '6 AM - 9 PM',
+      startTime: '06:00',
+      endTime: '21:00',
+      isActive: true,
+    });
+    await loginTimeWindowRepository.save(defaultWindow);
+    console.log('+ Created Login Time Window: 6 AM - 9 PM');
+  }
+
+  if (!adminUser.defaultBranchId) {
+    adminUser.defaultBranchId = branch.id;
+    adminUser.branchScopeMode = 'ALL';
+    adminUser.bypassIpRestriction = true;
+    adminUser = await userRepository.save(adminUser);
+  }
+
+  const adminBranchScope = await userBranchScopeRepository.findOneBy({
+    userId: adminUser.id,
+    branchId: branch.id,
+  });
+  if (!adminBranchScope) {
+    await userBranchScopeRepository.save(userBranchScopeRepository.create({
+      userId: adminUser.id,
+      branchId: branch.id,
+    }));
+    console.log('+ Created Admin Branch Scope');
   }
 
   // 6. Seed Rooms

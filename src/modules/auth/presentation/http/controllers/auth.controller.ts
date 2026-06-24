@@ -4,6 +4,7 @@ import { LoginUseCase } from '../../../application/use-cases/login.use-case';
 import { RegisterUseCase } from '../../../application/use-cases/register.use-case';
 import { RefreshTokenUseCase } from '../../../application/use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../../../application/use-cases/logout.use-case';
+import { GetCurrentUserUseCase } from '../../../application/use-cases/get-current-user.use-case';
 import { LoginDto } from '../../../application/dtos/login.dto';
 import { RegisterDto } from '../../../application/dtos/register.dto';
 import { TokenResponseDto } from '../../../application/dtos/token-response.dto';
@@ -18,7 +19,8 @@ export class AuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly registerUseCase: RegisterUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly logoutUseCase: LogoutUseCase
+    private readonly logoutUseCase: LogoutUseCase,
+    private readonly getCurrentUserUseCase: GetCurrentUserUseCase
   ) {}
 
   @Post('register')
@@ -40,8 +42,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Đăng nhập vào hệ thống' })
   @ApiResponse({ status: 200, type: TokenResponseDto, description: 'Đăng nhập thành công và nhận tokens' })
   @ApiResponse({ status: 401, description: 'Thông tin xác thực sai hoặc tài khoản bị khóa' })
-  async login(@Body() dto: LoginDto): Promise<TokenResponseDto> {
-    return await this.loginUseCase.execute(dto);
+  async login(@Body() dto: LoginDto, @Req() req: Request): Promise<TokenResponseDto> {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const clientIp = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor?.split(',')[0]?.trim() || req.ip;
+    return await this.loginUseCase.execute(dto, clientIp);
   }
 
   @Post('refresh')
@@ -75,6 +81,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Trả về thông tin tài khoản đang đăng nhập' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   async getMe(@Req() req: Request) {
-    return req['user'];
+    const user = (req as any).user;
+    return await this.getCurrentUserUseCase.execute(user?.sub);
   }
 }
