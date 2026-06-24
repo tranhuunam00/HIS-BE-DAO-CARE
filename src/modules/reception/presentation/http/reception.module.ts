@@ -17,6 +17,8 @@ import { IPatientRepositoryToken, ListPatientsUseCase, GetPatientUseCase, Create
 import { IAppointmentRepositoryToken, ListAppointmentsUseCase, GetAppointmentUseCase, CreateAppointmentUseCase, UpdateAppointmentUseCase } from '../../application/use-cases/appointment.use-cases';
 import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase, AcceptPatientUseCase, CompletePatientUseCase } from '../../application/use-cases/patient-visit.use-cases';
 
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -25,6 +27,7 @@ import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisit
       PatientVisitOrmEntity,
       StaffAttendanceOrmEntity,
       StaffAssignmentOrmEntity,
+      RoomOrmEntity,
     ]),
   ],
   controllers: [
