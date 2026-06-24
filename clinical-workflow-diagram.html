@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Sơ đồ quy trình phân luồng khám chữa bệnh - HIS-DAO-CARE</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #1f2020;
+      color: #ccc;
+    }
+    .header {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      border-bottom: 1px solid #444;
+    }
+    h1 {
+      color: #fff;
+      font-size: 24px;
+      margin: 0 0 10px 0;
+    }
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #aaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #272828;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid {
+      background: transparent;
+    }
+  </style>
+  <!-- Load Mermaid Library from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark', // Đặt theme tối cho hợp với màu nền
+      securityLevel: 'loose'
+    });
+  </script>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Sơ đồ Quy trình Phân luồng Khám chữa bệnh (Clinical Workflow Routing)</h1>
+    <p>💡 <strong>Hướng dẫn chỉnh sửa:</strong> Bạn có thể mở file này bằng VS Code (hoặc Notepad) để chỉnh sửa các đoạn text bên trong thẻ <code>&lt;div class="mermaid"&gt;</code>. Sau đó lưu lại và tải lại (Reload) trang web này trên trình duyệt để thấy thay đổi.</p>
+  </div>
+
+  <div class="container">
+    <div class="mermaid">
+      flowchart TD
+          %% Khởi đầu
+          Start([1. Bệnh nhân đến / Đăng ký online]) --> Admitted[2. Tiếp nhận: Trạng thái ADMITTED]
+          
+          %% Đo sinh hiệu
+          Admitted --> Vitals[3. Đo sinh hiệu: Mạch, HA, Chiều cao, Cân nặng]
+          
+          %% Phân luồng ban đầu
+          Vitals --> ChooseRoute{Bệnh nhân đã biết cần khám gì?}
+          
+          %% Nhánh A: Đã biết dịch vụ (Khám chuyên khoa thẳng hoặc dịch vụ CLS lẻ)
+          ChooseRoute -->|Đã biết dịch vụ| OrderServiceDirect[4A. Lập đơn dịch vụ trực tiếp]
+          OrderServiceDirect --> PayDirect[5A. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          PayDirect --> CashierOK{Thu ngân xác nhận đóng tiền?}
+          
+          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH A)
+          CashierOK -->|Đã đóng tiền| DispatchDirect[6A. Điều phối phân phòng & bác sĩ thực hiện dịch vụ]
+          DispatchDirect --> CheckStaffDirect{Kiểm tra phòng có BS trực & check-in?}
+          CheckStaffDirect -->|Đạt điều kiện| GoServiceDirect[7A. Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
+          CheckStaffDirect -->|Không đạt| ReAssignDirect[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
+          ReAssignDirect -->|Chọn phòng khác| DispatchDirect
+          ReAssignDirect -->|Hủy dịch vụ / Hoàn tiền| OrderServiceDirect
+          
+          %% Nhánh B: Chưa biết (Cần khám lâm sàng tổng quát / định hướng)
+          ChooseRoute -->|Chưa định hướng rõ| DispatchClinic[4B. Điều phối phân vào Phòng khám Lâm sàng]
+          DispatchClinic --> CheckClinicStaff{Kiểm tra phòng lâm sàng có BS trực & check-in?}
+          CheckClinicStaff -->|Đạt điều kiện| WAITING_CLINICAL_EXAM[5B. Chờ khám lâm sàng: Trạng thái WAITING_CLINICAL_EXAM]
+          CheckClinicStaff -->|Không đạt| ReAssignClinic[Điều phối chọn phòng lâm sàng khác]
+          ReAssignClinic --> DispatchClinic
+          
+          WAITING_CLINICAL_EXAM --> IN_CLINICAL_EXAM[6B. Bác sĩ tiếp nhận khám: Trạng thái IN_CLINICAL_EXAM]
+          IN_CLINICAL_EXAM --> CLINICAL_EXAM_DONE[7B. Bác sĩ hoàn thành khám & chỉ định CLS: Trạng thái CLINICAL_EXAM_DONE]
+          
+          %% Đăng ký & Thanh toán CLS cho nhánh B (hoặc dịch vụ phát sinh)
+          CLINICAL_EXAM_DONE --> OrderServiceCLS[8. Đăng ký các dịch vụ CLS chỉ định]
+          OrderServiceCLS --> PayCLS[9. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          PayCLS --> CashierOK_CLS{Thu ngân xác nhận đóng tiền?}
+          
+          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH B)
+          CashierOK_CLS -->|Đã đóng tiền| DispatchCLS[10. Điều phối phân phòng & bác sĩ cho từng dịch vụ CLS]
+          DispatchCLS --> CheckStaffCLS{Kiểm tra phòng có BS trực & check-in?}
+          CheckStaffCLS -->|Đạt điều kiện| GoServiceCLS[11. Chờ làm dịch vụ: Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
+          CheckStaffCLS -->|Không đạt| ReAssignCLS[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
+          ReAssignCLS -->|Chọn phòng khác| DispatchCLS
+          ReAssignCLS -->|Hủy dịch vụ / Hoàn tiền| OrderServiceCLS
+          
+          %% Thực hiện dịch vụ CLS
+          GoServiceDirect --> IN_SERVICE[12. Đang thực hiện dịch vụ: Trạng thái IN_SERVICE]
+          GoServiceCLS --> IN_SERVICE
+          IN_SERVICE --> SERVICE_DONE[13. Bác sĩ/KTV phòng CLS hoàn thành & tải kết quả]
+          
+          %% Kiểm tra còn dịch vụ nào chưa thực hiện?
+          SERVICE_DONE --> CheckMoreServices{Còn dịch vụ?}
+          CheckMoreServices -->|Còn| GoServiceCLS
+          
+          %% KHÂU HOÀN THÀNH DỊCH VỤ CUỐI CÙNG
+          CheckMoreServices -->|Hết dịch vụ| FinalServiceDone[14. Trạng thái HOÀN THÀNH DỊCH VỤ]
+          FinalServiceDone --> CoordinatorTalk[15. Điều phối viên hỏi han bệnh nhân]
+          CoordinatorTalk --> PatientDecision{Quyết định?}
+          
+          %% Đồng ý chờ kết quả (Để bên trái hướng xuống dưới)
+          PatientDecision -->|Đồng ý chờ KQ| CoordConfirm[Điều phối bấm Xác nhận chờ kết quả]
+          CoordConfirm --> WAITING_RESULTS[16. Chờ kết quả: Trạng thái WAITING_RESULTS]
+          
+          %% Bệnh nhân đổi ý / Muốn thêm dịch vụ (Để bên phải hướng đi lên)
+          PatientDecision -->|Yêu cầu thêm CLS| RegisterMore[Yêu cầu đăng ký dịch vụ mới]
+          RegisterMore --> OrderServiceCLS
+          
+          WAITING_RESULTS --> WAITING_CONCLUSION[17. Quay lại phòng khám lâm sàng ban đầu: Trạng thái WAITING_CONCLUSION]
+          
+          WAITING_CONCLUSION --> IN_CONCLUSION[18. Bác sĩ đọc kết quả & kết luận đơn thuốc: Trạng thái IN_CONCLUSION]
+          IN_CONCLUSION --> COMPLETED[19. Hoàn thành khám: Trạng thái COMPLETED]
+          
+          %% Đường rẽ nhánh hủy
+          Admitted -.-> CANCELLED[Đã hủy: Trạng thái CANCELLED]
+          WAITING_CLINICAL_EXAM -.-> CANCELLED
+          PENDING_PAYMENT -.-> CANCELLED
+    </div>
+  </div>
+
+</body>
+</html>
