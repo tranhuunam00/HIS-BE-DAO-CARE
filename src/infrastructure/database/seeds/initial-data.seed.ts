@@ -79,6 +79,11 @@ async function seed() {
     // Medical - Medication Permissions
     { name: 'medication:read', description: 'Xem danh mục thuốc' },
     { name: 'medication:write', description: 'Quản lý danh mục thuốc' },
+
+    // Schedule Permissions
+    { name: 'schedule:read', description: 'Xem lịch làm việc nhân viên' },
+    { name: 'schedule:update', description: 'Cập nhật lịch làm việc tuần (Template)' },
+    { name: 'schedule:update-daily', description: 'Điều chỉnh lịch làm việc ngày (Override)' },
   ];
 
   const dbPermissions: PermissionOrmEntity[] = [];

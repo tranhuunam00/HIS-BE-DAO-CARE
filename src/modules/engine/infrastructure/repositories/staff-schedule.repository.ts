@@ -66,6 +66,23 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
   }
 
   // Mapper helpers
+  private formatDate(date: any): string {
+    if (!date) return '';
+    if (typeof date === 'string') {
+      if (date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return date;
+    }
+    if (date instanceof Date) {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return String(date);
+  }
+
   private templateToDomain(orm: StaffScheduleTemplateOrmEntity): StaffScheduleTemplate {
     return new StaffScheduleTemplate(
       orm.id,
@@ -73,7 +90,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
       orm.branchId,
       orm.dayOfWeek,
       orm.shiftId,
-      orm.effectiveDate,
+      this.formatDate(orm.effectiveDate),
       orm.createdAt,
       orm.updatedAt,
     );
@@ -94,7 +111,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
     return new StaffScheduleOverride(
       orm.id,
       orm.staffId,
-      orm.date,
+      this.formatDate(orm.date),
       orm.overrideType,
       orm.branchId,
       orm.shiftId,
