@@ -1,0 +1,10 @@
+import { PatientVisit } from '../entities/patient-visit.model';
+
+export interface IPatientVisitRepository {
+  findAll(filters: { branchId?: string; roomId?: string; status?: string; date?: string }): Promise<PatientVisit[]>;
+  findById(id: string): Promise<PatientVisit | null>;
+  findByCode(code: string): Promise<PatientVisit | null>;
+  save(visit: Omit<PatientVisit, 'id'> & { id?: string }): Promise<PatientVisit>;
+  getNextQueueNumber(branchId: string, date: string): Promise<number>;
+  countAll(): Promise<number>;
+}

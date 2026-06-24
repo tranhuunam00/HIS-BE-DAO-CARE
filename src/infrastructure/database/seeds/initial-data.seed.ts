@@ -20,6 +20,9 @@ import { DepartmentOrmEntity } from '../../../modules/org/infrastructure/databas
 import { ShiftOrmEntity } from '../../../modules/engine/infrastructure/database/shift.entity';
 import { StaffScheduleTemplateOrmEntity } from '../../../modules/engine/infrastructure/database/staff-schedule-template.entity';
 import { FormTemplateOrmEntity } from '../../../modules/forms/infrastructure/database/form-template.entity';
+import { PatientOrmEntity } from '../../../modules/reception/infrastructure/database/patient.entity';
+import { AppointmentOrmEntity } from '../../../modules/reception/infrastructure/database/appointment.entity';
+import { PatientVisitOrmEntity } from '../../../modules/reception/infrastructure/database/patient-visit.entity';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -46,6 +49,10 @@ async function seed() {
   const departmentRepository = AppDataSource.getRepository(DepartmentOrmEntity);
   const shiftRepository = AppDataSource.getRepository(ShiftOrmEntity);
   const templateRepository = AppDataSource.getRepository(StaffScheduleTemplateOrmEntity);
+  const patientRepository = AppDataSource.getRepository(PatientOrmEntity);
+  const appointmentRepository = AppDataSource.getRepository(AppointmentOrmEntity);
+  const visitRepository = AppDataSource.getRepository(PatientVisitOrmEntity);
+
 
   // 1. Seed Permissions
   const permissionsList = [
@@ -1399,6 +1406,165 @@ async function seed() {
       const entity = formTemplateRepository.create(template);
       await formTemplateRepository.save(entity);
       console.log(`+ Created Form Template: ${template.name}`);
+    }
+  }
+
+  // 16. Seed Patients, Appointments & Visits
+  console.log('🌱 Seeding Patient, Appointment & Visit data...');
+  const patientDataList = [
+    {
+      patientCode: 'BN-2026-0001',
+      fullName: 'Trần Quốc Bảo',
+      dob: '1988-08-15',
+      gender: 'MALE',
+      phone: '0905123456',
+      email: 'baotq@gmail.com',
+      address: '72 Nguyễn Chí Thanh, Láng Thượng, Đống Đa, Hà Nội',
+      cccd: '037088998811',
+    },
+    {
+      patientCode: 'BN-2026-0002',
+      fullName: 'Nguyễn Thị Kim Chi',
+      dob: '1995-10-12',
+      gender: 'FEMALE',
+      phone: '0988223344',
+      email: 'chintk@gmail.com',
+      address: '15 Cầu Giấy, Láng Thượng, Đống Đa, Hà Nội',
+      cccd: '035200002532',
+    },
+    {
+      patientCode: 'BN-2026-0003',
+      fullName: 'Phạm Minh Hoàng',
+      dob: '2012-05-20',
+      gender: 'MALE',
+      phone: '0977112233',
+      email: null,
+      address: '120 Minh Khai, Hai Bà Trưng, Hà Nội',
+      cccd: '037012003456',
+      guardianName: 'Phạm Minh Hải',
+      guardianPhone: '0977112234',
+      guardianRelation: 'Bố',
+    },
+  ];
+
+  const dbPatients: Record<string, PatientOrmEntity> = {};
+  for (const patientData of patientDataList) {
+    let p = await patientRepository.findOneBy({ phone: patientData.phone });
+    if (!p) {
+      p = patientRepository.create(patientData);
+      p = await patientRepository.save(p);
+      console.log(`+ Created Patient: ${p.fullName}`);
+    }
+    dbPatients[p.phone] = p;
+  }
+
+  // Lookup IDs needed for appointments/visits
+  const defaultBranch = await branchRepository.findOneBy({ code: 'CN_HBT_HN' });
+  const docNam = await staffRepository.findOneBy({ staffCode: 'NV0001' });
+  const docMai = await staffRepository.findOneBy({ staffCode: 'NV0002' });
+  const room101 = await roomRepository.findOneBy({ code: 'PK101' });
+  const serviceKhamNoi = await serviceRepository.findOneBy({ name: 'Khám nội tổng quát' }) || await serviceRepository.findOne({ where: {} });
+
+  if (defaultBranch && docNam && docMai && room101) {
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Seed Appointments
+    const appointmentsList = [
+      {
+        appointmentCode: 'LH260624-0001',
+        patientId: dbPatients['0905123456'].id,
+        branchId: defaultBranch.id,
+        doctorId: docNam.id,
+        roomId: room101.id,
+        serviceId: serviceKhamNoi?.id || null,
+        appointmentDate: todayStr,
+        startTime: '09:00',
+        endTime: '09:30',
+        status: 'CHECKED_IN',
+        notes: 'Khám dạ dày định kỳ',
+      },
+      {
+        appointmentCode: 'LH260624-0002',
+        patientId: dbPatients['0988223344'].id,
+        branchId: defaultBranch.id,
+        doctorId: docMai.id,
+        roomId: room101.id,
+        serviceId: serviceKhamNoi?.id || null,
+        appointmentDate: todayStr,
+        startTime: '10:00',
+        endTime: '10:30',
+        status: 'BOOKED',
+        notes: 'Tư vấn sức khỏe sản phụ',
+      },
+      {
+        appointmentCode: 'LH260624-0003',
+        patientId: dbPatients['0977112233'].id,
+        branchId: defaultBranch.id,
+        doctorId: docNam.id,
+        roomId: room101.id,
+        serviceId: serviceKhamNoi?.id || null,
+        appointmentDate: todayStr,
+        startTime: '14:00',
+        endTime: '14:30',
+        status: 'CONFIRMED',
+        notes: 'Khám ho, sốt nhẹ ở trẻ em',
+      },
+    ];
+
+    const dbAppointments: Record<string, AppointmentOrmEntity> = {};
+    for (const appData of appointmentsList) {
+      let app = await appointmentRepository.findOneBy({ appointmentCode: appData.appointmentCode });
+      if (!app) {
+        app = appointmentRepository.create(appData);
+        app = await appointmentRepository.save(app);
+        console.log(`+ Created Appointment: ${app.appointmentCode}`);
+      }
+      dbAppointments[app.appointmentCode] = app;
+    }
+
+    // Seed Visits (Lượt khám bệnh nhân)
+    const visitsList = [
+      {
+        visitCode: 'LK260624-0001',
+        patientId: dbPatients['0905123456'].id,
+        branchId: defaultBranch.id,
+        appointmentId: dbAppointments['LH260624-0001'].id,
+        currentRoomId: room101.id,
+        currentDoctorId: docNam.id,
+        queueNumber: 1,
+        status: 'WAITING',
+        reason: 'Đau dạ dày, đầy hơi chướng bụng',
+        pulse: 78,
+        bloodPressure: '120/80',
+        temperature: 36.6,
+        weight: 65.5,
+        height: 170.0,
+      },
+      {
+        visitCode: 'LK260624-0002',
+        patientId: dbPatients['0977112233'].id,
+        branchId: defaultBranch.id,
+        appointmentId: dbAppointments['LH260624-0003'].id,
+        currentRoomId: room101.id,
+        currentDoctorId: docNam.id,
+        queueNumber: 2,
+        status: 'IN_ROOM',
+        reason: 'Khám ho và sốt ở trẻ em',
+        pulse: 90,
+        bloodPressure: '110/70',
+        temperature: 38.2,
+        weight: 22.0,
+        height: 115.0,
+      },
+    ];
+
+    for (const visitData of visitsList) {
+      let visit = await visitRepository.findOneBy({ visitCode: visitData.visitCode });
+      if (!visit) {
+        visit = visitRepository.create(visitData);
+        await visitRepository.save(visit);
+        console.log(`+ Created Patient Visit: ${visit.visitCode} (STT ${visit.queueNumber})`);
+      }
     }
   }
 
