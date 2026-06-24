@@ -80,6 +80,7 @@ export class StaffAttendanceRepository implements IStaffAttendanceRepository {
       orm.staff,
       orm.branch,
       orm.shift,
+      orm.isAcceptingPatients,
     );
   }
 
@@ -94,6 +95,7 @@ export class StaffAttendanceRepository implements IStaffAttendanceRepository {
     orm.checkOutTime = domain.checkOutTime;
     orm.checkoutReason = domain.checkoutReason;
     orm.status = domain.status;
+    orm.isAcceptingPatients = domain.isAcceptingPatients;
     return orm;
   }
 }

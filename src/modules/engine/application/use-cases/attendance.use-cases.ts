@@ -1,9 +1,12 @@
 import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { IStaffAttendanceRepositoryToken } from '../../domain/repositories/staff-attendance.repository.interface';
 import type { IStaffAttendanceRepository } from '../../domain/repositories/staff-attendance.repository.interface';
 import { GetStaffSchedulesUseCase } from './staff-schedule.use-cases';
 import { StaffAttendance } from '../../domain/entities/staff-attendance.model';
 import { CheckInDto, CheckOutDto } from '../dtos/attendance.dto';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 
 @Injectable()
 export class CheckInUseCase {
@@ -39,7 +42,7 @@ export class CheckInUseCase {
       throw new BadRequestException('Nhân viên đã điểm danh check-in ca trực này hôm nay');
     }
 
-    // 3. Create attendance
+    // 3. Create attendance (isAcceptingPatients = true)
     const attendance = new StaffAttendance(
       '',
       dto.staffId,
@@ -50,6 +53,12 @@ export class CheckInUseCase {
       null, // checkOutTime
       null, // checkoutReason
       'CHECKED_IN',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true, // isAcceptingPatients
     );
 
     return await this.attendanceRepository.save(attendance);
@@ -61,6 +70,8 @@ export class CheckOutUseCase {
   constructor(
     @Inject(IStaffAttendanceRepositoryToken)
     private readonly attendanceRepository: IStaffAttendanceRepository,
+    @InjectRepository(PatientVisitOrmEntity)
+    private readonly patientVisitRepository: Repository<PatientVisitOrmEntity>,
   ) {}
 
   async execute(dto: CheckOutDto): Promise<StaffAttendance> {
@@ -71,6 +82,41 @@ export class CheckOutUseCase {
 
     if (attendance.status === 'CHECKED_OUT' || attendance.checkOutTime) {
       throw new BadRequestException('Nhân viên đã check-out ca trực này trước đó');
+    }
+
+    // Check if there are active patients in the queue for this doctor at this branch
+    const remainingCount = await this.patientVisitRepository.count({
+      where: {
+        currentDoctorId: attendance.staffId,
+        branchId: attendance.branchId,
+        status: Not(In(['COMPLETED', 'CANCELLED'])),
+      },
+    });
+
+    if (remainingCount > 0) {
+      // Automatically disable accepting new patients
+      const updatedAccepting = new StaffAttendance(
+        attendance.id,
+        attendance.staffId,
+        attendance.branchId,
+        attendance.date,
+        attendance.shiftId,
+        attendance.checkInTime,
+        attendance.checkOutTime,
+        attendance.checkoutReason,
+        attendance.status,
+        attendance.createdAt,
+        attendance.updatedAt,
+        attendance.staff,
+        attendance.branch,
+        attendance.shift,
+        false, // isAcceptingPatients = false
+      );
+      await this.attendanceRepository.save(updatedAccepting);
+
+      throw new BadRequestException(
+        `Vẫn còn ${remainingCount} bệnh nhân trong hàng chờ. Vui lòng khám hết bệnh nhân hiện tại. Hệ thống đã tự động bật cờ 'Không nhận thêm bệnh nhân'.`
+      );
     }
 
     const updated = new StaffAttendance(
@@ -85,6 +131,45 @@ export class CheckOutUseCase {
       'CHECKED_OUT',
       attendance.createdAt,
       attendance.updatedAt,
+      attendance.staff,
+      attendance.branch,
+      attendance.shift,
+      attendance.isAcceptingPatients,
+    );
+
+    return await this.attendanceRepository.save(updated);
+  }
+}
+
+@Injectable()
+export class ToggleAcceptingPatientsUseCase {
+  constructor(
+    @Inject(IStaffAttendanceRepositoryToken)
+    private readonly attendanceRepository: IStaffAttendanceRepository,
+  ) {}
+
+  async execute(attendanceId: string, isAcceptingPatients: boolean): Promise<StaffAttendance> {
+    const attendance = await this.attendanceRepository.findById(attendanceId);
+    if (!attendance) {
+      throw new NotFoundException('Không tìm thấy bản ghi điểm danh');
+    }
+
+    const updated = new StaffAttendance(
+      attendance.id,
+      attendance.staffId,
+      attendance.branchId,
+      attendance.date,
+      attendance.shiftId,
+      attendance.checkInTime,
+      attendance.checkOutTime,
+      attendance.checkoutReason,
+      attendance.status,
+      attendance.createdAt,
+      attendance.updatedAt,
+      attendance.staff,
+      attendance.branch,
+      attendance.shift,
+      isAcceptingPatients,
     );
 
     return await this.attendanceRepository.save(updated);

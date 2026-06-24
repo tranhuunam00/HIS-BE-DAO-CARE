@@ -8,6 +8,7 @@ import { StaffScheduleOverrideOrmEntity } from '../../infrastructure/database/st
 import { StaffAttendanceOrmEntity } from '../../infrastructure/database/staff-attendance.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
+import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 
 // Controllers
 import { ShiftController } from './controllers/shift.controller';
@@ -43,6 +44,7 @@ import {
   CheckInUseCase,
   CheckOutUseCase,
   GetTodayStatusUseCase,
+  ToggleAcceptingPatientsUseCase,
 } from '../../application/use-cases/attendance.use-cases';
 
 @Module({
@@ -54,6 +56,7 @@ import {
       StaffAttendanceOrmEntity,
       BranchOrmEntity,
       StaffOrmEntity,
+      PatientVisitOrmEntity,
     ]),
   ],
   controllers: [
@@ -83,6 +86,7 @@ import {
     CheckInUseCase,
     CheckOutUseCase,
     GetTodayStatusUseCase,
+    ToggleAcceptingPatientsUseCase,
   ],
   exports: [
     IShiftRepositoryToken,

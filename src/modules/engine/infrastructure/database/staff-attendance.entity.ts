@@ -44,6 +44,9 @@ export class StaffAttendanceOrmEntity {
   @Column({ default: 'CHECKED_IN' })
   status: string; // 'CHECKED_IN' | 'CHECKED_OUT'
 
+  @Column({ name: 'is_accepting_patients', type: 'boolean', default: true })
+  isAcceptingPatients: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

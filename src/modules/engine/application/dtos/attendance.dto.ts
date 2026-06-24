@@ -45,6 +45,12 @@ export class AttendanceResponseDto {
   @ApiProperty({ required: false, nullable: true }) checkOutTime: Date | null;
   @ApiProperty({ required: false, nullable: true }) checkoutReason: string | null;
   @ApiProperty() status: string;
+  @ApiProperty() isAcceptingPatients: boolean;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
+}
+
+export class ToggleAcceptingDto {
+  @ApiProperty({ example: true })
+  isAcceptingPatients: boolean;
 }

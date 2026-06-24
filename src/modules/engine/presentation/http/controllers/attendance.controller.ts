@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../auth/presentation/http/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../../auth/presentation/http/guards/permissions.guard';
 import { RequirePermissions } from '../../../../auth/presentation/http/decorators/require-permissions.decorator';
-import { CheckInUseCase, CheckOutUseCase, GetTodayStatusUseCase } from '../../../application/use-cases/attendance.use-cases';
-import { CheckInDto, CheckOutDto, AttendanceResponseDto } from '../../../application/dtos/attendance.dto';
+import { CheckInUseCase, CheckOutUseCase, GetTodayStatusUseCase, ToggleAcceptingPatientsUseCase } from '../../../application/use-cases/attendance.use-cases';
+import { CheckInDto, CheckOutDto, AttendanceResponseDto, ToggleAcceptingDto } from '../../../application/dtos/attendance.dto';
 
 @ApiTags('Engine - Staff Attendance')
 @Controller('schedules/attendance')
@@ -15,6 +15,7 @@ export class AttendanceController {
     private readonly checkInUseCase: CheckInUseCase,
     private readonly checkOutUseCase: CheckOutUseCase,
     private readonly getTodayStatusUseCase: GetTodayStatusUseCase,
+    private readonly toggleAcceptingPatientsUseCase: ToggleAcceptingPatientsUseCase,
   ) {}
 
   @Post('check-in')
@@ -32,6 +33,18 @@ export class AttendanceController {
   @ApiResponse({ status: 200, type: AttendanceResponseDto })
   async checkOut(@Body() dto: CheckOutDto): Promise<AttendanceResponseDto> {
     const attendance = await this.checkOutUseCase.execute(dto);
+    return this.mapToDto(attendance);
+  }
+
+  @Patch(':id/accepting')
+  @RequirePermissions('schedule:update-daily')
+  @ApiOperation({ summary: 'Bật/tắt cờ sẵn sàng nhận bệnh nhân mới' })
+  @ApiResponse({ status: 200, type: AttendanceResponseDto })
+  async toggleAccepting(
+    @Param('id') id: string,
+    @Body() dto: ToggleAcceptingDto,
+  ): Promise<AttendanceResponseDto> {
+    const attendance = await this.toggleAcceptingPatientsUseCase.execute(id, dto.isAcceptingPatients);
     return this.mapToDto(attendance);
   }
 
@@ -59,6 +72,7 @@ export class AttendanceController {
       checkOutTime: domain.checkOutTime,
       checkoutReason: domain.checkoutReason,
       status: domain.status,
+      isAcceptingPatients: domain.isAcceptingPatients,
       createdAt: domain.createdAt,
       updatedAt: domain.updatedAt,
     };

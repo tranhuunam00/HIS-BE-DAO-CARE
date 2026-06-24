@@ -14,5 +14,6 @@ export class StaffAttendance {
     public readonly staff?: any,
     public readonly branch?: any,
     public readonly shift?: any,
+    public readonly isAcceptingPatients: boolean = true,
   ) {}
 }

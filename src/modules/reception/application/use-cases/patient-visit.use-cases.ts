@@ -129,6 +129,9 @@ export class CheckInUseCase {
       if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
         throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
       }
+      if (docAttendance.isAcceptingPatients === false) {
+        throw new BadRequestException('Bác sĩ yêu cầu hiện không nhận thêm bệnh nhân mới');
+      }
     }
 
     if (roomId) {
@@ -151,12 +154,20 @@ export class CheckInUseCase {
         relations: { staff: true },
       });
 
-      const hasActiveDoctor = activeAttendances.some(
+      const activeDoctors = activeAttendances.filter(
         (a) => a.staff && a.staff.title === 'DOCTOR',
       );
 
-      if (!hasActiveDoctor) {
+      if (activeDoctors.length === 0) {
         throw new BadRequestException('Phòng khám được chọn hiện không có bác sĩ nào đang hoạt động (chưa check-in hoặc đã check-out)');
+      }
+
+      const acceptingDoctors = activeDoctors.filter(
+        (a) => a.isAcceptingPatients !== false,
+      );
+
+      if (acceptingDoctors.length === 0) {
+        throw new BadRequestException('Phòng khám này hiện đã dừng nhận bệnh nhân mới (Bác sĩ đã bật cờ ngưng nhận bệnh)');
       }
     }
   }
@@ -321,6 +332,9 @@ export class TransferRoomUseCase {
       if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
         throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
       }
+      if (docAttendance.isAcceptingPatients === false) {
+        throw new BadRequestException('Bác sĩ yêu cầu hiện không nhận thêm bệnh nhân mới');
+      }
     }
 
     if (roomId) {
@@ -343,12 +357,20 @@ export class TransferRoomUseCase {
         relations: { staff: true },
       });
 
-      const hasActiveDoctor = activeAttendances.some(
+      const activeDoctors = activeAttendances.filter(
         (a) => a.staff && a.staff.title === 'DOCTOR',
       );
 
-      if (!hasActiveDoctor) {
+      if (activeDoctors.length === 0) {
         throw new BadRequestException('Phòng khám được chọn hiện không có bác sĩ nào đang hoạt động (chưa check-in hoặc đã check-out)');
+      }
+
+      const acceptingDoctors = activeDoctors.filter(
+        (a) => a.isAcceptingPatients !== false,
+      );
+
+      if (acceptingDoctors.length === 0) {
+        throw new BadRequestException('Phòng khám này hiện đã dừng nhận bệnh nhân mới (Bác sĩ đã bật cờ ngưng nhận bệnh)');
       }
     }
   }
