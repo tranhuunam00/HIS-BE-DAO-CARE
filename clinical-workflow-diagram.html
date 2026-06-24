@@ -91,7 +91,9 @@
           ReAssignClinic --> DispatchClinic
           
           WAITING_CLINICAL_EXAM --> IN_CLINICAL_EXAM[6B. Bác sĩ tiếp nhận khám: Trạng thái IN_CLINICAL_EXAM]
-          IN_CLINICAL_EXAM --> CLINICAL_EXAM_DONE[7B. Bác sĩ hoàn thành khám & chỉ định CLS: Trạng thái CLINICAL_EXAM_DONE]
+          IN_CLINICAL_EXAM --> CheckCLS{Bác sĩ có chỉ định dịch vụ CLS?}
+          CheckCLS -->|Có chỉ định CLS| CLINICAL_EXAM_DONE[7B. Khám xong lâm sàng: Trạng thái CLINICAL_EXAM_DONE]
+          CheckCLS -->|Không chỉ định CLS| COMPLETED[19. Hoàn thành khám: Trạng thái COMPLETED]
           
           %% Đăng ký & Thanh toán CLS cho nhánh B (hoặc dịch vụ phát sinh)
           CLINICAL_EXAM_DONE --> OrderServiceCLS[8. Đăng ký các dịch vụ CLS chỉ định]
