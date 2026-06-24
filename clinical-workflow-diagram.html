@@ -77,7 +77,7 @@
           
           %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH A)
           CashierOK -->|Đã đóng tiền| DispatchDirect[6A. Điều phối phân phòng & bác sĩ thực hiện dịch vụ]
-          DispatchDirect --> CheckStaffDirect{Kiểm tra phòng có BS trực & check-in?}
+          DispatchDirect --> CheckStaffDirect{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
           CheckStaffDirect -->|Đạt điều kiện| GoServiceDirect[7A. Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           CheckStaffDirect -->|Không đạt| ReAssignDirect[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
           ReAssignDirect -->|Chọn phòng khác| DispatchDirect
@@ -85,7 +85,7 @@
           
           %% Nhánh B: Chưa biết (Cần khám lâm sàng tổng quát / định hướng)
           ChooseRoute -->|Chưa định hướng rõ| DispatchClinic[4B. Điều phối phân vào Phòng khám Lâm sàng]
-          DispatchClinic --> CheckClinicStaff{Kiểm tra phòng lâm sàng có BS trực & check-in?}
+          DispatchClinic --> CheckClinicStaff{Kiểm tra phòng lâm sàng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
           CheckClinicStaff -->|Đạt điều kiện| WAITING_CLINICAL_EXAM[5B. Chờ khám lâm sàng: Trạng thái WAITING_CLINICAL_EXAM]
           CheckClinicStaff -->|Không đạt| ReAssignClinic[Điều phối chọn phòng lâm sàng khác]
           ReAssignClinic --> DispatchClinic
@@ -102,11 +102,20 @@
           
           %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH B)
           CashierOK_CLS -->|Đã đóng tiền| DispatchCLS[10. Điều phối phân phòng & bác sĩ cho từng dịch vụ CLS]
-          DispatchCLS --> CheckStaffCLS{Kiểm tra phòng có BS trực & check-in?}
+          DispatchCLS --> CheckStaffCLS{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
           CheckStaffCLS -->|Đạt điều kiện| GoServiceCLS[11. Chờ làm dịch vụ: Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           CheckStaffCLS -->|Không đạt| ReAssignCLS[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
           ReAssignCLS -->|Chọn phòng khác| DispatchCLS
           ReAssignCLS -->|Hủy dịch vụ / Hoàn tiền| OrderServiceCLS
+          
+          %% Hoàn tiền & Hủy dịch vụ sau thanh toán (Refund & Cancellation)
+          GoServiceDirect -.->|Yêu cầu hủy dịch vụ| RequestRefund[Bệnh nhân yêu cầu hủy/hoàn tiền]
+          GoServiceCLS -.->|Yêu cầu hủy dịch vụ| RequestRefund
+          RequestRefund --> CashierRefund{Thu ngân duyệt hoàn tiền?}
+          CashierRefund -->|Đồng ý| RefundSuccess[Trạng thái CANCELLED & Hoàn tiền]
+          RefundSuccess --> CANCELLED
+          CashierRefund -->|Từ chối| ReturnToQueue[Quay lại hàng chờ phòng CLS]
+          ReturnToQueue --> IN_SERVICE
           
           %% Thực hiện dịch vụ CLS
           GoServiceDirect --> IN_SERVICE[12. Đang thực hiện dịch vụ: Trạng thái IN_SERVICE]
@@ -161,9 +170,20 @@
           
           %% Tiếp đón
           SetStaffOnDuty --> ServePatients["Khám & thực hiện dịch vụ cho bệnh nhân"]
+          ServePatients --> ToggleAcceptingFlag{"Bác sĩ muốn dừng nhận bệnh mới? <br> (Bật/tắt cờ isAcceptingPatients)"}
+          ToggleAcceptingFlag -->|Bật cờ: NGƯNG NHẬN BỆNH| DisableAccepting["isAcceptingPatients = false <br> (Hệ thống chặn tiếp nhận mới)"]
+          ToggleAcceptingFlag -->|Tắt cờ: ĐANG NHẬN BỆNH| EnableAccepting["isAcceptingPatients = true"]
+          DisableAccepting --> ServePatients
+          EnableAccepting --> ServePatients
           
           %% Check-out
-          ServePatients --> ClickCheckOut["Bấm Check-out kết thúc ca trực"]
+          ServePatients --> TryCheckOut["Bấm Check-out kết thúc ca trực"]
+          TryCheckOut --> CheckQueueBeforeCheckout{Còn bệnh nhân trong hàng chờ?}
+          CheckQueueBeforeCheckout -->|Có bệnh nhân| AutoSetAcceptingPatientsFalse["Tự động tắt cờ: isAcceptingPatients = false"]
+          AutoSetAcceptingPatientsFalse --> BlockCheckoutAlert["Ném lỗi & Chặn Check-out <br> (Bác sĩ phải khám nốt)"]
+          BlockCheckoutAlert --> ServePatients
+          
+          CheckQueueBeforeCheckout -->|Hàng đợi trống| ClickCheckOut["Xử lý Check-out thực tế"]
           ClickCheckOut --> SelectReason{"Chọn lý do kết thúc?"}
           
           %% Chọn lý do
