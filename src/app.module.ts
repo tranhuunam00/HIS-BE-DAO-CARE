@@ -7,6 +7,7 @@ import { AppDataSource } from './infrastructure/database/data-source';
 import { AuthModule } from './modules/auth/presentation/http/auth.module';
 import { OrgModule } from './modules/org/presentation/http/org.module';
 import { MedicalModule } from './modules/medical/presentation/http/medical.module';
+import { EngineModule } from './modules/engine/presentation/http/engine.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MedicalModule } from './modules/medical/presentation/http/medical.modul
     AuthModule,
     OrgModule,
     MedicalModule,
+    EngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],
