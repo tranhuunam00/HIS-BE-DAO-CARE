@@ -142,5 +142,42 @@
     </div>
   </div>
 
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Quy trình Điểm danh Ca trực Bác sĩ (Doctor Shift Attendance)</h1>
+    <p>Sơ đồ dưới đây thể hiện quy trình bác sĩ vào ca trực (Check-in) và tan ca trực (Check-out) để phục vụ chấm công và làm điều kiện xác thực gán phòng điều phối.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          %% Thiết lập lịch trực
+          AdminCreateShift["1. Admin thiết lập ca trực tuần (Templates & Overrides)"] --> StartShift(["2. Bác sĩ bắt đầu ca trực"])
+          StartShift --> ViewSchedules["Xem danh sách ca trực hôm nay"]
+          
+          %% Check-in
+          ViewSchedules --> ClickCheckIn["Bấm Điểm danh Check-in"]
+          ClickCheckIn --> SetCheckInTime["Ghi nhận thời gian Check-in thực tế"]
+          SetCheckInTime --> SetStaffOnDuty["Trạng thái bác sĩ: ĐANG TRỰC / SẴN SÀNG"]
+          
+          %% Tiếp đón
+          SetStaffOnDuty --> ServePatients["Khám & thực hiện dịch vụ cho bệnh nhân"]
+          
+          %% Check-out
+          ServePatients --> ClickCheckOut["Bấm Check-out kết thúc ca trực"]
+          ClickCheckOut --> SelectReason{"Chọn lý do kết thúc?"}
+          
+          %% Chọn lý do
+          SelectReason -->|Hết giờ làm việc| SetCheckOut["Ghi nhận lý do: HẾT GIỜ"]
+          SelectReason -->|Có việc riêng| SetCheckOutReason["Nhập lý do chi tiết & ghi nhận"]
+          SelectReason -->|Lý do khác| SetCheckOutReason
+          
+          SetCheckOut --> CalculateHours["Tính toán số giờ trực thực tế để chấm công"]
+          SetCheckOutReason --> CalculateHours
+          
+          CalculateHours --> SetStaffOffDuty["Trạng thái bác sĩ: ĐÃ VỀ / OFF-DUTY"]
+          SetStaffOffDuty --> EndShift(["Kết thúc ca trực"])
+    </div>
+  </div>
+
 </body>
 </html>
