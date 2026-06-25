@@ -39,6 +39,21 @@ export class UpdateFormTemplateDto {
   @IsString()
   name?: string;
 
+  @ApiProperty({ example: 'PRESCRIPTION_TEMPLATE', required: false })
+  @IsOptional()
+  @IsString()
+  code?: string;
+
+  @ApiProperty({ example: 'PRINT_TEMPLATE', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiProperty({ example: 'PRESCRIPTION', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
   @ApiProperty({ example: '<html>...</html>', required: false })
   @IsOptional()
   @IsString()
