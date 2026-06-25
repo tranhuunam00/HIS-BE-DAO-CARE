@@ -51,6 +51,7 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     date?: string;
     doctorId?: string;
     serviceId?: string;
+    patientId?: string;
   }): Promise<PatientVisit[]> {
     const query = this.ormRepository.createQueryBuilder('visit')
       .leftJoinAndSelect('visit.patient', 'patient')
@@ -62,6 +63,9 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       .leftJoin(OrderItemOrmEntity, 'doctorItem', 'doctorItem.orderId = doctorOrder.id')
       .distinct(true);
 
+    if (filters.patientId) {
+      query.andWhere('visit.patientId = :patientId', { patientId: filters.patientId });
+    }
     if (filters.branchId) {
       query.andWhere('visit.branchId = :branchId', { branchId: filters.branchId });
     }

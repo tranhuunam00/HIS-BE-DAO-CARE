@@ -40,6 +40,7 @@ export class PatientVisitController {
   @ApiQuery({ name: 'date', required: false, description: 'Lọc ngày tạo lượt khám (YYYY-MM-DD)' })
   @ApiQuery({ name: 'doctorId', required: false, description: 'Lọc worklist theo bác sĩ đang/đã nhận ca' })
   @ApiQuery({ name: 'serviceId', required: false, description: 'Lọc worklist theo dịch vụ được chỉ định' })
+  @ApiQuery({ name: 'patientId', required: false, description: 'Lọc theo ID bệnh nhân' })
   @ApiResponse({ status: 200, type: [PatientVisitResponseDto] })
   async getAll(
     @Query('branchId') branchId?: string,
@@ -48,8 +49,9 @@ export class PatientVisitController {
     @Query('date') date?: string,
     @Query('doctorId') doctorId?: string,
     @Query('serviceId') serviceId?: string,
+    @Query('patientId') patientId?: string,
   ): Promise<PatientVisitResponseDto[]> {
-    return await this.listPatientVisitsUseCase.execute({ branchId, roomId, status, date, doctorId, serviceId });
+    return await this.listPatientVisitsUseCase.execute({ branchId, roomId, status, date, doctorId, serviceId, patientId });
   }
 
   @Get(':id')

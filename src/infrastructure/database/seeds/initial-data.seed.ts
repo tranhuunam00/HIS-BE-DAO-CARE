@@ -23,6 +23,7 @@ import { FormTemplateOrmEntity } from '../../../modules/forms/infrastructure/dat
 import { PatientOrmEntity } from '../../../modules/reception/infrastructure/database/patient.entity';
 import { AppointmentOrmEntity } from '../../../modules/reception/infrastructure/database/appointment.entity';
 import { PatientVisitOrmEntity } from '../../../modules/reception/infrastructure/database/patient-visit.entity';
+import { PATIENT_ROLE_DESCRIPTION, PATIENT_ROLE_NAME } from '../../../modules/auth/domain/constants/auth.constants';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -118,6 +119,7 @@ async function seed() {
     { name: 'RECEPTION', description: 'Lễ tân tiếp đón' },
     { name: 'NURSE', description: 'Điều dưỡng viên' },
     { name: 'TECHNICIAN', description: 'Kỹ thuật viên' },
+    { name: PATIENT_ROLE_NAME, description: PATIENT_ROLE_DESCRIPTION },
   ];
 
   const dbRoles: Record<string, RoleOrmEntity> = {};
@@ -1555,6 +1557,54 @@ async function seed() {
         temperature: 38.2,
         weight: 22.0,
         height: 115.0,
+      },
+      {
+        visitCode: 'LK260515-0001',
+        patientId: dbPatients['0905123456'].id,
+        branchId: defaultBranch.id,
+        appointmentId: null,
+        currentRoomId: room101.id,
+        currentDoctorId: docNam.id,
+        queueNumber: 10,
+        status: 'COMPLETED',
+        reason: 'Đau dạ dày, đầy bụng khó tiêu kéo dài',
+        pulse: 80,
+        bloodPressure: '125/80',
+        temperature: 36.8,
+        weight: 65.5,
+        height: 170.0,
+      },
+      {
+        visitCode: 'LK260420-0001',
+        patientId: dbPatients['0905123456'].id,
+        branchId: defaultBranch.id,
+        appointmentId: null,
+        currentRoomId: room101.id,
+        currentDoctorId: docNam.id,
+        queueNumber: 12,
+        status: 'COMPLETED',
+        reason: 'Ho khan, đau họng, sốt nhẹ vào chiều tối',
+        pulse: 84,
+        bloodPressure: '120/75',
+        temperature: 37.4,
+        weight: 66.0,
+        height: 170.0,
+      },
+      {
+        visitCode: 'LK260522-0001',
+        patientId: dbPatients['0988223344'].id,
+        branchId: defaultBranch.id,
+        appointmentId: null,
+        currentRoomId: room101.id,
+        currentDoctorId: docMai.id,
+        queueNumber: 8,
+        status: 'COMPLETED',
+        reason: 'Định kỳ kiểm tra huyết áp và tim mạch',
+        pulse: 72,
+        bloodPressure: '135/85',
+        temperature: 36.5,
+        weight: 54.0,
+        height: 158.0,
       },
     ];
 

@@ -1,11 +1,13 @@
 import { Controller, Post, Body, UseGuards, Req, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginUseCase } from '../../../application/use-cases/login.use-case';
+import { GoogleLoginUseCase } from '../../../application/use-cases/google-login.use-case';
 import { RegisterUseCase } from '../../../application/use-cases/register.use-case';
 import { RefreshTokenUseCase } from '../../../application/use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../../../application/use-cases/logout.use-case';
 import { GetCurrentUserUseCase } from '../../../application/use-cases/get-current-user.use-case';
 import { LoginDto } from '../../../application/dtos/login.dto';
+import { GoogleLoginDto, GoogleLoginResponseDto } from '../../../application/dtos/google-login.dto';
 import { RegisterDto } from '../../../application/dtos/register.dto';
 import { TokenResponseDto } from '../../../application/dtos/token-response.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -17,6 +19,7 @@ import type { Request } from 'express';
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
+    private readonly googleLoginUseCase: GoogleLoginUseCase,
     private readonly registerUseCase: RegisterUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
@@ -48,6 +51,16 @@ export class AuthController {
       ? forwardedFor[0]
       : forwardedFor?.split(',')[0]?.trim() || req.ip;
     return await this.loginUseCase.execute(dto, clientIp);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Dang nhap bang Google va tu dong tao ho so benh nhan' })
+  @ApiResponse({ status: 200, type: GoogleLoginResponseDto, description: 'Dang nhap Google thanh cong' })
+  @ApiResponse({ status: 401, description: 'Google ID token khong hop le' })
+  @ApiResponse({ status: 409, description: 'So dien thoai da gan voi ho so khac' })
+  async loginWithGoogle(@Body() dto: GoogleLoginDto): Promise<GoogleLoginResponseDto> {
+    return await this.googleLoginUseCase.execute(dto);
   }
 
   @Post('refresh')

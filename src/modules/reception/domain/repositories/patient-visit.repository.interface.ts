@@ -8,6 +8,7 @@ export interface IPatientVisitRepository {
     date?: string;
     doctorId?: string;
     serviceId?: string;
+    patientId?: string;
   }): Promise<PatientVisit[]>;
   findById(id: string): Promise<PatientVisit | null>;
   findByCode(code: string): Promise<PatientVisit | null>;

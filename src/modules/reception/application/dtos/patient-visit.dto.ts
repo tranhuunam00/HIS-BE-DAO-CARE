@@ -185,6 +185,15 @@ export class PatientVisitResponseDto {
   @ApiProperty({ required: false })
   height: number | null;
 
+  @ApiProperty({ required: false })
+  diagnosis?: string;
+
+  @ApiProperty({ required: false })
+  advice?: string;
+
+  @ApiProperty({ required: false })
+  prescriptions?: any[];
+
   @ApiProperty()
   createdAt: Date;
 

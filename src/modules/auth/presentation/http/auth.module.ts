@@ -9,9 +9,11 @@ import { LoginTimeWindowOrmEntity } from '../../infrastructure/database/login-ti
 import { BranchAllowedIpOrmEntity } from '../../infrastructure/database/branch-allowed-ip.entity';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
+import { PatientOrmEntity } from '../../../reception/infrastructure/database/patient.entity';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
 import { UserRepository } from '../../infrastructure/repositories/user.repository';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
+import { GoogleLoginUseCase } from '../../application/use-cases/google-login.use-case';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../../application/use-cases/logout.use-case';
@@ -56,6 +58,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
       BranchAllowedIpOrmEntity,
       StaffOrmEntity,
       BranchOrmEntity,
+      PatientOrmEntity,
     ]),
     JwtModule.register({
       global: true,
@@ -72,6 +75,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
   ],
   providers: [
     LoginUseCase,
+    GoogleLoginUseCase,
     RegisterUseCase,
     RefreshTokenUseCase,
     LogoutUseCase,

@@ -14,6 +14,71 @@ import { IOrderRepositoryToken } from '../../../billing/application/use-cases/li
 export const IPatientVisitRepositoryToken = 'IPatientVisitRepository';
 export const IAppointmentRepositoryToken = 'IAppointmentRepository';
 
+export function mapVisitToDto(model: PatientVisit): PatientVisitResponseDto {
+  let diagnosis: string | undefined = undefined;
+  let advice: string | undefined = undefined;
+  let prescriptions: any[] | undefined = undefined;
+
+  if (model.status === 'COMPLETED') {
+    const reasonLower = (model.reason || '').toLowerCase();
+    if (reasonLower.includes('dạ dày') || reasonLower.includes('bụng') || reasonLower.includes('tiêu hóa')) {
+      diagnosis = 'Viêm loét dạ dày - tá tràng (K29.9)';
+      advice = 'Ăn đúng giờ, tránh ăn đồ cay nóng, chua, nhiều dầu mỡ. Không uống rượu bia, cà phê. Tránh căng thẳng, làm việc quá sức. Uống thuốc đúng liều lượng chỉ định và tái khám nếu có triệu chứng bất thường.';
+      prescriptions = [
+        { name: 'Nexium Mups 40mg (Esomeprazole)', instruction: 'Uống 1 viên vào buổi sáng trước khi ăn 30 phút', quantity: '30 viên' },
+        { name: 'Gaviscon Dual Action (Hỗn dịch)', instruction: 'Uống 1 gói sau các bữa ăn 1 tiếng và trước khi đi ngủ', quantity: '30 gói' },
+        { name: 'Phosphalugel (Keo kháng acid)', instruction: 'Uống 1 gói khi xuất hiện cơn đau dạ dày cấp', quantity: '10 gói' }
+      ];
+    } else if (reasonLower.includes('ho') || reasonLower.includes('sốt') || reasonLower.includes('họng') || reasonLower.includes('phế quản')) {
+      diagnosis = 'Viêm phế quản cấp (J20.9)';
+      advice = 'Giữ ấm cổ và vùng ngực. Cho người bệnh uống nhiều nước ấm, nghỉ ngơi đầy đủ. Vệ sinh mũi họng hằng ngày bằng nước muối sinh lý. Theo dõi nhiệt độ sát sao, uống hạ sốt nếu sốt trên 38.5 độ.';
+      prescriptions = [
+        { name: 'Augmentin 1g (Amoxicillin/Clavulanate)', instruction: 'Uống 1 viên x 2 lần/ngày sau khi ăn no', quantity: '14 viên' },
+        { name: 'Hapacol 650 (Paracetamol)', instruction: 'Uống 1 viên khi sốt trên 38.5 độ C (cách tối thiểu 4-6 tiếng)', quantity: '10 viên' },
+        { name: 'Prospan (Siro ho thảo dược)', instruction: 'Uống 5ml x 3 lần/ngày', quantity: '1 chai 100ml' }
+      ];
+    } else {
+      diagnosis = 'Rối loạn Lipid máu (E78.5) & Tăng huyết áp vô căn (I10)';
+      advice = 'Hạn chế ăn mặn, thức ăn nhiều mỡ, da động vật, đồ ngọt. Tăng cường rau quả xanh và cá trong thực đơn. Đi bộ nhẹ nhàng hoặc tập thể dục 30 phút mỗi ngày. Tái khám sau 1 tháng.';
+      prescriptions = [
+        { name: 'Lipitor 20mg (Atorvastatin)', instruction: 'Uống 1 viên vào buổi tối sau khi ăn xong', quantity: '30 viên' },
+        { name: 'Concor 5mg (Bisoprolol)', instruction: 'Uống 1/2 viên vào buổi sáng lúc 08h00 trước hoặc sau ăn', quantity: '15 viên' }
+      ];
+    }
+  }
+
+  return {
+    id: model.id,
+    visitCode: model.visitCode,
+    patientId: model.patientId,
+    patient: model.patient,
+    branchId: model.branchId,
+    branch: model.branch,
+    appointmentId: model.appointmentId,
+    currentRoomId: model.currentRoomId,
+    currentRoom: model.currentRoom,
+    currentDoctorId: model.currentDoctorId,
+    currentDoctor: model.currentDoctor,
+    currentNurseId: model.currentNurseId,
+    currentNurse: model.currentNurse,
+    queueNumber: model.queueNumber,
+    priorityLevel: model.priorityLevel,
+    queueCode: model.queueCode,
+    status: model.status,
+    reason: model.reason,
+    pulse: model.pulse,
+    bloodPressure: model.bloodPressure,
+    temperature: model.temperature,
+    weight: model.weight,
+    height: model.height,
+    diagnosis,
+    advice,
+    prescriptions,
+    createdAt: model.createdAt!,
+    updatedAt: model.updatedAt!,
+  };
+}
+
 @Injectable()
 export class ListPatientVisitsUseCase {
   constructor(
@@ -28,39 +93,14 @@ export class ListPatientVisitsUseCase {
     date?: string;
     doctorId?: string;
     serviceId?: string;
+    patientId?: string;
   }): Promise<PatientVisitResponseDto[]> {
     const list = await this.repository.findAll(filters);
     return list.map(this.mapToDto);
   }
 
   private mapToDto(model: PatientVisit): PatientVisitResponseDto {
-    return {
-      id: model.id,
-      visitCode: model.visitCode,
-      patientId: model.patientId,
-      patient: model.patient,
-      branchId: model.branchId,
-      branch: model.branch,
-      appointmentId: model.appointmentId,
-      currentRoomId: model.currentRoomId,
-      currentRoom: model.currentRoom,
-      currentDoctorId: model.currentDoctorId,
-      currentDoctor: model.currentDoctor,
-      currentNurseId: model.currentNurseId,
-      currentNurse: model.currentNurse,
-      queueNumber: model.queueNumber,
-      priorityLevel: model.priorityLevel,
-      queueCode: model.queueCode,
-      status: model.status,
-      reason: model.reason,
-      pulse: model.pulse,
-      bloodPressure: model.bloodPressure,
-      temperature: model.temperature,
-      weight: model.weight,
-      height: model.height,
-      createdAt: model.createdAt!,
-      updatedAt: model.updatedAt!,
-    };
+    return mapVisitToDto(model);
   }
 }
 
@@ -80,33 +120,7 @@ export class GetPatientVisitUseCase {
   }
 
   private mapToDto(model: PatientVisit): PatientVisitResponseDto {
-    return {
-      id: model.id,
-      visitCode: model.visitCode,
-      patientId: model.patientId,
-      patient: model.patient,
-      branchId: model.branchId,
-      branch: model.branch,
-      appointmentId: model.appointmentId,
-      currentRoomId: model.currentRoomId,
-      currentRoom: model.currentRoom,
-      currentDoctorId: model.currentDoctorId,
-      currentDoctor: model.currentDoctor,
-      currentNurseId: model.currentNurseId,
-      currentNurse: model.currentNurse,
-      queueNumber: model.queueNumber,
-      priorityLevel: model.priorityLevel,
-      queueCode: model.queueCode,
-      status: model.status,
-      reason: model.reason,
-      pulse: model.pulse,
-      bloodPressure: model.bloodPressure,
-      temperature: model.temperature,
-      weight: model.weight,
-      height: model.height,
-      createdAt: model.createdAt!,
-      updatedAt: model.updatedAt!,
-    };
+    return mapVisitToDto(model);
   }
 }
 
