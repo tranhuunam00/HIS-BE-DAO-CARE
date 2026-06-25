@@ -92,8 +92,11 @@ export class PatientVisitController {
   @RequirePermissions('org:write')
   @ApiOperation({ summary: 'Bác sĩ tiếp nhận bệnh nhân vào phòng khám/CLS' })
   @ApiResponse({ status: 200, type: PatientVisitResponseDto })
-  async acceptPatient(@Param('id') id: string): Promise<PatientVisitResponseDto> {
-    return await this.acceptPatientUseCase.execute(id);
+  async acceptPatient(
+    @Param('id') id: string,
+    @Body() body: { doctorId?: string },
+  ): Promise<PatientVisitResponseDto> {
+    return await this.acceptPatientUseCase.execute(id, body?.doctorId);
   }
 
   @Patch(':id/complete')

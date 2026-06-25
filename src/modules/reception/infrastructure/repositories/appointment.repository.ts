@@ -35,7 +35,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     );
   }
 
-  async findAll(filters: { branchId?: string; doctorId?: string; date?: string; status?: string }): Promise<Appointment[]> {
+  async findAll(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string }): Promise<Appointment[]> {
     const query = this.ormRepository.createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor')
@@ -53,6 +53,9 @@ export class AppointmentRepository implements IAppointmentRepository {
     }
     if (filters.status) {
       query.andWhere('appointment.status = :status', { status: filters.status });
+    }
+    if (filters.phone) {
+      query.andWhere('patient.phone LIKE :phone', { phone: `%${filters.phone}%` });
     }
 
     query.orderBy('appointment.appointmentDate', 'ASC')

@@ -12,7 +12,7 @@ export class ListAppointmentsUseCase {
     private readonly repository: IAppointmentRepository,
   ) {}
 
-  async execute(filters: { branchId?: string; doctorId?: string; date?: string; status?: string }): Promise<AppointmentResponseDto[]> {
+  async execute(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string }): Promise<AppointmentResponseDto[]> {
     const list = await this.repository.findAll(filters);
     return list.map(this.mapToDto);
   }

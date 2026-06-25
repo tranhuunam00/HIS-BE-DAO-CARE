@@ -6,5 +6,6 @@ export interface IPatientVisitRepository {
   findByCode(code: string): Promise<PatientVisit | null>;
   save(visit: Omit<PatientVisit, 'id'> & { id?: string }): Promise<PatientVisit>;
   getNextQueueNumber(branchId: string, date: string): Promise<number>;
+  getNextQueueCode(branchId: string, date: string, priorityLevel: string): Promise<string>;
   countAll(): Promise<number>;
 }

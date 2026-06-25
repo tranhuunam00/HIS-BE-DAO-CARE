@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { OrderOrmEntity } from './order.entity';
 import { ServiceOrmEntity } from '../../../medical/infrastructure/database/service.entity';
+import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 
 @Entity({ name: 'order_items', schema: 'his' })
 export class OrderItemOrmEntity {
@@ -40,6 +41,13 @@ export class OrderItemOrmEntity {
 
   @Column({ name: 'result_notes', type: 'text', nullable: true })
   resultNotes: string | null;
+
+  @Column({ name: 'performed_by_id', type: 'uuid', nullable: true })
+  performedById: string | null;
+
+  @ManyToOne(() => StaffOrmEntity, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'performed_by_id' })
+  performedBy: StaffOrmEntity | null;
 
   @Column({ name: 'result_status', type: 'varchar', default: 'NONE' })
   resultStatus: string; // 'NONE' | 'PENDING' | 'COMPLETED'

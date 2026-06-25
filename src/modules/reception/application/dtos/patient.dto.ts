@@ -32,10 +32,10 @@ export class CreatePatientDto {
   @IsString()
   address?: string;
 
-  @ApiProperty({ description: 'Số CCCD' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'Số CCCD' })
+  @IsOptional()
   @IsString()
-  cccd: string;
+  cccd?: string;
 
   @ApiPropertyOptional({ description: 'Họ tên người giám hộ' })
   @IsOptional()

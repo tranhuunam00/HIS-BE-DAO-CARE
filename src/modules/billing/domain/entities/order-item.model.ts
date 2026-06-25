@@ -11,5 +11,7 @@ export class OrderItem {
     public readonly service?: any,
     public readonly resultNotes?: string | null,
     public readonly resultStatus?: string, // 'NONE' | 'PENDING' | 'COMPLETED'
+    public readonly performedById?: string | null,
+    public readonly performedBy?: any,
   ) {}
 }

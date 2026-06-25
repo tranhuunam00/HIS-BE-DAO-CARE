@@ -42,6 +42,8 @@ export class ListPatientVisitsUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -86,6 +88,8 @@ export class GetPatientVisitUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -185,6 +189,8 @@ export class CheckInUseCase {
 
     // 1. Get next sequential Queue Number for this branch today
     const queueNumber = await this.visitRepository.getNextQueueNumber(dto.branchId, today);
+    const priorityLevel = dto.priorityLevel || 'REGULAR';
+    const queueCode = await this.visitRepository.getNextQueueCode(dto.branchId, today, priorityLevel);
 
     // 2. Generate visit code
     const count = await this.visitRepository.countAll();
@@ -213,7 +219,9 @@ export class CheckInUseCase {
       currentDoctorId: dto.currentDoctorId || null,
       currentNurseId: null,
       queueNumber,
-      status: dto.currentRoomId ? 'WAITING_CLINICAL_EXAM' : 'ADMITTED',
+      priorityLevel,
+      queueCode,
+      status: 'ADMITTED',
       reason: dto.reason || null,
       pulse: dto.pulse || null,
       bloodPressure: dto.bloodPressure || null,
@@ -241,6 +249,8 @@ export class CheckInUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -291,6 +301,8 @@ export class UpdateVitalSignsUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -416,6 +428,8 @@ export class TransferRoomUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -470,6 +484,8 @@ export class ConfirmResultsWaitUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -490,7 +506,7 @@ export class AcceptPatientUseCase {
     private readonly repository: IPatientVisitRepository,
   ) {}
 
-  async execute(id: string): Promise<PatientVisitResponseDto> {
+  async execute(id: string, doctorId?: string): Promise<PatientVisitResponseDto> {
     const visit = await this.repository.findById(id);
     if (!visit) {
       throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
@@ -510,6 +526,7 @@ export class AcceptPatientUseCase {
     const updated = await this.repository.save({
       ...visit,
       status: newStatus,
+      currentDoctorId: doctorId || visit.currentDoctorId,
     });
 
     return this.mapToDto(updated);
@@ -531,6 +548,8 @@ export class AcceptPatientUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,
@@ -622,6 +641,8 @@ export class CompletePatientUseCase {
       currentNurseId: model.currentNurseId,
       currentNurse: model.currentNurse,
       queueNumber: model.queueNumber,
+      priorityLevel: model.priorityLevel,
+      queueCode: model.queueCode,
       status: model.status,
       reason: model.reason,
       pulse: model.pulse,

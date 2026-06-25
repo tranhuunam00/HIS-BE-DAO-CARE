@@ -9,6 +9,8 @@ export class PatientVisit {
     public readonly currentDoctorId: string | null,
     public readonly currentNurseId: string | null,
     public readonly queueNumber: number,
+    public readonly priorityLevel: string,
+    public readonly queueCode: string | null,
     public readonly status: string, // 'WAITING' | 'IN_ROOM' | 'COMPLETED' | 'CANCELLED'
     public readonly reason: string | null,
     // Vital Signs

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quy trình Vận hành của Điều phối viên (Coordinator Operations) - HIS-DAO-CARE</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-header: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --border-color: #334155;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .app-header {
+      background-color: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .app-header p {
+      margin: 5px 0 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-scenario {
+      background-color: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .badge-action {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-system {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .main-container {
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .tabs-bar {
+      margin-bottom: 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .scenario-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .scenario-header {
+      padding: 16px 24px;
+      background-color: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .scenario-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .step-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .step-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--accent-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .step-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .step-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column-section {
+      background-color: rgba(15, 23, 42, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .column-section h4 {
+      margin: 0 0 12px 0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-action h4 {
+      color: var(--accent-blue);
+    }
+
+    .section-screen h4 {
+      color: var(--accent-purple);
+    }
+
+    .section-system h4 {
+      color: var(--primary);
+    }
+
+    .action-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .action-list li {
+      margin-bottom: 8px;
+    }
+
+    .action-list li strong {
+      color: var(--text-main);
+    }
+
+    .diagram-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .diagram-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-main);
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+      width: 100%;
+    }
+
+    .mermaid {
+      background: transparent;
+      width: 100%;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+
+    function showTab(tabId) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-btn');
+      
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      tabs.forEach(tab => {
+        if (tab.id === tabId) {
+          tab.style.display = 'block';
+        } else {
+          tab.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+
+  <div class="app-header">
+    <div>
+      <h1>LUỒNG VẬN HÀNH ĐIỀU PHỐI (COORDINATOR OPERATIONAL JOURNEY)</h1>
+      <p>Đặc tả thao tác thực tế của Điều phối viên/Lễ tân khi tiếp đón bệnh nhân đi từ nhà đến phòng khám</p>
+    </div>
+    <div>
+      <span class="badge badge-system">Chuẩn Vận hành HIS</span>
+    </div>
+  </div>
+
+  <div class="main-container">
+
+    <!-- MERMAID: HÀNH TRÌNH TỪ NHÀ ĐẾN PHÒNG KHÁM -->
+    <div class="diagram-container">
+      <div class="diagram-title">Sơ đồ Luồng Tiếp nhận từ nhà đến phòng khám (Walk-in & Online Booking)</div>
+      <div class="mermaid">
+        flowchart TD
+            %% Khởi đầu luồng tiếp nhận
+            Start([Khởi đầu tiếp nhận]) --> EntranceCheck{Nguồn tiếp nhận?}
+            
+            %% Luồng 1: Đã đặt hẹn
+            EntranceCheck -->|1. Đã đặt lịch trước| BookingList[Màn hình: Danh sách Đặt hẹn]
+            BookingList --> FilterBooking[Lọc lịch hẹn theo Ngày / SĐT]
+            FilterBooking --> SelectBooking[Chọn Lịch hẹn & Ấn nút Tiếp nhận]
+            SelectBooking --> CheckMRNExists{Đã có hồ sơ bệnh nhân MRN?}
+            CheckMRNExists -->|Chưa có| CreatePatientProfile[Bắt buộc tạo/cập nhật hồ sơ bệnh nhân]
+            CreatePatientProfile --> SaveMRN[Lưu thông tin & sinh mã MRN]
+            SaveMRN --> OpenPriorityPopup
+            CheckMRNExists -->|Đã có| OpenPriorityPopup[Hiển thị Popup: Chọn cấp độ Tiếp nhận]
+            
+            %% Luồng 2: Chưa đặt hẹn
+            EntranceCheck -->|2. Chưa đặt lịch / Walk-in| PatientList[Màn hình: Danh sách Bệnh nhân]
+            PatientList --> SearchPatient[Tìm kiếm bằng SĐT / CCCD]
+            SearchPatient --> PatientExists{Có hồ sơ cũ?}
+            PatientExists -->|Chưa có| CreateNewPatient[Tạo mới thông tin hồ sơ bệnh nhân]
+            CreateNewPatient --> SelectPatient[Chọn bệnh nhân & Ấn nút Tiếp nhận]
+            PatientExists -->|Đã có| SelectPatient
+            SelectPatient --> OpenPriorityPopup
+            
+            %% Popup và sinh số
+            OpenPriorityPopup --> TickPriority[Điều phối viên chọn cấp độ ưu tiên]
+            TickPriority --> PriorityLevels{Các cấp độ ưu tiên}
+            PriorityLevels -->|🔴 Đỏ| EmergencyLevel[Cấp cứu: Highlight Đỏ]
+            PriorityLevels -->|🟠 Cam| PriorityLevel[Ưu tiên: Tiền tố P - Highlight Cam]
+            PriorityLevels -->|🟢 Xanh lá| RegularLevel[Thường: Tiền tố W - Highlight Xanh lá]
+            
+            EmergencyLevel --> ConfirmCheckin[Bấm Xác nhận Tiếp nhận]
+            PriorityLevel --> ConfirmCheckin
+            RegularLevel --> ConfirmCheckin
+            
+            ConfirmCheckin --> GenSTT[Hệ thống tự động sinh số thứ tự STT]
+            GenSTT --> SaveDB[(Lưu số STT & trạng thái vào CSDL)]
+            SaveDB --> PrintSTT[In phiếu số thứ tự cho bệnh nhân]
+            PrintSTT --> NextStep[Chuyển bước tiếp theo: Điều phối đi phòng khám / Đo sinh hiệu]
+      </div>
+    </div>
+
+    <!-- TABS BAR ĐIỀU PHỐI -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="showTab('tab-reception')">1. Tiếp đón tại Quầy (Check-in)</button>
+      <button class="tab-btn" onclick="showTab('tab-clinical')">2. Điều phối Khám Lâm sàng</button>
+      <button class="tab-btn" onclick="showTab('tab-paraclinical')">3. Điều phối Cận lâm sàng (CLS)</button>
+      <button class="tab-btn" onclick="showTab('tab-conclusion')">4. Hỏi han & Hướng dẫn Kết luận</button>
+    </div>
+
+    <!-- TAB 1: TIẾP ĐÓN & CHECK-IN -->
+    <div id="tab-reception" class="tab-content">
+      
+      <!-- TÌNH HUỐNG A: BỆNH NHÂN ĐÃ ĐẶT LỊCH TRƯỚC -->
+      <div class="scenario-card">
+        <div class="scenario-header">
+          <div class="scenario-title">TÌNH HUỐNG A: Tiếp nhận từ MÀN HÌNH DANH SÁCH ĐẶT HẸN (Đã đặt hẹn trực tuyến)</div>
+          <span class="badge badge-scenario" style="background-color:rgba(59, 130, 246, 0.15); color:var(--accent-blue); border:1px solid rgba(59, 130, 246, 0.3);">Đặt hẹn trước</span>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-title">
+              <div class="step-num">1</div>
+              <span>Tìm kiếm lịch hẹn (Filter theo Ngày & SĐT)</span>
+            </div>
+            <span class="badge badge-action">Lọc danh sách</span>
+          </div>
+          <div class="step-body">
+            <div class="column-section section-action">
+              <h4>🎯 Thao tác cụ thể</h4>
+              <ul class="action-list">
+                <li>Điều phối viên truy cập <strong>Danh sách đặt hẹn</strong>.</li>
+                <li>Nhập <strong>Số điện thoại</strong> hoặc lọc theo <strong>Ngày hẹn</strong> để tìm nhanh lịch đặt.</li>
+                <li>Xác định đúng lịch hẹn của bệnh nhân đang đứng trước quầy.</li>
+              </ul>
+            </div>
+            <div class="column-section section-screen">
+              <h4>🖥️ Xuất phát từ Màn hình</h4>
+              <ul class="action-list">
+                <li><strong>Màn hình: Quản lý lịch đặt hẹn / Booking Management Screen</strong>.</li>
+                <li>Bộ lọc tìm kiếm đa năng (Ngày hẹn, Số điện thoại, Tên bệnh nhân, Mã lịch hẹn).</li>
+              </ul>
+            </div>
+            <div class="column-section section-system">
+              <h4>💻 Dữ liệu & Xử lý hệ thống</h4>
+              <ul class="action-list">
+                <li>Hệ thống trả về danh sách lịch hẹn thỏa mãn điều kiện lọc.</li>
+                <li>Hiển thị trạng thái lịch hẹn (ví dụ: `BOOKED`, `CONFIRMED`).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-title">
+              <div class="step-num">2</div>
+              <span>Kiểm tra hồ sơ bệnh nhân (MRN Check) & Ấn nút Tiếp nhận</span>
+            </div>
+            <span class="badge badge-system">Kiểm tra thông tin hồ sơ</span>
+          </div>
+          <div class="step-body">
+            <div class="column-section section-action">
+              <h4>🎯 Thao tác cụ thể</h4>
+              <ul class="action-list">
+                <li>Điều phối viên ấn nút <strong>Tiếp nhận</strong> trên dòng lịch hẹn.</li>
+                <li><strong>Nếu chưa có hồ sơ bệnh nhân</strong>: Hệ thống yêu cầu cập nhật/tạo mới hồ sơ bệnh nhân (MRN) trước. Nhập thông tin hành chính & Lưu để sinh mã MRN.</li>
+                <li><strong>Nếu đã có hồ sơ bệnh nhân</strong>: Hệ thống cho phép đi tiếp.</li>
+              </ul>
+            </div>
+            <div class="column-section section-screen">
+              <h4>🖥️ Xuất phát từ Màn hình</h4>
+              <ul class="action-list">
+                <li><strong>Giao diện: Form đăng ký/cập nhật thông tin bệnh nhân</strong> (chỉ xuất hiện khi chưa có hồ sơ bệnh nhân đầy đủ).</li>
+              </ul>
+            </div>
+            <div class="column-section section-system">
+              <h4>💻 Quy tắc logic hệ thống</h4>
+              <ul class="action-list">
+                <li>Bắt buộc phải có mã <strong>MRN (Medical Record Number)</strong> được liên kết với lịch hẹn trước khi tiếp nhận để đảm bảo tính nhất quán dữ liệu y khoa.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TÌNH HUỐNG B: BỆNH NHÂN TỰ ĐẾN (WALK-IN / CHƯA ĐẶT LỊCH) -->
+      <div class="scenario-card">
+        <div class="scenario-header">
+          <div class="scenario-title">TÌNH HUỐNG B: Tiếp nhận từ MÀN HÌNH DANH SÁCH BỆNH NHÂN (Bệnh nhân tự đến / Walk-in)</div>
+          <span class="badge badge-scenario">Walk-in thông thường</span>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-title">
+              <div class="step-num">1</div>
+              <span>Tìm kiếm & Xác nhận/Tạo mới hồ sơ bệnh nhân</span>
+            </div>
+            <span class="badge badge-action">Xử lý hồ sơ</span>
+          </div>
+          <div class="step-body">
+            <div class="column-section section-action">
+              <h4>🎯 Thao tác cụ thể</h4>
+              <ul class="action-list">
+                <li>Bệnh nhân xuất trình thẻ CCCD hoặc cung cấp SĐT tại quầy.</li>
+                <li>Điều phối viên tìm kiếm trong Danh sách bệnh nhân.</li>
+                <li>Nếu là <strong>Bệnh nhân cũ</strong>: Chọn bệnh nhân -> Ấn Tiếp nhận.</li>
+                <li>Nếu là <strong>Bệnh nhân mới</strong>: Ấn "Tạo mới thông tin" (quét CCCD chip để điền nhanh) -> Lưu hồ sơ sinh mã MRN -> Ấn Tiếp nhận.</li>
+              </ul>
+            </div>
+            <div class="column-section section-screen">
+              <h4>🖥️ Xuất phát từ Màn hình</h4>
+              <ul class="action-list">
+                <li><strong>Màn hình: Danh sách Bệnh nhân / Patient Directory Screen</strong>.</li>
+                <li>Tích hợp Form Đăng ký nhanh (CCCD Reader API).</li>
+              </ul>
+            </div>
+            <div class="column-section section-system">
+              <h4>💻 Dữ liệu & Xử lý hệ thống</h4>
+              <ul class="action-list">
+                <li>So khớp SĐT/CCCD để tránh tạo trùng lặp hồ sơ bệnh nhân (Duplicate MRN prevention).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUY TRÌNH CHUNG: POPUP CẤP ĐỘ ƯU TIÊN, SINH SỐ & LƯU CSDL -->
+      <div class="scenario-card" style="border: 1px dashed var(--accent-purple);">
+        <div class="scenario-header" style="background-color: rgba(139, 92, 246, 0.05);">
+          <div class="scenario-title" style="color:var(--accent-purple);">QUY TRÌNH XÁC NHẬN: CHỌN CẤP ĐỘ, SINH SỐ & GHI NHẬN CƠ SỞ DỮ LIỆU</div>
+          <span class="badge badge-system">Quy trình bắt buộc</span>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-title">
+              <div class="step-num">1</div>
+              <span>Tích chọn Cấp độ Ưu tiên trên Popup</span>
+            </div>
+            <span class="badge badge-action">Chọn cấp độ</span>
+          </div>
+          <div class="step-body">
+            <div class="column-section section-action">
+              <h4>🎯 Thao tác cụ thể</h4>
+              <ul class="action-list">
+                <li>Sau khi ấn Tiếp nhận (ở Luồng A hoặc Luồng B), hệ thống hiển thị **Popup Chọn Cấp độ Tiếp nhận**.</li>
+                <li>Điều phối viên tích chọn một trong ba mức độ ưu tiên của số:
+                  <br>&bull; 🔴 <strong style="color:var(--accent-red)">Đỏ (Cấp cứu)</strong>
+                  <br>&bull; 🟠 <strong style="color:var(--accent-yellow)">Cam (Ưu tiên / Đã đặt hẹn)</strong>
+                  <br>&bull; 🟢 <strong style="color:var(--primary)">Xanh lá (Thường)</strong>
+                </li>
+              </ul>
+            </div>
+            <div class="column-section section-screen">
+              <h4>🖥️ Xuất phát từ Màn hình</h4>
+              <ul class="action-list">
+                <li><strong>Popup: Cấu hình tiếp nhận & Cấp độ ưu tiên (Check-in Priority Dialog)</strong>.</li>
+              </ul>
+            </div>
+            <div class="column-section section-system">
+              <h4>💻 Quy tắc màu sắc & Cấu hình</h4>
+              <ul class="action-list">
+                <li>🔴 <strong>Đỏ - Cấp cứu</strong>: Cấp cứu khẩn cấp, số thứ tự được highlight Đỏ, bỏ qua các bước sinh hiệu thông thường hoặc chuyển thẳng phòng cấp cứu.</li>
+                <li>🟠 <strong>Cam - Ưu tiên</strong>: Dành cho lịch hẹn trước, người già, trẻ nhỏ, phụ nữ mang thai. Số sinh ra có tiền tố <strong>P (Priority)</strong>, highlight Cam.</li>
+                <li>🟢 <strong>Xanh lá - Thường</strong>: Walk-in thông thường. Số sinh ra có tiền tố <strong>W (Walk-in)</strong>, highlight Xanh lá.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-title">
+              <div class="step-num">2</div>
+              <span>Xác nhận sinh số thứ tự & Lưu vào Cơ sở dữ liệu (CSDL)</span>
+            </div>
+            <span class="badge badge-system">Sinh số & Ghi nhận CSDL</span>
+          </div>
+          <div class="step-body">
+            <div class="column-section section-action">
+              <h4>🎯 Thao tác cụ thể</h4>
+              <ul class="action-list">
+                <li>Điều phối viên nhấn nút <strong>"Xác nhận Tiếp nhận"</strong> trên Popup.</li>
+                <li>Hệ thống in phiếu số thứ tự (STT) tự động từ máy in nhiệt tại quầy.</li>
+                <li>Bệnh nhân cầm phiếu và chuyển sang bước tiếp theo (Điều phối đi Đo sinh hiệu hoặc Phòng khám chuyên khoa).</li>
+              </ul>
+            </div>
+            <div class="column-section section-screen">
+              <h4>🖥️ Xuất phát từ Màn hình</h4>
+              <ul class="action-list">
+                <li><strong>Màn hình: Bảng điều khiển sảnh tiếp đón (Reception Dashboard)</strong>.</li>
+              </ul>
+            </div>
+            <div class="column-section section-system">
+              <h4>💻 Cơ chế lưu trữ & Sinh số tự động</h4>
+              <ul class="action-list">
+                <li>Hệ thống tự động tính toán số tiếp theo của ngày hôm đó dựa theo cấp độ đã chọn.</li>
+                <li><strong>LƯU TRỮ CSDL</strong>: Số STT được ghi nhận trực tiếp vào CSDL, cập nhật trạng thái lượt khám thành <strong style="color:var(--primary)">CHECKED_IN / ADMITTED</strong>.</li>
+                <li><strong>ĐIỀU PHỐI BƯỚC SAU</strong>: Sau khi hoàn thành sinh số và lưu CSDL, hệ thống mới hiển thị thông tin bệnh nhân trên màn hình hàng đợi tiếp theo (Đo sinh hiệu hoặc Phòng khám) để tiếp tục điều phối.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: ĐIỀU PHỐI KHÁM LÂM SÀNG -->
+    <div id="tab-clinical" class="tab-content" style="display:none;">
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">1</div>
+            <span>Đo sinh hiệu & Tự động điều phối phòng khám</span>
+          </div>
+          <span class="badge badge-action">Đo sinh hiệu & Phân phòng</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>🎯 Thao tác của Điều phối viên/Điều dưỡng</h4>
+            <ul class="action-list">
+              <li>Tại phòng sinh hiệu, điều dưỡng quét mã QR trên phiếu tiếp nhận của bệnh nhân để mở nhanh biểu mẫu đo.</li>
+              <li>Thực hiện đo các chỉ số cơ thể: HA, Mạch, Cân nặng, Chiều cao, SpO2 và nhập vào hệ thống.</li>
+              <li>Hệ thống tự động tính BMI và hiển thị màu cảnh báo nếu chỉ số bất thường.</li>
+              <li>Sau khi ấn Lưu sinh hiệu, hệ thống **tự động xếp bệnh nhân vào phòng khám chuyên khoa** đã chọn ở bước tiếp tiếp nhận.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Trạm nhập liệu Sinh hiệu (Vitals Intake Terminal)</strong>.</li>
+              <li>Màn hình này độc quyền cho điều dưỡng trực sảnh đo sinh hiệu khám sàng lọc ban đầu.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Thuật toán tự động phân phòng khám (Smart Routing Rules)</h4>
+            <ul class="action-list">
+              <li>Hệ thống quét danh sách các phòng khám thuộc Chuyên khoa tương ứng.</li>
+              <li>Kiểm tra trạng thái bác sĩ trực phòng đó: Phải có bác sĩ check-in vào ca trực và cờ nhận bệnh <strong style="color:var(--primary)">isAcceptingPatients = true</strong>.</li>
+              <li>Xếp bệnh nhân vào phòng có hàng đợi ngắn nhất (Queue length) để cân bằng tải, trừ trường hợp bệnh nhân đã chọn đích danh bác sĩ từ bước đặt lịch hẹn trước.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">2</div>
+            <span>Theo dõi & Điều tiết hàng đợi lâm sàng</span>
+          </div>
+          <span class="badge badge-system">Hệ thống giám sát</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>🎯 Thao tác của Điều phối viên khu vực</h4>
+            <ul class="action-list">
+              <li>Điều phối viên di chuyển tại sảnh phòng khám để hỗ trợ bệnh nhân và theo dõi màn hình hiển thị hàng đợi.</li>
+              <li>Nếu thấy phòng khám số 1 quá tải (nhiều ca bệnh nặng chiếm thời gian), điều phối viên có thể bấm **Đổi phòng khám** trên phần mềm để chuyển các bệnh nhân tiếp theo sang phòng khám số 2 cùng chuyên khoa đang vắng hơn.</li>
+              <li>Hướng dẫn bệnh nhân di chuyển sang khu vực phòng khám mới.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Bảng điều khiển điều phối Hàng đợi lâm sàng (Clinical Queue Console)</strong>.</li>
+              <li>Đây là màn hình Dashboard tổng hợp hiển thị real-time số lượng hàng chờ trước tất cả các phòng khám.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Màn hình điều phối hàng đợi (Queue Management Console)</h4>
+            <ul class="action-list">
+              <li>Giao diện Dashboard hiển thị danh sách phòng khám, tên bác sĩ trực, số lượng bệnh nhân đang chờ (Waiting), số bệnh nhân đang khám (In Room) và thời gian chờ ước tính.</li>
+              <li>Cho phép thao tác click-and-drag hoặc chọn danh sách thả xuống để chuyển bệnh nhân sang hàng đợi phòng khám khác một cách nhanh chóng.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUOC 3: QUY TRINH TIEP NHAN & KHAM BENH TAI PHONG KHAM CUA BAC SI -->
+      <div class="step-card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">3</div>
+            <span>Tiep nhan kham benh tai phong cua Bac si (Doctor Clinic Queue & Check-in Rules)</span>
+          </div>
+          <span class="badge badge-system">Quy tac nghiep vu lam sang</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>Nghiep vu & Thao tac cua Bac si</h4>
+            <ul class="action-list">
+              <li><strong>Xem danh sach cho phong kham</strong>: Bac si chi co the xem danh sach benh nhan dang cho cua dung phong minh duoc phan cong (phong ma bac si co ca truc). Khong xem duoc danh sach cho cua cac phong khac.</li>
+              <li><strong>Dieu kien hien thi phong</strong>: Bac si phai co ca truc dang hoat dong (active shift) tai phong do moi hien thi thong tin phong va danh sach benh nhan cho cua phong do.</li>
+              <li><strong>Nhan benh nhan vao kham</strong>: Chi khi bac si da thuc hien check-in (diem danh) vao ca truc cua phong do thi nut <strong>"Nhan vao kham" (Accept Patient)</strong> moi hoat dong de goi benh nhan vao buong kham.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>Xuat phat tu Man hinh</h4>
+            <ul class="action-list">
+              <li><strong>Màn hinh: Danh sach kham tai phong bac si (Doctor Clinic Dashboard / EHR Queue)</strong>.</li>
+              <li>Bang hien thi trang thai check-in ca truc cua bac si, thong tin ca hien tai, va nut diem danh nhanh.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>Thuat toan Hang doi & Sap xep (Sorting & Security Rules)</h4>
+            <ul class="action-list">
+              <li><strong>Thu tu xep hang thuc te</strong>: Khong dung truc tiep so thu tu tiep nhan ban dau (STT) de kham truoc/sau, ma sap xep theo thuat toan:
+                <br />1. <strong>Muc do uu tien (priorityLevel)</strong>: EMERGENCY (Cap cuu) &rarr; PRIORITY (Uu tien) &rarr; REGULAR (Thuong).
+                <br />2. <strong>Thoi diem dieu phoi (dispatchedAt / updatedAt)</strong>: Ai duoc dieu phoi vao phong kham truoc se duoc xep len truoc doi voi cung muc uu tien.
+              </li>
+              <li><strong>Phan quyen hoat dong</strong>: Chi cho phep goi kham (Status: WAITING_CLINICAL_EXAM &rarr; IN_CLINICAL_EXAM) khi bac si co ca truc hop le tai phong do va da check-in thanh cong.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ĐIỀU PHỐI CẬN LÂM SÀNG (CLS) -->
+    <div id="tab-paraclinical" class="tab-content" style="display:none;">
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">1</div>
+            <span>Tiếp nhận chỉ định Cận lâm sàng từ bác sĩ</span>
+          </div>
+          <span class="badge badge-action">Chỉ định & Đóng phí phát sinh</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>🎯 Thao tác của Điều phối viên sảnh / Thu ngân tầng</h4>
+            <ul class="action-list">
+              <li>Bác sĩ từ phòng khám lâm sàng hoàn tất khám, ra chỉ định CLS (Xét nghiệm, Siêu âm, X-quang...) và hướng dẫn bệnh nhân đi ra quầy điều phối sảnh.</li>
+              <li>Điều phối viên quét mã định danh lượt khám của bệnh nhân để lấy nhanh danh sách dịch vụ CLS vừa được chỉ định.</li>
+              <li>In phiếu thanh toán chi phí CLS phát sinh.</li>
+              <li>Hướng dẫn bệnh nhân thanh toán bằng tiền mặt, thẻ, hoặc quét mã **VietQR động** hiển thị trên phiếu chỉ định/màn hình thu ngân.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Quầy thu ngân tầng / Điểm thanh toán nhanh CLS (POS Billing & Invoicing Screen)</strong>.</li>
+              <li>Có thể truy cập trực tiếp bằng cách quét mã QR khám của bệnh nhân để mở nhanh phiếu tạm tính.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Dữ liệu & Quy tắc xử lý</h4>
+            <ul class="action-list">
+              <li>Hệ thống tạo phiếu tạm thu y tế. Trạng thái các dịch vụ CLS được chỉ định là <strong style="color:var(--accent-yellow)">PENDING_PAYMENT</strong>.</li>
+              <li>Ngay khi thanh toán thành công, hệ thống chuyển trạng thái các dịch vụ thành <strong style="color:var(--primary)">PAID</strong> và kích hoạt phân phòng kỹ thuật CLS tự động.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">2</div>
+            <span>Điều phối luồng thực hiện Cận lâm sàng</span>
+          </div>
+          <span class="badge badge-system">Tự động định luồng kỹ thuật</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>🎯 Thao tác của Điều phối viên CLS</h4>
+            <ul class="action-list">
+              <li>Nếu bệnh nhân được chỉ định nhiều dịch vụ CLS cùng lúc (Ví dụ: vừa xét nghiệm máu, vừa siêu âm, vừa chụp X-quang):</li>
+              <li>Hệ thống tự động sắp xếp thứ tự thực hiện tối ưu để tiết kiệm thời gian chờ (Ví dụ: ưu tiên chỉ định vào phòng Siêu âm trước vì hàng chờ đang ngắn, sau đó qua Chụp X-quang, và cuối cùng qua Xét nghiệm).</li>
+              <li>Điều phối viên in **Phiếu hướng dẫn lộ trình CLS** chỉ rõ thứ tự các phòng cần đi và hướng dẫn bệnh nhân di chuyển.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Bảng điều khiển phân luồng Cận lâm sàng (CLS Dispatch Board)</strong>.</li>
+              <li>Giao diện hiển thị chi tiết tiến độ các dịch vụ CLS được phân bổ theo phòng chụp/xét nghiệm.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Màn hình Giám sát tiến độ dịch vụ (CLS Service Dashboard)</h4>
+            <ul class="action-list">
+              <li><strong>Trạng thái từng dịch vụ CLS</strong>:
+                <br>&bull; <strong style="color:var(--text-muted)">WAITING_SERVICE</strong>: Đang nằm trong hàng chờ phòng chụp chiếu/xét nghiệm.
+                <br>&bull; <strong style="color:var(--accent-blue)">IN_SERVICE</strong>: Kỹ thuật viên/Bác sĩ CLS đang thực hiện kỹ thuật cho bệnh nhân.
+                <br>&bull; <strong style="color:var(--primary)">WAITING_RESULTS</strong>: Đã thực hiện xong kỹ thuật, đang chờ kỹ thuật viên duyệt/ký số kết quả trên máy.
+              </li>
+              <li>Tự động đẩy thông báo sang màn hình bác sĩ khám lâm sàng ban đầu khi toàn bộ kết quả CLS đã được tải lên hệ thống.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUOC 3: THUC HIEN KY THUAT & TRA KET QUA CAN LAM SANG -->
+      <div class="step-card" style="border-left: 4px solid var(--primary);">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">3</div>
+            <span>Thuc hien dich vu, doc va tra ket qua Can lam sang</span>
+          </div>
+          <span class="badge badge-action">Thuc hien & Tra ket qua</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>Nghiep vu & Thao tac cua Bac si / Ky thuat vien CLS</h4>
+            <ul class="action-list">
+              <li><strong>Tiep nhan benh nhan</strong>: Khi bac si CLS bam tiep nhan benh nhan vao phong ky thuat, cac dich vu chi dinh tuong ung cua benh nhan do se duoc day vao danh sach lam viec cua bac si.</li>
+              <li><strong>Doc va nhap ket qua (Toi da 2 ngay)</strong>: Bac si thuc hien ky thuat chuyen mon (xet nghiem, chup X-quang, sieu am...) va nhap ket luan chi tiet. Quy trinh doc va tra ket qua thuc hien toi da trong 2 ngay ke tu khi tiep nhan.</li>
+              <li><strong>Hoan thanh va tra ket qua</strong>: Bac si bam nut <strong>Hoan thanh</strong> de khoa phieu. Ket qua va hinh anh (neu co) se lap tuc hien thi tren phan he chi dinh/hoa don (Order) de benh nhan va bac si lam sang xem duoc ngay.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>Xuat phat tu Man hinh</h4>
+            <ul class="action-list">
+              <li><strong>Man hinh: Chi dinh va nhap ket qua CLS (CLS Worklist & Results Entry Board)</strong>.</li>
+              <li>Giao dien hien thi nut "Tiep nhan", nut "Hoan thanh", o nhap "Ghi chu ket qua" / "Result Notes" cho tung dich vu cua benh nhan.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>Quy tac & Dinh luong he thong</h4>
+            <ul class="action-list">
+              <li><strong>Chuyen trang thai dich vu</strong>: 
+                <br />&bull; Khi tiep nhan: Status dich vu chuyen tu WAITING_SERVICE sang IN_SERVICE.
+                <br />&bull; Khi luu va tra ket qua: Status dich vu chuyen thanh COMPLETED, resultStatus chuyen thanh COMPLETED.
+              </li>
+              <li><strong>Dong bo tuc thi (Real-time update)</strong>: He thong cap nhat ngay thong tin resultNotes vao order items tuong ung de benh nhan co the tra cuu ngay tren he thong hoac trang ca nhan cua minh.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: HỎI HAN & KẾT LUẬN -->
+    <div id="tab-conclusion" class="tab-content" style="display:none;">
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">1</div>
+            <span>Hỏi han bệnh nhân & Điều phối quay lại Phòng khám lâm sàng</span>
+          </div>
+          <span class="badge badge-action">Chăm sóc bệnh nhân</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>🎯 Thao tác của Điều phối viên sảnh</h4>
+            <ul class="action-list">
+              <li>Khi hệ thống hiển thị toàn bộ kết quả CLS đã có đầy đủ, điều phối viên đón bệnh nhân tại khu vực chờ CLS.</li>
+              <li>Hỏi thăm nhanh về mức độ hài lòng hoặc tình trạng mệt mỏi của bệnh nhân (Hỏi han chăm sóc).</li>
+              <li>Bấm nút **"Xác nhận chờ kết luận"** trên màn hình để chuyển bệnh nhân quay lại hàng chờ của Phòng khám lâm sàng ban đầu.</li>
+              <li>Dẫn bệnh nhân quay lại trước cửa phòng khám lâm sàng ban đầu để bác sĩ kết luận.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Quầy chăm sóc khách hàng & Trả kết quả (Patient Care & Results Tracker)</strong>.</li>
+              <li>Bảng hiển thị các bệnh nhân đã hoàn thành đầy đủ tất cả chỉ định CLS để điều phối viên tiếp cận.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Dữ liệu & Trạng thái dịch chuyển</h4>
+            <ul class="action-list">
+              <li>Lượt khám chuyển sang trạng thái: <strong style="color:var(--accent-purple)">WAITING_CONCLUSION</strong>.</li>
+              <li>Bệnh nhân tự động được ưu tiên xếp lên đầu danh sách hàng chờ của Bác sĩ khám lâm sàng ban đầu (vì họ đã hoàn thành các chỉ định CLS và quay lại để kết luận bệnh, không phải khám mới).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-title">
+            <div class="step-num">2</div>
+            <span>Bác sĩ kết luận chẩn đoán & Toa thuốc ngoại trú</span>
+          </div>
+          <span class="badge badge-system">Hoàn thành Lượt khám</span>
+        </div>
+        <div class="step-body">
+          <div class="column-section section-action">
+            <h4>Nghiep vu & Thao tac cua Bac si Lam sang (Nguoi Tong hop)</h4>
+            <ul class="action-list">
+              <li><strong>Tong hop ket qua</strong>: Bac si kham lam sang ban dau (nguoi tiep nhan kham dau tien) la nguoi chiu trach nhiem **tong hop toan bo ket qua can lam sang** da thuc hien.</li>
+              <li><strong>Xem va doi chieu</strong>: Bac si mo xem ket qua CLS (truc quan hinh anh sieu am, X-quang va tri so xet nghiem) hien thi tu dong tren benh an dien tu. Doi chieu voi cac trieu chung lam sang ban dau.</li>
+              <li><strong>Ket luan va ke toa</strong>: Dua ra chan doan xac dinh cuoi cung va ke don thuoc dien tu (nhap so luong thuoc, lieu dung, loi dan).</li>
+              <li><strong>Hoan thanh luot kham</strong>: Nhan nut <strong>"Hoan thanh kham"</strong> de khoa ho so va ket thuc luot kham.</li>
+            </ul>
+          </div>
+          <div class="column-section section-screen">
+            <h4>🖥️ Xuất phát từ Màn hình</h4>
+            <ul class="action-list">
+              <li><strong>Màn hình: Giao diện khám bệnh của Bác sĩ chuyên khoa (Doctor Consultation Workspace)</strong>.</li>
+              <li>Trực thuộc phân hệ EHR / EMR của phòng khám lâm sàng.</li>
+            </ul>
+          </div>
+          <div class="column-section section-system">
+            <h4>💻 Thao tác của Bệnh nhân sau khám</h4>
+            <ul class="action-list">
+              <li>Hệ thống chuyển trạng thái Lượt khám thành: <strong style="color:var(--primary)">COMPLETED</strong>.</li>
+              <li>Tự động gửi email/Zalo chứa bản PDF đơn thuốc điện tử và đường link xem hình ảnh kết quả chụp chiếu cho bệnh nhân.</li>
+              <li>Bệnh nhân nhận thuốc tại quầy thuốc nhà thuốc phòng khám (nếu có đăng ký) hoặc tự đi mua ngoài bằng mã đơn thuốc liên thông y tế.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

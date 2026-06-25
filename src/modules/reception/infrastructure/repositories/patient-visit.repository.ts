@@ -23,6 +23,8 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       entity.currentDoctorId,
       entity.currentNurseId,
       entity.queueNumber,
+      entity.priorityLevel,
+      entity.queueCode,
       entity.status,
       entity.reason,
       entity.pulse,
@@ -97,6 +99,17 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       .andWhere('DATE(visit.createdAt) = :date', { date })
       .getCount();
     return count + 1;
+  }
+
+  async getNextQueueCode(branchId: string, date: string, priorityLevel: string): Promise<string> {
+    const count = await this.ormRepository.createQueryBuilder('visit')
+      .where('visit.branchId = :branchId', { branchId })
+      .andWhere('DATE(visit.createdAt) = :date', { date })
+      .andWhere('visit.priorityLevel = :priorityLevel', { priorityLevel })
+      .getCount();
+    const nextNum = (count + 1).toString().padStart(3, '0');
+    const prefix = priorityLevel === 'EMERGENCY' ? 'E' : priorityLevel === 'PRIORITY' ? 'P' : 'W';
+    return `${prefix}${nextNum}`;
   }
 
   async countAll(): Promise<number> {

@@ -33,6 +33,7 @@ export class UpdateOrderItemUseCase {
       status: dto.status,
       resultNotes: dto.resultNotes !== undefined ? dto.resultNotes : item.resultNotes,
       resultStatus: dto.resultStatus !== undefined ? dto.resultStatus : item.resultStatus,
+      performedById: dto.performedById !== undefined ? dto.performedById : item.performedById,
     });
 
     const savedOrder = await this.orderRepository.findById(orderId);
@@ -79,6 +80,7 @@ export class UpdateOrderItemUseCase {
         status: i.status,
         resultNotes: i.resultNotes,
         resultStatus: i.resultStatus,
+        performedById: i.performedById,
         createdAt: i.createdAt!,
         updatedAt: i.updatedAt!,
         service: i.service,

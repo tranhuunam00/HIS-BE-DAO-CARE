@@ -25,14 +25,16 @@ export class AppointmentController {
   @ApiQuery({ name: 'doctorId', required: false })
   @ApiQuery({ name: 'date', required: false, description: 'Lọc ngày hẹn (YYYY-MM-DD)' })
   @ApiQuery({ name: 'status', required: false, description: 'Lọc trạng thái' })
+  @ApiQuery({ name: 'phone', required: false, description: 'Lọc theo SĐT bệnh nhân' })
   @ApiResponse({ status: 200, type: [AppointmentResponseDto] })
   async getAll(
     @Query('branchId') branchId?: string,
     @Query('doctorId') doctorId?: string,
     @Query('date') date?: string,
     @Query('status') status?: string,
+    @Query('phone') phone?: string,
   ): Promise<AppointmentResponseDto[]> {
-    return await this.listAppointmentsUseCase.execute({ branchId, doctorId, date, status });
+    return await this.listAppointmentsUseCase.execute({ branchId, doctorId, date, status, phone });
   }
 
   @Get(':id')

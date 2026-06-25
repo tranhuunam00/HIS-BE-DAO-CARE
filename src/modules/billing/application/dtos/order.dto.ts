@@ -34,6 +34,11 @@ export class UpdateOrderItemDto {
   @IsOptional()
   @IsString()
   resultStatus?: string;
+
+  @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien (tinh KPI)' })
+  @IsOptional()
+  @IsUUID()
+  performedById?: string;
 }
 
 export class OrderItemResponseDto {
@@ -61,6 +66,9 @@ export class OrderItemResponseDto {
   @ApiPropertyOptional()
   resultStatus?: string;
 
+  @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien' })
+  performedById?: string | null;
+
   @ApiProperty()
   createdAt: Date;
 
@@ -69,6 +77,9 @@ export class OrderItemResponseDto {
 
   @ApiPropertyOptional()
   service?: any;
+
+  @ApiPropertyOptional({ description: 'Thong tin nhan vien thuc hien' })
+  performedBy?: any;
 }
 
 export class OrderResponseDto {

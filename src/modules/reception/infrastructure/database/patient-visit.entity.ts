@@ -58,6 +58,12 @@ export class PatientVisitOrmEntity {
   @Column({ name: 'queue_number' })
   queueNumber: number; // STT in the day
 
+  @Column({ name: 'priority_level', type: 'varchar', default: 'REGULAR' })
+  priorityLevel: string; // 'EMERGENCY' | 'PRIORITY' | 'REGULAR'
+
+  @Column({ name: 'queue_code', type: 'varchar', nullable: true })
+  queueCode: string | null;
+
   @Column()
   status: string; // 'WAITING' | 'IN_ROOM' | 'COMPLETED' | 'CANCELLED'
 

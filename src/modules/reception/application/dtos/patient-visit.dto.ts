@@ -59,6 +59,11 @@ export class CheckInDto {
   @IsOptional()
   @IsNumber()
   height?: number;
+
+  @ApiPropertyOptional({ description: 'Cấp độ ưu tiên tiếp nhận (EMERGENCY, PRIORITY, REGULAR)' })
+  @IsOptional()
+  @IsString()
+  priorityLevel?: string;
 }
 
 export class UpdateVitalSignsDto {
@@ -152,6 +157,12 @@ export class PatientVisitResponseDto {
 
   @ApiProperty()
   queueNumber: number;
+
+  @ApiProperty({ description: 'Cấp độ ưu tiên tiếp nhận' })
+  priorityLevel: string;
+
+  @ApiProperty({ required: false, description: 'Số thứ tự hiển thị' })
+  queueCode: string | null;
 
   @ApiProperty()
   status: string;

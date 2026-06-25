@@ -45,6 +45,8 @@ export class OrderRepository implements IOrderRepository {
       entity.service,
       entity.resultNotes,
       entity.resultStatus,
+      entity.performedById,
+      entity.performedBy,
     );
   }
 
@@ -54,7 +56,8 @@ export class OrderRepository implements IOrderRepository {
       .leftJoinAndSelect('order.visit', 'visit')
       .leftJoinAndSelect('order.patient', 'patient')
       .leftJoinAndSelect('order.items', 'items')
-      .leftJoinAndSelect('items.service', 'service');
+      .leftJoinAndSelect('items.service', 'service')
+      .leftJoinAndSelect('items.performedBy', 'performedBy');
 
     if (filters?.status) {
       queryBuilder.andWhere('order.status = :status', { status: filters.status });
@@ -75,7 +78,7 @@ export class OrderRepository implements IOrderRepository {
   async findById(id: string): Promise<Order | null> {
     const entity = await this.ormRepository.findOne({
       where: { id },
-      relations: { visit: true, patient: true, items: { service: true } },
+      relations: { visit: true, patient: true, items: { service: true, performedBy: true } },
     });
     return entity ? this.mapToDomain(entity) : null;
   }
@@ -83,7 +86,7 @@ export class OrderRepository implements IOrderRepository {
   async findByVisitId(visitId: string): Promise<Order | null> {
     const entity = await this.ormRepository.findOne({
       where: { visitId },
-      relations: { visit: true, patient: true, items: { service: true } },
+      relations: { visit: true, patient: true, items: { service: true, performedBy: true } },
     });
     return entity ? this.mapToDomain(entity) : null;
   }
