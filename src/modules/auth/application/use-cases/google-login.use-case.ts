@@ -26,6 +26,7 @@ import { User } from '../../domain/entities/user.entity';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { RoleOrmEntity } from '../../infrastructure/database/role.entity';
+import { PermissionOrmEntity } from '../../infrastructure/database/permission.entity';
 import { PatientOrmEntity } from '../../../reception/infrastructure/database/patient.entity';
 import { PatientResponseDto } from '../../../reception/application/dtos/patient.dto';
 import { GoogleLoginDto, GoogleLoginResponseDto } from '../dtos/google-login.dto';
@@ -185,20 +186,40 @@ export class GoogleLoginUseCase {
 
   private async ensurePatientRole(): Promise<RoleOrmEntity> {
     const roleRepository = this.dataSource.getRepository(RoleOrmEntity);
-    const existingRole = await roleRepository.findOne({
+    const permissionRepository = this.dataSource.getRepository(PermissionOrmEntity);
+
+    const requiredPermNames = [
+      'branch:read',
+      'specialty:read',
+      'service:read',
+      'staff:read',
+      'org:read',
+      'org:write',
+    ];
+    const permissions = await permissionRepository.find({
+      where: requiredPermNames.map((name) => ({ name })),
+    });
+
+    let role = await roleRepository.findOne({
       where: { name: PATIENT_ROLE_NAME },
       relations: { permissions: true },
     });
 
-    if (existingRole) {
-      return existingRole;
+    if (role) {
+      const rolePermNames = new Set(role.permissions.map((p) => p.name));
+      const hasAll = requiredPermNames.every((name) => rolePermNames.has(name));
+      if (!hasAll) {
+        role.permissions = permissions;
+        role = await roleRepository.save(role);
+      }
+      return role;
     }
 
     return await roleRepository.save(
       roleRepository.create({
         name: PATIENT_ROLE_NAME,
         description: PATIENT_ROLE_DESCRIPTION,
-        permissions: [],
+        permissions,
       })
     );
   }

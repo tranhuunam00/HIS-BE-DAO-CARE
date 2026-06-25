@@ -144,6 +144,10 @@ async function seed() {
       role.permissions = dbPermissions.filter((p) =>
         ['org:read', 'branch:read', 'user:read', 'room:read', 'resource:read', 'staff:read', 'schedule:read'].includes(p.name)
       );
+    } else if (r.name === PATIENT_ROLE_NAME) {
+      role.permissions = dbPermissions.filter((p) =>
+        ['branch:read', 'specialty:read', 'service:read', 'staff:read', 'org:read', 'org:write'].includes(p.name)
+      );
     }
 
     role = await roleRepository.save(role);
