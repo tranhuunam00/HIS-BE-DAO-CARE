@@ -21,7 +21,14 @@ export class ListPatientVisitsUseCase {
     private readonly repository: IPatientVisitRepository,
   ) {}
 
-  async execute(filters: { branchId?: string; roomId?: string; status?: string; date?: string }): Promise<PatientVisitResponseDto[]> {
+  async execute(filters: {
+    branchId?: string;
+    roomId?: string;
+    status?: string;
+    date?: string;
+    doctorId?: string;
+    serviceId?: string;
+  }): Promise<PatientVisitResponseDto[]> {
     const list = await this.repository.findAll(filters);
     return list.map(this.mapToDto);
   }

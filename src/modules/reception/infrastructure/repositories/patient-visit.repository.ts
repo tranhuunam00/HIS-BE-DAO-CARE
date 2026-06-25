@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { IPatientVisitRepository } from '../../domain/repositories/patient-visit.repository.interface';
 import { PatientVisit } from '../../domain/entities/patient-visit.model';
 import { PatientVisitOrmEntity } from '../database/patient-visit.entity';
+import { OrderOrmEntity } from '../../../billing/infrastructure/database/order.entity';
+import { OrderItemOrmEntity } from '../../../billing/infrastructure/database/order-item.entity';
 
 @Injectable()
 export class PatientVisitRepository implements IPatientVisitRepository {
@@ -42,13 +44,23 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     );
   }
 
-  async findAll(filters: { branchId?: string; roomId?: string; status?: string; date?: string }): Promise<PatientVisit[]> {
+  async findAll(filters: {
+    branchId?: string;
+    roomId?: string;
+    status?: string;
+    date?: string;
+    doctorId?: string;
+    serviceId?: string;
+  }): Promise<PatientVisit[]> {
     const query = this.ormRepository.createQueryBuilder('visit')
       .leftJoinAndSelect('visit.patient', 'patient')
       .leftJoinAndSelect('visit.currentRoom', 'currentRoom')
       .leftJoinAndSelect('visit.currentDoctor', 'currentDoctor')
       .leftJoinAndSelect('visit.currentNurse', 'currentNurse')
-      .leftJoinAndSelect('visit.branch', 'branch');
+      .leftJoinAndSelect('visit.branch', 'branch')
+      .leftJoin(OrderOrmEntity, 'doctorOrder', 'doctorOrder.visitId = visit.id')
+      .leftJoin(OrderItemOrmEntity, 'doctorItem', 'doctorItem.orderId = doctorOrder.id')
+      .distinct(true);
 
     if (filters.branchId) {
       query.andWhere('visit.branchId = :branchId', { branchId: filters.branchId });
@@ -62,6 +74,15 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     if (filters.date) {
       // Compare only date part of createdAt
       query.andWhere('DATE(visit.createdAt) = :date', { date: filters.date });
+    }
+    if (filters.doctorId) {
+      query.andWhere(
+        '(visit.currentDoctorId = :doctorId OR doctorItem.performedById = :doctorId)',
+        { doctorId: filters.doctorId },
+      );
+    }
+    if (filters.serviceId) {
+      query.andWhere('doctorItem.serviceId = :serviceId', { serviceId: filters.serviceId });
     }
 
     query.orderBy('visit.queueNumber', 'ASC');
