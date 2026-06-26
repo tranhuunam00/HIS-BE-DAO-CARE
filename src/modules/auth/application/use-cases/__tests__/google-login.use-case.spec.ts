@@ -5,6 +5,7 @@ import { GoogleLoginUseCase } from '../google-login.use-case';
 import { User } from '../../../domain/entities/user.entity';
 import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { RoleOrmEntity } from '../../../infrastructure/database/role.entity';
+import { PermissionOrmEntity } from '../../../infrastructure/database/permission.entity';
 import { PatientOrmEntity } from '../../../../reception/infrastructure/database/patient.entity';
 
 describe('GoogleLoginUseCase', () => {
@@ -27,6 +28,9 @@ describe('GoogleLoginUseCase', () => {
     count: jest.Mock;
     create: jest.Mock;
     save: jest.Mock;
+  };
+  let permissionRepository: {
+    find: jest.Mock;
   };
   let mockDataSource: DataSource;
 
@@ -86,6 +90,10 @@ describe('GoogleLoginUseCase', () => {
       save: jest.fn(async (patient: PatientOrmEntity) => patient),
     };
 
+    permissionRepository = {
+      find: jest.fn(async () => []),
+    };
+
     mockDataSource = {
       getRepository: jest.fn((entity: unknown) => {
         if (entity === RoleOrmEntity) {
@@ -93,6 +101,9 @@ describe('GoogleLoginUseCase', () => {
         }
         if (entity === PatientOrmEntity) {
           return patientRepository;
+        }
+        if (entity === PermissionOrmEntity) {
+          return permissionRepository;
         }
         throw new Error('Unexpected repository');
       }),
