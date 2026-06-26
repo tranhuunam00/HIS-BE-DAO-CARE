@@ -1,0 +1,1531 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HIS DAO Care - So do CSDL</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --text: #132033;
+      --muted: #607089;
+      --line: #d8e0ea;
+      --auth: #2f6f9f;
+      --org: #0f8b7b;
+      --medical: #7d5a1f;
+      --engine: #6d5bb8;
+      --reception: #b45b4f;
+      --billing: #3d7c3a;
+      --forms: #667085;
+      --warning: #9a3412;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand strong {
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .hero {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 24px 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      max-width: 820px;
+      font-size: 15px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 110px);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .layout {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 24px 48px;
+      display: grid;
+      grid-template-columns: 286px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-pad {
+      padding: 14px;
+    }
+
+    .search-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .search {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 11px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: #5f8fc2;
+      box-shadow: 0 0 0 3px rgba(47, 111, 159, 0.14);
+    }
+
+    .side-title {
+      margin: 0 0 9px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .module-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .module-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .module-link:hover {
+      border-color: #9fb1c6;
+      background: var(--surface-2);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: -1px;
+    }
+
+    .module-link small {
+      color: var(--muted);
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .legend-line {
+      width: 32px;
+      height: 0;
+      border-top: 2px solid #57708c;
+    }
+
+    .legend-line.dashed {
+      border-top-style: dashed;
+    }
+
+    main {
+      display: grid;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .diagram-wrap {
+      overflow: auto;
+      background:
+        linear-gradient(#eef3f8 1px, transparent 1px),
+        linear-gradient(90deg, #eef3f8 1px, transparent 1px);
+      background-size: 28px 28px;
+      padding: 18px;
+    }
+
+    .erd-svg {
+      display: block;
+      min-width: 1680px;
+      width: 100%;
+      height: auto;
+      border: 1px solid #cdd7e3;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .module-box {
+      fill: rgba(248, 250, 252, 0.84);
+      stroke: #ccd7e4;
+      stroke-width: 1;
+      rx: 8;
+    }
+
+    .module-title {
+      font-size: 15px;
+      font-weight: 700;
+      fill: #1f2f46;
+    }
+
+    .node rect {
+      fill: #fff;
+      stroke-width: 1.4;
+      rx: 8;
+      filter: drop-shadow(0 8px 13px rgba(15, 23, 42, 0.10));
+    }
+
+    .node text {
+      fill: #182337;
+      font-size: 12px;
+      font-weight: 650;
+      pointer-events: none;
+    }
+
+    .node:hover rect {
+      stroke-width: 2.4;
+    }
+
+    .node.auth rect { stroke: var(--auth); }
+    .node.org rect { stroke: var(--org); }
+    .node.medical rect { stroke: var(--medical); }
+    .node.engine rect { stroke: var(--engine); }
+    .node.reception rect { stroke: var(--reception); }
+    .node.billing rect { stroke: var(--billing); }
+    .node.forms rect { stroke: var(--forms); }
+
+    .fk-line {
+      fill: none;
+      stroke: #57708c;
+      stroke-width: 1.7;
+      marker-end: url(#arrow);
+    }
+
+    .fk-line.logic {
+      stroke-dasharray: 6 5;
+      marker-end: url(#arrowLogic);
+    }
+
+    .fk-label {
+      fill: #52647a;
+      font-size: 11px;
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    .content-pad {
+      padding: 16px 18px 18px;
+    }
+
+    .note-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      border-left: 4px solid #5f8fc2;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .note.warning {
+      border-left-color: var(--warning);
+      background: #fff8f3;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 11px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #344156;
+      background: #f8fafc;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    td {
+      color: #27364b;
+    }
+
+    .schema-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .schema-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .schema-card[hidden] {
+      display: none;
+    }
+
+    .table-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .table-title {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .table-title code,
+    td code {
+      font-family: "Cascadia Code", Consolas, "SFMono-Regular", monospace;
+      font-size: 0.95em;
+    }
+
+    .table-desc {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #fff;
+      white-space: nowrap;
+    }
+
+    .badge.module-auth { border-color: rgba(47, 111, 159, 0.38); color: var(--auth); }
+    .badge.module-org { border-color: rgba(15, 139, 123, 0.38); color: var(--org); }
+    .badge.module-medical { border-color: rgba(125, 90, 31, 0.38); color: var(--medical); }
+    .badge.module-engine { border-color: rgba(109, 91, 184, 0.38); color: var(--engine); }
+    .badge.module-reception { border-color: rgba(180, 91, 79, 0.38); color: var(--reception); }
+    .badge.module-billing { border-color: rgba(61, 124, 58, 0.38); color: var(--billing); }
+    .badge.module-forms { border-color: rgba(102, 112, 133, 0.38); color: var(--forms); }
+
+    .key-cell {
+      min-width: 160px;
+      color: #1f4d7a;
+      font-weight: 600;
+    }
+
+    .field-cell {
+      min-width: 190px;
+      font-weight: 650;
+    }
+
+    .relation {
+      padding: 11px 14px 13px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      background: #fcfdff;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .empty-state {
+      border: 1px dashed #b8c5d5;
+      border-radius: 8px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      background: #fff;
+    }
+
+    @media (max-width: 1040px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .note-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner,
+      .hero,
+      .layout {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head,
+      .table-head {
+        grid-template-columns: 1fr;
+      }
+
+      .badges {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <strong>HIS DAO Care - Database Schema</strong>
+        <span>Nguon: TypeORM migrations + entities trong backend</span>
+      </div>
+      <div class="top-actions" aria-label="Thong tin nhanh">
+        <span class="pill">PostgreSQL schema: <strong>his</strong></span>
+        <span class="pill">31 bang</span>
+        <span class="pill">Standalone HTML</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>So do CSDL HIS DAO Care</h1>
+      <p class="lead">
+        Ban HTML de nhin ro hon Markdown: ERD co the cuon ngang, node co the bam de nhay xuong chi tiet bang,
+        kem field, dang du lieu, y nghia, khoa chinh, khoa phu, index va quan he.
+      </p>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>31</strong><span>bang</span></div>
+      <div class="stat"><strong>7</strong><span>nhom module</span></div>
+      <div class="stat"><strong>1</strong><span>schema his</span></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="panel panel-pad">
+        <label class="search-label" for="schemaSearch">Tim bang / field / y nghia</label>
+        <input class="search" id="schemaSearch" type="search" placeholder="Vi du: patient, order, branch..." />
+      </div>
+
+      <div class="panel panel-pad">
+        <p class="side-title">Module</p>
+        <nav class="module-list" id="moduleNav"></nav>
+      </div>
+
+      <div class="panel panel-pad">
+        <p class="side-title">Chu thich</p>
+        <div class="legend">
+          <div class="legend-row"><span class="legend-line"></span><span>FK da enforce trong DB</span></div>
+          <div class="legend-row"><span class="legend-line dashed"></span><span>Quan he logic, chua co FK DB</span></div>
+          <div><strong>PK</strong>: khoa chinh</div>
+          <div><strong>UQ</strong>: unique constraint/index</div>
+          <div><strong>IDX</strong>: index tao bang CREATE INDEX</div>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="section" id="overview">
+        <div class="section-head">
+          <div>
+            <h2>ERD tong quan</h2>
+            <p>Cuon ngang de xem het. Bam vao ten bang de nhay den chi tiet.</p>
+          </div>
+          <span class="pill">Solid = FK(DB), dashed = FK(logic)</span>
+        </div>
+        <div class="diagram-wrap">
+          <svg class="erd-svg" viewBox="0 0 1680 1120" role="img" aria-labelledby="erdTitle erdDesc">
+            <title id="erdTitle">ERD HIS DAO Care</title>
+            <desc id="erdDesc">So do quan he bang CSDL chinh cua backend HIS DAO Care.</desc>
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#57708c"></path>
+              </marker>
+              <marker id="arrowLogic" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#8a6f42"></path>
+              </marker>
+            </defs>
+
+            <rect class="module-box" x="28" y="30" width="340" height="394"></rect>
+            <text class="module-title" x="48" y="58">Auth &amp; Access</text>
+            <rect class="module-box" x="430" y="30" width="390" height="548"></rect>
+            <text class="module-title" x="450" y="58">Organization</text>
+            <rect class="module-box" x="882" y="30" width="346" height="340"></rect>
+            <text class="module-title" x="902" y="58">Medical Catalog</text>
+            <rect class="module-box" x="430" y="626" width="390" height="338"></rect>
+            <text class="module-title" x="450" y="654">Engine / Schedule</text>
+            <rect class="module-box" x="882" y="430" width="360" height="332"></rect>
+            <text class="module-title" x="902" y="458">Reception</text>
+            <rect class="module-box" x="1310" y="558" width="322" height="246"></rect>
+            <text class="module-title" x="1330" y="586">Billing</text>
+            <rect class="module-box" x="1310" y="94" width="322" height="124"></rect>
+            <text class="module-title" x="1330" y="122">Forms</text>
+
+            <path class="fk-line" d="M548 123 C520 123 520 123 492 123"></path>
+            <text class="fk-label" x="505" y="115">org</text>
+            <path class="fk-line" d="M552 194 C520 194 520 194 492 194"></path>
+            <path class="fk-line" d="M552 265 C520 265 520 265 492 265"></path>
+            <path class="fk-line" d="M550 336 C520 336 520 336 492 336"></path>
+            <path class="fk-line" d="M550 407 C520 407 520 407 492 407"></path>
+
+            <path class="fk-line" d="M188 194 C188 156 188 156 188 123"></path>
+            <path class="fk-line" d="M188 265 C188 228 188 228 188 194"></path>
+            <path class="fk-line" d="M188 336 C188 300 188 300 188 265"></path>
+            <path class="fk-line" d="M52 407 C28 470 356 486 552 125"></path>
+            <path class="fk-line" d="M324 407 C390 470 470 470 552 125"></path>
+
+            <path class="fk-line" d="M690 478 C690 540 690 582 690 696"></path>
+            <path class="fk-line" d="M608 478 C580 580 580 610 580 696"></path>
+            <path class="fk-line" d="M588 478 C540 610 540 684 580 767"></path>
+            <path class="fk-line" d="M704 478 C738 610 738 690 714 767"></path>
+            <path class="fk-line" d="M690 767 C690 800 690 800 690 838"></path>
+
+            <path class="fk-line logic" d="M758 265 C810 222 850 195 908 123"></path>
+            <path class="fk-line logic" d="M758 407 C820 352 850 300 908 123"></path>
+            <path class="fk-line logic" d="M1120 194 C1120 156 1120 156 1120 123"></path>
+            <path class="fk-line" d="M1102 265 C1102 230 1102 230 1102 194"></path>
+
+            <path class="fk-line" d="M1080 549 C1080 510 1080 510 1080 478"></path>
+            <path class="fk-line" d="M1014 620 C936 548 838 430 758 123"></path>
+            <path class="fk-line" d="M1080 620 C1080 588 1080 584 1080 549"></path>
+            <path class="fk-line" d="M1212 620 C1292 620 1292 620 1340 620"></path>
+            <path class="fk-line" d="M1212 691 C1292 691 1292 691 1340 620"></path>
+            <path class="fk-line" d="M1212 691 C1292 691 1292 691 1340 691"></path>
+            <path class="fk-line" d="M1122 691 C1122 720 1220 742 1340 762"></path>
+            <path class="fk-line" d="M1150 620 C1220 520 870 305 1120 194"></path>
+
+            <path class="fk-line" d="M1488 691 C1488 657 1488 657 1488 620"></path>
+            <path class="fk-line" d="M1488 762 C1488 730 1488 730 1488 691"></path>
+            <path class="fk-line" d="M1340 691 C1285 691 1250 690 1212 691"></path>
+            <path class="fk-line" d="M1340 691 C1270 620 1220 265 1150 194"></path>
+
+            <a href="#table-permissions"><g class="node auth" transform="translate(52 86)"><rect width="272" height="42"></rect><text x="14" y="26">permissions</text></g></a>
+            <a href="#table-roles"><g class="node auth" transform="translate(52 157)"><rect width="272" height="42"></rect><text x="14" y="26">roles</text></g></a>
+            <a href="#table-role_permissions"><g class="node auth" transform="translate(52 228)"><rect width="272" height="42"></rect><text x="14" y="26">role_permissions</text></g></a>
+            <a href="#table-users"><g class="node auth" transform="translate(52 299)"><rect width="272" height="42"></rect><text x="14" y="26">users</text></g></a>
+            <a href="#table-login_time_windows"><g class="node auth" transform="translate(52 370)"><rect width="128" height="42"></rect><text x="14" y="26">login_time_windows</text></g></a>
+            <a href="#table-user_branch_scopes"><g class="node auth" transform="translate(196 370)"><rect width="128" height="42"></rect><text x="12" y="26">user_branch_scopes</text></g></a>
+
+            <a href="#table-organizations"><g class="node org" transform="translate(552 86)"><rect width="206" height="42"></rect><text x="14" y="26">organizations</text></g></a>
+            <a href="#table-branches"><g class="node org" transform="translate(552 157)"><rect width="206" height="42"></rect><text x="14" y="26">branches</text></g></a>
+            <a href="#table-departments"><g class="node org" transform="translate(552 228)"><rect width="206" height="42"></rect><text x="14" y="26">departments</text></g></a>
+            <a href="#table-rooms"><g class="node org" transform="translate(552 299)"><rect width="206" height="42"></rect><text x="14" y="26">rooms</text></g></a>
+            <a href="#table-resources"><g class="node org" transform="translate(552 370)"><rect width="206" height="42"></rect><text x="14" y="26">resources</text></g></a>
+            <a href="#table-staff"><g class="node org" transform="translate(552 441)"><rect width="206" height="42"></rect><text x="14" y="26">staff</text></g></a>
+            <a href="#table-staff_assignments"><g class="node org" transform="translate(450 512)"><rect width="152" height="42"></rect><text x="12" y="26">staff_assignments</text></g></a>
+            <a href="#table-practicing_certificates"><g class="node org" transform="translate(620 512)"><rect width="168" height="42"></rect><text x="12" y="26">practicing_certificates</text></g></a>
+            <a href="#table-branch_allowed_ips"><g class="node auth" transform="translate(450 86)"><rect width="42" height="42"></rect><text x="8" y="26">IPs</text></g></a>
+
+            <a href="#table-specialties"><g class="node medical" transform="translate(908 86)"><rect width="244" height="42"></rect><text x="14" y="26">specialties</text></g></a>
+            <a href="#table-services"><g class="node medical" transform="translate(908 157)"><rect width="244" height="42"></rect><text x="14" y="26">services</text></g></a>
+            <a href="#table-service_prices"><g class="node medical" transform="translate(908 228)"><rect width="244" height="42"></rect><text x="14" y="26">service_prices</text></g></a>
+            <a href="#table-icd10_codes"><g class="node medical" transform="translate(908 299)"><rect width="116" height="42"></rect><text x="12" y="26">icd10_codes</text></g></a>
+            <a href="#table-medications"><g class="node medical" transform="translate(1040 299)"><rect width="112" height="42"></rect><text x="12" y="26">medications</text></g></a>
+
+            <a href="#table-shifts"><g class="node engine" transform="translate(552 696)"><rect width="206" height="42"></rect><text x="14" y="26">shifts</text></g></a>
+            <a href="#table-staff_schedule_templates"><g class="node engine" transform="translate(552 767)"><rect width="206" height="42"></rect><text x="14" y="26">staff_schedule_templates</text></g></a>
+            <a href="#table-staff_schedule_overrides"><g class="node engine" transform="translate(552 838)"><rect width="206" height="42"></rect><text x="14" y="26">staff_schedule_overrides</text></g></a>
+            <a href="#table-staff_attendances"><g class="node engine" transform="translate(552 909)"><rect width="206" height="42"></rect><text x="14" y="26">staff_attendances</text></g></a>
+
+            <a href="#table-patients"><g class="node reception" transform="translate(1014 512)"><rect width="198" height="42"></rect><text x="14" y="26">patients</text></g></a>
+            <a href="#table-appointments"><g class="node reception" transform="translate(1014 583)"><rect width="198" height="42"></rect><text x="14" y="26">appointments</text></g></a>
+            <a href="#table-patient_visits"><g class="node reception" transform="translate(1014 654)"><rect width="198" height="42"></rect><text x="14" y="26">patient_visits</text></g></a>
+
+            <a href="#table-orders"><g class="node billing" transform="translate(1340 599)"><rect width="148" height="42"></rect><text x="14" y="26">orders</text></g></a>
+            <a href="#table-order_items"><g class="node billing" transform="translate(1340 670)"><rect width="148" height="42"></rect><text x="14" y="26">order_items</text></g></a>
+            <a href="#table-payments"><g class="node billing" transform="translate(1340 741)"><rect width="148" height="42"></rect><text x="14" y="26">payments</text></g></a>
+
+            <a href="#table-form_templates"><g class="node forms" transform="translate(1338 150)"><rect width="246" height="42"></rect><text x="14" y="26">form_templates</text></g></a>
+          </svg>
+        </div>
+      </section>
+
+      <section class="section" id="notes">
+        <div class="section-head">
+          <div>
+            <h2>Luu y quan trong</h2>
+            <p>Cac diem can biet khi so DB that voi migration/entity.</p>
+          </div>
+        </div>
+        <div class="content-pad">
+          <div class="note-grid">
+            <div class="note warning">Migration hard-code schema <code>his</code>, nhung config mac dinh dang co the roi ve <code>public</code> neu khong set <code>DATABASE_SCHEMA=his</code>.</div>
+            <div class="note warning">Mot so migration co thu tu timestamp de gay loi khi chay tu DB rong: migration lich/cham cong va billing co thao tac voi bang tao sau.</div>
+            <div class="note">Cac cot <code>specialty_id</code> tren mot so bang la quan he logic, chua co FK DB enforce.</div>
+            <div class="note">PostgreSQL khong tu tao index cho FK. Hien schema chi co explicit non-unique index tren <code>role_permissions</code>.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="indexes">
+        <div class="section-head">
+          <div>
+            <h2>Index va unique</h2>
+            <p>Tong hop cac constraint/index dang thay trong migration.</p>
+          </div>
+        </div>
+        <div class="content-pad table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Bang</th>
+                <th>Cot</th>
+                <th>Loai</th>
+                <th>Ghi chu</th>
+              </tr>
+            </thead>
+            <tbody id="indexRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="tables">
+        <div class="section-head">
+          <div>
+            <h2>Chi tiet bang</h2>
+            <p id="resultCount">Dang tai schema...</p>
+          </div>
+          <a class="pill" href="#overview">Len ERD</a>
+        </div>
+        <div class="content-pad">
+          <div class="schema-grid" id="schemaGrid"></div>
+          <div class="empty-state" id="emptyState" hidden>Khong tim thay bang/field phu hop.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const modules = [
+      { id: "auth", name: "Auth & Access", color: "var(--auth)" },
+      { id: "org", name: "Organization", color: "var(--org)" },
+      { id: "medical", name: "Medical Catalog", color: "var(--medical)" },
+      { id: "engine", name: "Engine / Schedule", color: "var(--engine)" },
+      { id: "reception", name: "Reception", color: "var(--reception)" },
+      { id: "billing", name: "Billing", color: "var(--billing)" },
+      { id: "forms", name: "Forms", color: "var(--forms)" }
+    ];
+
+    const schema = [
+      {
+        module: "auth",
+        table: "permissions",
+        meaning: "Danh muc quyen thao tac trong he thong.",
+        relation: "N-N voi roles qua role_permissions.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh quyen."],
+          ["name", "varchar", "NOT NULL", "UQ", "Ma quyen, vi du user:create, user:read."],
+          ["description", "varchar", "NULL", "", "Mo ta quyen."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "roles",
+        meaning: "Nhom vai tro nguoi dung.",
+        relation: "1-N voi users; N-N voi permissions qua role_permissions.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh vai tro."],
+          ["name", "varchar", "NOT NULL", "UQ", "Ma vai tro, vi du ADMIN, DOCTOR, RECEPTION, NURSE."],
+          ["description", "varchar", "NULL", "", "Mo ta vai tro."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "role_permissions",
+        meaning: "Bang noi vai tro va quyen.",
+        relation: "Moi dong gan mot permission cho mot role; xoa role se cascade bang noi.",
+        fields: [
+          ["role_id", "uuid", "NOT NULL", "PK, FK(DB) -> roles.id, IDX", "Vai tro duoc gan quyen."],
+          ["permission_id", "uuid", "NOT NULL", "PK, FK(DB) -> permissions.id, IDX", "Quyen duoc gan vao vai tro."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "users",
+        meaning: "Tai khoan dang nhap va chinh sach truy cap.",
+        relation: "N-1 roles; N-1 branches qua default_branch_id; N-1 login_time_windows; 1-N user_branch_scopes; 0/1-0/1 voi staff.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh user."],
+          ["email", "varchar", "NOT NULL", "UQ", "Email dang nhap/lien he."],
+          ["username", "varchar", "NULL", "UQ", "Ten dang nhap ngan gon."],
+          ["password_hash", "varchar", "NOT NULL", "", "Mat khau da hash."],
+          ["refresh_token_hash", "varchar", "NULL", "", "Refresh token da hash."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Tai khoan dang hoat dong hay bi vo hieu hoa."],
+          ["role_id", "uuid", "NOT NULL", "FK(DB) -> roles.id", "Vai tro cua user."],
+          ["default_branch_id", "uuid", "NULL", "FK(DB) -> branches.id, ON DELETE SET NULL", "Chi nhanh mac dinh."],
+          ["branch_scope_mode", "varchar", "NOT NULL, default SPECIFIC", "", "Che do pham vi chi nhanh."],
+          ["bypass_ip_restriction", "boolean", "NOT NULL, default true", "", "Bo qua kiem tra IP cho user nay."],
+          ["login_time_window_id", "uuid", "NULL", "FK(DB) -> login_time_windows.id, ON DELETE SET NULL", "Khung gio duoc phep dang nhap."],
+          ["failed_login_count", "integer", "NOT NULL, default 0", "", "So lan dang nhap sai."],
+          ["failed_login_limit", "integer", "NULL", "", "Gioi han dang nhap sai rieng user."],
+          ["locked_at", "timestamp", "NULL", "", "Thoi diem khoa tai khoan."],
+          ["locked_by", "uuid", "NULL", "FK(logic)", "Nguoi thao tac khoa tai khoan, chua enforce FK."],
+          ["lock_reason", "varchar", "NULL", "", "Ly do khoa."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "login_time_windows",
+        meaning: "Cau hinh khung gio dang nhap.",
+        relation: "1-N users.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh khung gio."],
+          ["name", "varchar", "NOT NULL", "", "Ten khung gio."],
+          ["start_time", "varchar", "NOT NULL", "", "Gio bat dau, vi du 06:00."],
+          ["end_time", "varchar", "NOT NULL", "", "Gio ket thuc, vi du 21:00."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con ap dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "user_branch_scopes",
+        meaning: "Pham vi chi nhanh user duoc truy cap.",
+        relation: "N-1 users, N-1 branches; cap user_id + branch_id la duy nhat.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh scope."],
+          ["user_id", "uuid", "NOT NULL", "FK(DB) -> users.id, UQ pair", "User duoc cap pham vi."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, UQ pair", "Chi nhanh duoc phep truy cap."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao scope."]
+        ]
+      },
+      {
+        module: "auth",
+        table: "branch_allowed_ips",
+        meaning: "Danh sach IP duoc phep dang nhap theo chi nhanh.",
+        relation: "N-1 branches.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh cau hinh IP."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, ON DELETE CASCADE", "Chi nhanh ap dung."],
+          ["ip_address", "varchar", "NOT NULL", "", "Dia chi IP duoc phep."],
+          ["description", "varchar", "NULL", "", "Mo ta IP."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Dang ap dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "organizations",
+        meaning: "Phap nhan/to chuc chu quan cua he thong phong kham.",
+        relation: "1-N branches.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh to chuc."],
+          ["name", "varchar", "NOT NULL", "", "Ten day du."],
+          ["short_name", "varchar", "NULL", "", "Ten viet tat."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma to chuc."],
+          ["logo_url", "varchar", "NULL", "", "URL logo."],
+          ["tax_code", "varchar", "NULL", "", "Ma so thue."],
+          ["operating_license", "varchar", "NULL", "", "Giay phep hoat dong."],
+          ["legal_representative", "varchar", "NULL", "", "Nguoi dai dien phap ly."],
+          ["hotline", "varchar", "NULL", "", "So hotline."],
+          ["email", "varchar", "NULL", "", "Email lien he."],
+          ["website", "varchar", "NULL", "", "Website."],
+          ["address", "varchar", "NULL", "", "Dia chi to chuc."],
+          ["language", "varchar", "NOT NULL, default vi", "", "Ngon ngu mac dinh."],
+          ["timezone", "varchar", "NOT NULL, default Asia/Ho_Chi_Minh", "", "Mui gio mac dinh."],
+          ["country", "varchar", "NOT NULL, default VN", "", "Quoc gia."],
+          ["default_currency", "varchar", "NOT NULL, default VND", "", "Tien te mac dinh."],
+          ["date_format", "varchar", "NOT NULL, default YYYY-MM-DD", "", "Dinh dang ngay."],
+          ["time_format", "varchar", "NOT NULL, default HH:mm:ss", "", "Dinh dang gio."],
+          ["currency_format", "varchar", "NOT NULL, default standard", "", "Cach hien thi tien te."],
+          ["otp_expiration_time", "integer", "NOT NULL, default 300", "", "Thoi gian het han OTP, tinh bang giay."],
+          ["appointment_cancellation_limit", "integer", "NOT NULL, default 24", "", "Gioi han huy lich hen, tinh bang gio."],
+          ["mrn_format", "varchar", "NOT NULL, default MRN-{YY}{MM}{DD}-{SEQ}", "", "Format ma ho so/y te."],
+          ["patient_code_format", "varchar", "NOT NULL, default PT-{YY}{MM}-{SEQ}", "", "Format ma benh nhan."],
+          ["visit_code_format", "varchar", "NOT NULL, default VS-{YY}{MM}{DD}-{SEQ}", "", "Format ma luot kham."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "branches",
+        meaning: "Co so/chi nhanh phong kham.",
+        relation: "N-1 organizations; 1-N departments, rooms, staff_assignments, appointments, patient_visits, staff_attendances, branch_allowed_ips, user_branch_scopes, schedules.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh chi nhanh."],
+          ["organization_id", "uuid", "NOT NULL", "FK(DB) -> organizations.id, ON DELETE CASCADE", "To chuc chu quan."],
+          ["name", "varchar", "NOT NULL", "", "Ten chi nhanh."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma chi nhanh."],
+          ["type", "varchar", "NOT NULL, default CLINIC", "", "Loai co so."],
+          ["technical_director", "varchar", "NULL", "", "Nguoi phu trach chuyen mon."],
+          ["operating_license", "varchar", "NULL", "", "Giay phep hoat dong chi nhanh."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Trang thai hoat dong."],
+          ["hotline", "varchar", "NULL", "", "Hotline chi nhanh."],
+          ["email", "varchar", "NULL", "", "Email chi nhanh."],
+          ["country", "varchar", "NOT NULL, default VN", "", "Quoc gia."],
+          ["province", "varchar", "NULL", "", "Tinh/thanh."],
+          ["district", "varchar", "NULL", "", "Quan/huyen."],
+          ["address_detail", "varchar", "NULL", "", "Dia chi chi tiet."],
+          ["latitude", "double precision", "NULL", "", "Vi do."],
+          ["longitude", "double precision", "NULL", "", "Kinh do."],
+          ["working_days", "text", "NULL", "", "Danh sach ngay lam viec; entity dung simple-array."],
+          ["open_time", "varchar", "NOT NULL, default 08:00", "", "Gio mo cua."],
+          ["close_time", "varchar", "NOT NULL, default 20:00", "", "Gio dong cua."],
+          ["bank_name", "varchar", "NULL", "", "Ten ngan hang."],
+          ["bank_account_no", "varchar", "NULL", "", "So tai khoan ngan hang."],
+          ["bank_account_name", "varchar", "NULL", "", "Ten chu tai khoan."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "departments",
+        meaning: "Phong ban/bo phan trong chi nhanh.",
+        relation: "N-1 branches; 1-N staff.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh phong ban."],
+          ["branch_id", "uuid", "NULL", "FK(DB) -> branches.id, ON DELETE SET NULL", "Chi nhanh truc thuoc."],
+          ["name", "varchar", "NOT NULL", "", "Ten phong ban."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma phong ban."],
+          ["description", "varchar", "NULL", "", "Mo ta."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Trang thai hoat dong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "rooms",
+        meaning: "Phong kham, phong dieu tri, labo, chan doan hinh anh.",
+        relation: "N-1 branches; 1-N resources; 1-N staff_assignments; duoc tham chieu boi appointments va patient_visits.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh phong."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, ON DELETE CASCADE", "Chi nhanh so huu phong."],
+          ["name", "varchar", "NOT NULL", "", "Ten phong."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma phong."],
+          ["type", "varchar", "NOT NULL, default CLINIC", "", "Loai phong: CLINIC, TREATMENT, PROCEDURE, LABORATORY, IMAGING."],
+          ["specialty_id", "uuid", "NULL", "FK(logic) -> specialties.id", "Chuyen khoa phu hop."],
+          ["floor", "varchar", "NULL", "", "Tang/khu vuc."],
+          ["capacity", "integer", "NOT NULL, default 1", "", "Suc chua/so benh nhan co the phuc vu."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Trang thai phong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "resources",
+        meaning: "Tai nguyen trong phong nhu ghe, giuong, thiet bi.",
+        relation: "N-1 rooms.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh tai nguyen."],
+          ["room_id", "uuid", "NOT NULL", "FK(DB) -> rooms.id, ON DELETE CASCADE", "Phong chua tai nguyen."],
+          ["name", "varchar", "NOT NULL", "", "Ten tai nguyen."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma tai nguyen."],
+          ["type", "varchar", "NOT NULL", "", "Loai tai nguyen: CHAIR, BED, EQUIPMENT."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["is_occupied", "boolean", "NOT NULL, default false", "", "Dang bi su dung/ban hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "staff",
+        meaning: "Ho so nhan su/bac si/dieu duong/le tan.",
+        relation: "N-1 departments; 0/1-0/1 users; 1-1 practicing_certificates; 1-N assignments, schedules, attendances; duoc tham chieu boi appointment/visit/order item.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh nhan su."],
+          ["full_name", "varchar", "NOT NULL", "", "Ho ten."],
+          ["date_of_birth", "date", "NOT NULL", "", "Ngay sinh."],
+          ["gender", "varchar", "NOT NULL", "", "Gioi tinh: MALE, FEMALE, OTHER."],
+          ["identity_number", "varchar", "NOT NULL", "UQ", "CCCD/CMND cua nhan su."],
+          ["phone", "varchar", "NOT NULL", "", "So dien thoai."],
+          ["email", "varchar", "NOT NULL", "UQ", "Email nhan su."],
+          ["address", "varchar", "NULL", "", "Dia chi."],
+          ["staff_code", "varchar", "NOT NULL", "UQ", "Ma nhan vien."],
+          ["join_date", "date", "NOT NULL", "", "Ngay vao lam."],
+          ["title", "varchar", "NOT NULL", "", "Chuc danh: DOCTOR, NURSE, TECHNICIAN, RECEPTIONIST, ADMINISTRATOR, OTHER."],
+          ["is_clinical", "boolean", "NOT NULL, default false", "", "Co tham gia chuyen mon/lam sang hay khong."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Dang lam viec hay khong."],
+          ["nickname", "varchar", "NULL", "", "Ten goi ngan gon."],
+          ["department_id", "uuid", "NULL", "FK(DB) -> departments.id, ON DELETE SET NULL", "Phong ban truc thuoc."],
+          ["user_id", "uuid", "NULL", "UQ, FK(DB) -> users.id, ON DELETE SET NULL", "Tai khoan dang nhap lien ket."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "staff_assignments",
+        meaning: "Phan cong nhan su theo chi nhanh/phong/chuyen khoa.",
+        relation: "N-1 staff, branches, rooms.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh phan cong."],
+          ["staff_id", "uuid", "NOT NULL", "FK(DB) -> staff.id, ON DELETE CASCADE", "Nhan su duoc phan cong."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, ON DELETE CASCADE", "Chi nhanh lam viec."],
+          ["specialty_id", "uuid", "NULL", "FK(logic) -> specialties.id", "Chuyen khoa phu trach."],
+          ["room_id", "uuid", "NULL", "FK(DB) -> rooms.id, ON DELETE SET NULL", "Phong duoc gan."],
+          ["is_primary", "boolean", "NOT NULL, default true", "", "Phan cong chinh hay phu."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "org",
+        table: "practicing_certificates",
+        meaning: "Chung chi hanh nghe cua nhan su lam sang.",
+        relation: "1-1 staff.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh chung chi."],
+          ["staff_id", "uuid", "NOT NULL", "UQ, FK(DB) -> staff.id, ON DELETE CASCADE", "Nhan su so huu chung chi; moi staff toi da 1 chung chi."],
+          ["certificate_number", "varchar", "NOT NULL", "UQ", "So chung chi hanh nghe."],
+          ["issued_date", "date", "NOT NULL", "", "Ngay cap."],
+          ["expiry_date", "date", "NULL", "", "Ngay het han."],
+          ["issued_by", "varchar", "NOT NULL", "", "Don vi cap."],
+          ["scope_of_practice", "text", "NOT NULL", "", "Pham vi hanh nghe."],
+          ["signature_scan_url", "varchar", "NULL", "", "URL anh chu ky."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "engine",
+        table: "shifts",
+        meaning: "Ca lam viec.",
+        relation: "1-N staff_schedule_templates, staff_schedule_overrides, staff_attendances.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh ca."],
+          ["name", "varchar", "NOT NULL", "", "Ten ca."],
+          ["start_time", "varchar", "NOT NULL", "", "Gio bat dau."],
+          ["end_time", "varchar", "NOT NULL", "", "Gio ket thuc."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "engine",
+        table: "staff_schedule_templates",
+        meaning: "Lich lam viec lap lai cua nhan su.",
+        relation: "N-1 staff, branches, shifts.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh lich mau."],
+          ["staff_id", "uuid", "NOT NULL", "FK(DB) -> staff.id, ON DELETE CASCADE", "Nhan su."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, ON DELETE CASCADE", "Chi nhanh lam viec."],
+          ["day_of_week", "varchar", "NOT NULL", "", "Thu trong tuan, vi du Monday."],
+          ["shift_id", "uuid", "NOT NULL", "FK(DB) -> shifts.id, ON DELETE CASCADE", "Ca lam viec."],
+          ["effective_date", "date", "NOT NULL", "", "Ngay bat dau hieu luc."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "engine",
+        table: "staff_schedule_overrides",
+        meaning: "Ngoai le lich lam viec theo ngay.",
+        relation: "N-1 staff; tuy chon N-1 branches, shifts.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh lich ngoai le."],
+          ["staff_id", "uuid", "NOT NULL", "FK(DB) -> staff.id, ON DELETE CASCADE", "Nhan su."],
+          ["date", "date", "NOT NULL", "", "Ngay ap dung ngoai le."],
+          ["override_type", "varchar", "NOT NULL", "", "Loai ngoai le: LEAVE hoac WORK."],
+          ["branch_id", "uuid", "NULL", "FK(DB) -> branches.id, ON DELETE SET NULL", "Chi nhanh neu di lam bo sung."],
+          ["shift_id", "uuid", "NULL", "FK(DB) -> shifts.id, ON DELETE SET NULL", "Ca lam neu di lam bo sung."],
+          ["reason", "varchar", "NULL", "", "Ly do nghi/lam bu."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "engine",
+        table: "staff_attendances",
+        meaning: "Ban ghi cham cong/check-in ca lam cua nhan su.",
+        relation: "N-1 staff, branches, shifts.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh cham cong."],
+          ["staff_id", "uuid", "NOT NULL", "FK(DB) -> staff.id, ON DELETE CASCADE", "Nhan su cham cong."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id, ON DELETE CASCADE", "Chi nhanh check-in."],
+          ["date", "date", "NOT NULL", "", "Ngay lam viec."],
+          ["shift_id", "uuid", "NOT NULL", "FK(DB) -> shifts.id, ON DELETE CASCADE", "Ca lam viec."],
+          ["check_in_time", "timestamp with time zone", "NULL", "", "Thoi diem check-in."],
+          ["check_out_time", "timestamp with time zone", "NULL", "", "Thoi diem check-out."],
+          ["checkout_reason", "varchar", "NULL", "", "Ly do checkout/ket thuc ca."],
+          ["status", "varchar", "NOT NULL, default CHECKED_IN", "", "Trang thai: CHECKED_IN, CHECKED_OUT."],
+          ["is_accepting_patients", "boolean", "NOT NULL, default true", "", "Bac si/nhan su con nhan benh moi hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "medical",
+        table: "specialties",
+        meaning: "Danh muc chuyen khoa.",
+        relation: "Quan he logic tu services, icd10_codes, rooms, staff_assignments qua specialty_id.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh chuyen khoa."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma chuyen khoa."],
+          ["name", "varchar", "NOT NULL", "", "Ten chuyen khoa."],
+          ["description", "text", "NULL", "", "Mo ta."],
+          ["icon_url", "varchar", "NULL", "", "URL icon."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "medical",
+        table: "services",
+        meaning: "Danh muc dich vu y te/thu thuat/xet nghiem.",
+        relation: "1-N service_prices; duoc tham chieu boi appointments.service_id va order_items.service_id.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh dich vu."],
+          ["specialty_id", "uuid", "NULL", "FK(logic) -> specialties.id", "Chuyen khoa cua dich vu."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma dich vu."],
+          ["name", "varchar", "NOT NULL", "", "Ten dich vu."],
+          ["category", "varchar", "NOT NULL, default EXAMINATION", "", "Nhom dich vu: EXAMINATION, LAB_TEST, IMAGING, PROCEDURE, SURGERY, THERAPY."],
+          ["insurance_code", "varchar", "NULL", "", "Ma bao hiem."],
+          ["description", "text", "NULL", "", "Mo ta dich vu."],
+          ["duration_minutes", "integer", "NOT NULL, default 30", "", "Thoi luong thuc hien du kien."],
+          ["result_duration_hours", "integer", "NULL", "", "Thoi gian tra ket qua du kien."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "medical",
+        table: "service_prices",
+        meaning: "Bang gia theo loai gia va ngay hieu luc cua dich vu.",
+        relation: "N-1 services.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh gia dich vu."],
+          ["service_id", "uuid", "NOT NULL", "FK(DB) -> services.id, ON DELETE CASCADE", "Dich vu duoc dinh gia."],
+          ["price_type", "varchar", "NOT NULL", "", "Loai gia, vi du LISTED, INSURANCE, VIP."],
+          ["amount", "numeric(15,2)", "NOT NULL", "", "So tien."],
+          ["vat_rate", "numeric(5,2)", "NOT NULL, default 0", "", "Ty le VAT."],
+          ["effective_date", "date", "NOT NULL", "", "Ngay hieu luc."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "medical",
+        table: "icd10_codes",
+        meaning: "Danh muc ma chan doan ICD-10.",
+        relation: "Logic N-1 specialties.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh ICD-10."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma ICD-10."],
+          ["name", "varchar", "NOT NULL", "", "Ten benh/chan doan tieng Viet."],
+          ["name_en", "varchar", "NULL", "", "Ten tieng Anh."],
+          ["specialty_id", "uuid", "NULL", "FK(logic) -> specialties.id", "Chuyen khoa lien quan."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "medical",
+        table: "medications",
+        meaning: "Danh muc thuoc.",
+        relation: "Doc lap trong schema hien tai.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh thuoc."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma thuoc noi bo."],
+          ["national_code", "varchar", "NULL", "UQ", "Ma thuoc quoc gia."],
+          ["name", "varchar", "NOT NULL", "", "Ten thuoc."],
+          ["active_ingredient", "varchar", "NOT NULL", "", "Hoat chat."],
+          ["concentration", "varchar", "NOT NULL", "", "Ham luong/nong do."],
+          ["unit", "varchar", "NOT NULL", "", "Don vi dong goi/ton kho."],
+          ["usage_unit", "varchar", "NULL", "", "Don vi su dung, vi du vien, goi, ml."],
+          ["route_of_administration", "varchar", "NOT NULL, default ORAL", "", "Duong dung: ORAL, INJECTION, TOPICAL, INHALATION, OTHER."],
+          ["max_dose_per_day", "varchar", "NULL", "", "Lieu toi da moi ngay."],
+          ["group_name", "varchar", "NULL", "", "Nhom thuoc."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "forms",
+        table: "form_templates",
+        meaning: "Mau in/mau noi dung HTML cho hoa don, don thuoc, ket qua, SOAP.",
+        relation: "Doc lap trong schema hien tai.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh mau."],
+          ["name", "varchar", "NOT NULL", "", "Ten mau."],
+          ["code", "varchar", "NOT NULL", "UQ", "Ma mau."],
+          ["type", "varchar", "NOT NULL", "", "Loai mau: PRINT_TEMPLATE, CLINICAL_TEMPLATE, ADMINISTRATIVE_TEMPLATE."],
+          ["category", "varchar", "NOT NULL", "", "Nhom mau: INVOICE, PRESCRIPTION, LAB_RESULT, ULTRASOUND_RESULT, SOAP."],
+          ["html_content", "text", "NOT NULL", "", "Noi dung HTML cua mau."],
+          ["description", "varchar", "NULL", "", "Mo ta."],
+          ["is_active", "boolean", "NOT NULL, default true", "", "Con su dung hay khong."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "reception",
+        table: "patients",
+        meaning: "Ho so benh nhan/khach hang.",
+        relation: "1-N appointments, patient_visits, orders.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh benh nhan."],
+          ["patient_code", "varchar", "NOT NULL", "UQ", "Ma benh nhan."],
+          ["full_name", "varchar", "NOT NULL", "", "Ho ten."],
+          ["dob", "date", "NOT NULL", "", "Ngay sinh."],
+          ["gender", "varchar", "NOT NULL", "", "Gioi tinh: MALE, FEMALE, OTHER."],
+          ["phone", "varchar", "NOT NULL", "UQ", "So dien thoai."],
+          ["email", "varchar", "NULL", "", "Email."],
+          ["address", "varchar", "NULL", "", "Dia chi."],
+          ["cccd", "varchar", "NULL", "", "So CCCD/giay to."],
+          ["guardian_name", "varchar", "NULL", "", "Ten nguoi giam ho."],
+          ["guardian_phone", "varchar", "NULL", "", "Dien thoai nguoi giam ho."],
+          ["guardian_relation", "varchar", "NULL", "", "Quan he voi nguoi giam ho."],
+          ["avatar_url", "varchar", "NULL", "", "URL anh dai dien."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "reception",
+        table: "appointments",
+        meaning: "Lich hen cua benh nhan.",
+        relation: "N-1 patients, branches, staff doctor, rooms, services; 1-N patient_visits theo appointment_id.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh lich hen."],
+          ["appointment_code", "varchar", "NOT NULL", "UQ", "Ma lich hen."],
+          ["patient_id", "uuid", "NOT NULL", "FK(DB) -> patients.id", "Benh nhan dat lich."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id", "Chi nhanh kham."],
+          ["doctor_id", "uuid", "NULL", "FK(DB) -> staff.id", "Bac si du kien."],
+          ["room_id", "uuid", "NULL", "FK(DB) -> rooms.id", "Phong du kien."],
+          ["service_id", "uuid", "NULL", "FK(DB) -> services.id", "Dich vu du kien."],
+          ["appointment_date", "date", "NOT NULL", "", "Ngay hen."],
+          ["start_time", "varchar", "NOT NULL", "", "Gio bat dau."],
+          ["end_time", "varchar", "NOT NULL", "", "Gio ket thuc."],
+          ["status", "varchar", "NOT NULL", "", "Trang thai: BOOKED, CONFIRMED, CHECKED_IN, CANCELLED."],
+          ["notes", "text", "NULL", "", "Ghi chu lich hen."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "reception",
+        table: "patient_visits",
+        meaning: "Luot tiep nhan/kham cua benh nhan trong ngay.",
+        relation: "N-1 patients, branches, appointments, rooms, staff; 1-N orders.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh luot kham."],
+          ["visit_code", "varchar", "NOT NULL", "UQ", "Ma luot kham."],
+          ["patient_id", "uuid", "NOT NULL", "FK(DB) -> patients.id", "Benh nhan."],
+          ["branch_id", "uuid", "NOT NULL", "FK(DB) -> branches.id", "Chi nhanh tiep nhan."],
+          ["appointment_id", "uuid", "NULL", "FK(DB) -> appointments.id", "Lich hen goc neu check-in tu lich hen."],
+          ["current_room_id", "uuid", "NULL", "FK(DB) -> rooms.id", "Phong hien tai."],
+          ["current_doctor_id", "uuid", "NULL", "FK(DB) -> staff.id", "Bac si hien tai."],
+          ["current_nurse_id", "uuid", "NULL", "FK(DB) -> staff.id", "Dieu duong hien tai."],
+          ["queue_number", "integer", "NOT NULL", "", "So thu tu trong ngay/chi nhanh."],
+          ["priority_level", "varchar", "NOT NULL, default REGULAR", "", "Muc uu tien: EMERGENCY, PRIORITY, REGULAR."],
+          ["queue_code", "varchar", "NULL", "", "Ma hien thi trong hang doi."],
+          ["status", "varchar", "NOT NULL", "", "Trang thai luong kham: ADMITTED, WAITING, WAITING_CLINICAL_EXAM, IN_CLINICAL_EXAM, CLINICAL_EXAM_DONE, PENDING_PAYMENT, WAITING_SERVICE, IN_SERVICE, ALL_SERVICES_DONE, WAITING_RESULTS, WAITING_CONCLUSION, IN_CONCLUSION, COMPLETED, CANCELLED."],
+          ["reason", "varchar", "NULL", "", "Ly do kham/trieu chung chinh."],
+          ["pulse", "integer", "NULL", "", "Mach, nhip/phut."],
+          ["blood_pressure", "varchar", "NULL", "", "Huyet ap, vi du 120/80."],
+          ["temperature", "numeric(4,1)", "NULL", "", "Nhiet do C."],
+          ["weight", "numeric(5,2)", "NULL", "", "Can nang kg."],
+          ["height", "numeric(5,2)", "NULL", "", "Chieu cao cm."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "billing",
+        table: "orders",
+        meaning: "Don chi dinh/hoa don dich vu gan voi luot kham.",
+        relation: "N-1 patient_visits, patients; 1-N order_items, payments.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh don."],
+          ["order_code", "varchar", "NOT NULL", "UQ", "Ma don."],
+          ["visit_id", "uuid", "NOT NULL", "FK(DB) -> patient_visits.id", "Luot kham phat sinh don."],
+          ["patient_id", "uuid", "NOT NULL", "FK(DB) -> patients.id", "Benh nhan so huu don."],
+          ["status", "varchar", "NOT NULL, default PENDING", "", "Trang thai: PENDING, PAID, CANCELLED."],
+          ["total_amount", "numeric(15,2)", "NOT NULL, default 0", "", "Tong tien don."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "billing",
+        table: "order_items",
+        meaning: "Dong dich vu trong don.",
+        relation: "N-1 orders, services, staff.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh dong don."],
+          ["order_id", "uuid", "NOT NULL", "FK(DB) -> orders.id, ON DELETE CASCADE", "Don cha."],
+          ["service_id", "uuid", "NOT NULL", "FK(DB) -> services.id", "Dich vu duoc chi dinh."],
+          ["quantity", "integer", "NOT NULL, default 1", "", "So luong."],
+          ["price", "numeric(15,2)", "NOT NULL, default 0", "", "Don gia tai thoi diem lap don."],
+          ["status", "varchar", "NOT NULL, default PENDING", "", "Trang thai thuc hien: PENDING, COMPLETED, CANCELLED."],
+          ["performed_by_id", "uuid", "NULL", "FK(DB) -> staff.id, ON DELETE SET NULL", "Nhan su thuc hien dich vu."],
+          ["result_notes", "text", "NULL", "", "Ghi chu ket qua."],
+          ["result_status", "varchar", "NOT NULL, default NONE", "", "Trang thai ket qua: NONE, PENDING, COMPLETED."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      },
+      {
+        module: "billing",
+        table: "payments",
+        meaning: "Giao dich thanh toan cho don.",
+        relation: "N-1 orders.",
+        fields: [
+          ["id", "uuid", "NOT NULL, default uuid_generate_v4()", "PK", "Dinh danh thanh toan."],
+          ["payment_code", "varchar", "NOT NULL", "UQ", "Ma phieu/giao dich thanh toan."],
+          ["order_id", "uuid", "NOT NULL", "FK(DB) -> orders.id", "Don duoc thanh toan."],
+          ["amount", "numeric(15,2)", "NOT NULL", "", "So tien thanh toan."],
+          ["payment_method", "varchar", "NOT NULL", "", "Phuong thuc: CASH, TRANSFER, CARD."],
+          ["status", "varchar", "NOT NULL, default SUCCESS", "", "Trang thai thanh toan: SUCCESS, FAILED."],
+          ["paid_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem thanh toan."],
+          ["created_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem tao."],
+          ["updated_at", "timestamp", "NOT NULL, default now()", "", "Thoi diem cap nhat."]
+        ]
+      }
+    ];
+
+    const indexSummary = [
+      ["Tat ca bang chinh", "id", "PK", "Implicit btree index"],
+      ["role_permissions", "role_id, permission_id", "Composite PK", "Bang noi role-permission"],
+      ["role_permissions", "role_id", "IDX", "CREATE INDEX"],
+      ["role_permissions", "permission_id", "IDX", "CREATE INDEX"],
+      ["permissions", "name", "UQ", "Unique permission name"],
+      ["roles", "name", "UQ", "Unique role name"],
+      ["users", "email, username", "UQ", "Unique login identifiers"],
+      ["user_branch_scopes", "user_id, branch_id", "UQ", "Moi user-branch chi co mot dong"],
+      ["organizations", "code", "UQ", "Ma to chuc"],
+      ["branches", "code", "UQ", "Ma chi nhanh"],
+      ["departments", "code", "UQ", "Ma phong ban"],
+      ["rooms", "code", "UQ", "Ma phong"],
+      ["resources", "code", "UQ", "Ma tai nguyen"],
+      ["staff", "identity_number, email, staff_code, user_id", "UQ", "Dinh danh nhan su va lien ket user"],
+      ["practicing_certificates", "staff_id, certificate_number", "UQ", "Moi staff toi da mot chung chi"],
+      ["specialties", "code", "UQ", "Ma chuyen khoa"],
+      ["services", "code", "UQ", "Ma dich vu"],
+      ["icd10_codes", "code", "UQ", "Ma ICD-10"],
+      ["medications", "code, national_code", "UQ", "Ma thuoc"],
+      ["form_templates", "code", "UQ", "Ma template"],
+      ["patients", "patient_code, phone", "UQ", "Ma benh nhan va phone"],
+      ["appointments", "appointment_code", "UQ", "Ma lich hen"],
+      ["patient_visits", "visit_code", "UQ", "Ma luot kham"],
+      ["orders", "order_code", "UQ", "Ma don"],
+      ["payments", "payment_code", "UQ", "Ma thanh toan"]
+    ];
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function moduleName(id) {
+      return modules.find((item) => item.id === id)?.name || id;
+    }
+
+    function moduleClass(id) {
+      return "module-" + id;
+    }
+
+    function renderModules() {
+      const nav = document.getElementById("moduleNav");
+      nav.innerHTML = modules.map((mod) => {
+        const count = schema.filter((item) => item.module === mod.id).length;
+        const firstTable = schema.find((item) => item.module === mod.id)?.table || "tables";
+        return `<a class="module-link" href="#table-${firstTable}" data-module="${mod.id}">
+          <span><span class="dot" style="background:${mod.color}"></span>${escapeHtml(mod.name)}</span>
+          <small>${count}</small>
+        </a>`;
+      }).join("");
+    }
+
+    function renderIndexes() {
+      const rows = document.getElementById("indexRows");
+      rows.innerHTML = indexSummary.map((item) => `<tr>
+        <td><code>${escapeHtml(item[0])}</code></td>
+        <td><code>${escapeHtml(item[1])}</code></td>
+        <td>${escapeHtml(item[2])}</td>
+        <td class="muted">${escapeHtml(item[3])}</td>
+      </tr>`).join("");
+    }
+
+    function tableMatches(table, query) {
+      if (!query) return true;
+      const text = [
+        table.module,
+        table.table,
+        table.meaning,
+        table.relation,
+        ...table.fields.flat()
+      ].join(" ").toLowerCase();
+      return text.includes(query);
+    }
+
+    function renderTables() {
+      const query = document.getElementById("schemaSearch").value.trim().toLowerCase();
+      const grid = document.getElementById("schemaGrid");
+      const visible = schema.filter((table) => tableMatches(table, query));
+
+      grid.innerHTML = visible.map((table) => {
+        const rows = table.fields.map((field) => `<tr>
+          <td class="field-cell"><code>${escapeHtml(field[0])}</code></td>
+          <td><code>${escapeHtml(field[1])}</code></td>
+          <td>${escapeHtml(field[2])}</td>
+          <td class="key-cell">${field[3] ? escapeHtml(field[3]) : '<span class="muted">-</span>'}</td>
+          <td>${escapeHtml(field[4])}</td>
+        </tr>`).join("");
+
+        return `<article class="schema-card" id="table-${escapeHtml(table.table)}" data-module="${escapeHtml(table.module)}">
+          <div class="table-head">
+            <div>
+              <h3 class="table-title"><code>his.${escapeHtml(table.table)}</code></h3>
+              <p class="table-desc">${escapeHtml(table.meaning)}</p>
+            </div>
+            <div class="badges">
+              <span class="badge ${moduleClass(table.module)}">${escapeHtml(moduleName(table.module))}</span>
+              <span class="badge">${table.fields.length} fields</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Dang</th>
+                  <th>Null/default</th>
+                  <th>Key/index</th>
+                  <th>Y nghia</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <div class="relation"><strong>Quan he:</strong> ${escapeHtml(table.relation)}</div>
+        </article>`;
+      }).join("");
+
+      document.getElementById("emptyState").hidden = visible.length > 0;
+      document.getElementById("resultCount").textContent = `${visible.length}/${schema.length} bang dang hien thi`;
+    }
+
+    renderModules();
+    renderIndexes();
+    renderTables();
+
+    document.getElementById("schemaSearch").addEventListener("input", renderTables);
+  </script>
+</body>
+</html>
