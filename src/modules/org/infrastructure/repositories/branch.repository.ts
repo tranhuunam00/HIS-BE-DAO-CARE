@@ -55,8 +55,7 @@ export class BranchRepository implements IBranchRepository {
       orm.province,
       orm.district,
       orm.addressDetail,
-      orm.latitude,
-      orm.longitude,
+      orm.googleMapUrl,
       orm.workingDays,
       orm.openTime,
       orm.closeTime,
@@ -84,8 +83,7 @@ export class BranchRepository implements IBranchRepository {
     orm.province = domain.province;
     orm.district = domain.district;
     orm.addressDetail = domain.addressDetail;
-    orm.latitude = domain.latitude;
-    orm.longitude = domain.longitude;
+    orm.googleMapUrl = domain.googleMapUrl;
     orm.workingDays = domain.workingDays;
     orm.openTime = domain.openTime;
     orm.closeTime = domain.closeTime;

@@ -48,11 +48,8 @@ export class BranchOrmEntity {
   @Column({ name: 'address_detail', type: 'varchar', nullable: true })
   addressDetail: string | null;
 
-  @Column({ name: 'latitude', type: 'double precision', nullable: true })
-  latitude: number | null;
-
-  @Column({ name: 'longitude', type: 'double precision', nullable: true })
-  longitude: number | null;
+  @Column({ name: 'google_map_url', type: 'varchar', nullable: true })
+  googleMapUrl: string | null;
 
   // Working Hours
   @Column({ name: 'working_days', type: 'simple-array', nullable: true })

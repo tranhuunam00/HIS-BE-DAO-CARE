@@ -273,8 +273,7 @@ Y nghia: co so/chi nhanh phong kham.
 | `province` | `varchar` | NULL |  | Tinh/thanh. |
 | `district` | `varchar` | NULL |  | Quan/huyen. |
 | `address_detail` | `varchar` | NULL |  | Dia chi chi tiet. |
-| `latitude` | `double precision` | NULL |  | Vi do. |
-| `longitude` | `double precision` | NULL |  | Kinh do. |
+| `google_map_url` | `varchar` | NULL |  | Duong dan Google Map. |
 | `working_days` | `text` | NULL |  | Danh sach ngay lam viec; entity dung `simple-array`. |
 | `open_time` | `varchar` | NOT NULL, default `08:00` |  | Gio mo cua. |
 | `close_time` | `varchar` | NOT NULL, default `20:00` |  | Gio dong cua. |

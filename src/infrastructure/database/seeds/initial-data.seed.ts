@@ -159,7 +159,7 @@ async function seed() {
     // Assign all permissions to ADMIN
     if (r.name === AUTH_ROLE_NAME.ADMIN) {
       role.permissions = dbPermissions;
-    } else if ([AUTH_ROLE_NAME.DOCTOR, AUTH_ROLE_NAME.NURSE, AUTH_ROLE_NAME.TECHNICIAN, AUTH_ROLE_NAME.RECEPTION].includes(r.name)) {
+    } else if ([AUTH_ROLE_NAME.DOCTOR, AUTH_ROLE_NAME.NURSE, AUTH_ROLE_NAME.TECHNICIAN, AUTH_ROLE_NAME.RECEPTION].includes(r.name as any)) {
       role.permissions = dbPermissions.filter((p) =>
         ['org:read', 'branch:read', 'user:read', 'room:read', 'resource:read', 'staff:read', 'schedule:read'].includes(p.name)
       );
@@ -233,8 +233,7 @@ async function seed() {
       province: 'Hà Nội',
       district: 'Hai Bà Trưng',
       addressDetail: 'Số 1 Đại Cồ Việt',
-      latitude: 21.006326,
-      longitude: 105.843132,
+      googleMapUrl: 'https://maps.app.goo.gl/tW53Jk8pLgJ6e1nE8',
       workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       openTime: '08:00',
       closeTime: '20:00',

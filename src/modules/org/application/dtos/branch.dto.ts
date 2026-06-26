@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsNumber, IsArray, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsArray, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   BRANCH_TYPE,
@@ -62,15 +62,10 @@ export class CreateBranchDto {
   @IsString()
   addressDetail?: string;
 
-  @ApiProperty({ example: 21.006326, required: false })
+  @ApiProperty({ example: 'https://maps.app.goo.gl/tW53Jk8pLgJ6e1nE8', required: false })
   @IsOptional()
-  @IsNumber()
-  latitude?: number;
-
-  @ApiProperty({ example: 105.843132, required: false })
-  @IsOptional()
-  @IsNumber()
-  longitude?: number;
+  @IsString()
+  googleMapUrl?: string;
 
   @ApiProperty({ example: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], required: false })
   @IsOptional()
@@ -156,15 +151,10 @@ export class UpdateBranchDto {
   @IsString()
   addressDetail?: string;
 
-  @ApiProperty({ example: 21.006326, required: false })
+  @ApiProperty({ example: 'https://maps.app.goo.gl/tW53Jk8pLgJ6e1nE8', required: false })
   @IsOptional()
-  @IsNumber()
-  latitude?: number;
-
-  @ApiProperty({ example: 105.843132, required: false })
-  @IsOptional()
-  @IsNumber()
-  longitude?: number;
+  @IsString()
+  googleMapUrl?: string;
 
   @ApiProperty({ example: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], required: false })
   @IsOptional()
@@ -242,10 +232,7 @@ export class BranchResponseDto {
   addressDetail: string | null;
 
   @ApiProperty()
-  latitude: number | null;
-
-  @ApiProperty()
-  longitude: number | null;
+  googleMapUrl: string | null;
 
   @ApiProperty()
   workingDays: string[] | null;
