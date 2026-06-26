@@ -13,6 +13,8 @@ import { SpecialtyController } from './controllers/specialty.controller';
 import { ServiceController } from './controllers/service.controller';
 import { Icd10Controller } from './controllers/icd10.controller';
 import { MedicationController } from './controllers/medication.controller';
+import { UploadController } from './controllers/upload.controller';
+import { StorageService } from '../../infrastructure/storage/storage.service';
 
 // Repository tokens & implementations
 import { ISpecialtyRepositoryToken } from '../../domain/repositories/specialty.repository.interface';
@@ -69,6 +71,7 @@ import { ToggleMedicationStatusUseCase } from '../../application/use-cases/toggl
     ServiceController,
     Icd10Controller,
     MedicationController,
+    UploadController,
   ],
   providers: [
     // Repositories
@@ -105,6 +108,7 @@ import { ToggleMedicationStatusUseCase } from '../../application/use-cases/toggl
     CreateMedicationUseCase,
     UpdateMedicationUseCase,
     ToggleMedicationStatusUseCase,
+    StorageService,
   ],
   exports: [
     ISpecialtyRepositoryToken,
