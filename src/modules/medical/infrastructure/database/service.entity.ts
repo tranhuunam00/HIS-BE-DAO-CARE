@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ServicePriceOrmEntity } from './service-price.entity';
+import { SERVICE_CATEGORY } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'services' })
 export class ServiceOrmEntity {
@@ -22,7 +23,7 @@ export class ServiceOrmEntity {
   @Column()
   name: string;
 
-  @Column({ default: 'EXAMINATION' })
+  @Column({ default: SERVICE_CATEGORY.EXAMINATION })
   category: string; // EXAMINATION | LAB_TEST | IMAGING | PROCEDURE | SURGERY | THERAPY
 
   @Column({ name: 'insurance_code', type: 'varchar', nullable: true })

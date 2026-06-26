@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID, IsNumber, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsNumber, Min, IsIn } from 'class-validator';
+import {
+  PAYMENT_METHOD,
+  type PaymentMethod,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreatePaymentDto {
   @ApiProperty({ description: 'ID của hóa đơn' })
@@ -13,10 +17,11 @@ export class CreatePaymentDto {
   @Min(0)
   amount: number;
 
-  @ApiProperty({ description: 'Phương thức thanh toán (CASH | TRANSFER | CARD)' })
+  @ApiProperty({ description: 'Phương thức thanh toán', enum: PAYMENT_METHOD })
   @IsNotEmpty()
   @IsString()
-  paymentMethod: string;
+  @IsIn(Object.values(PAYMENT_METHOD))
+  paymentMethod: PaymentMethod;
 }
 
 export class PaymentResponseDto {

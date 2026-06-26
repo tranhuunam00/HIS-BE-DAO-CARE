@@ -1,6 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, IsInt, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsInt, Min, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ResourceResponseDto } from './resource.dto';
+import {
+  ROOM_TYPE,
+  type RoomType,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateRoomDto {
   @ApiProperty({ example: 'b0efcb3f-9b58-4834-9544-7d27f77a3108' })
@@ -18,10 +22,11 @@ export class CreateRoomDto {
   @IsNotEmpty()
   code: string;
 
-  @ApiProperty({ example: 'CLINIC', description: 'CLINIC, TREATMENT, PROCEDURE, LABORATORY, IMAGING' })
+  @ApiProperty({ enum: ROOM_TYPE, example: ROOM_TYPE.CLINIC })
   @IsString()
   @IsNotEmpty()
-  type: string;
+  @IsIn(Object.values(ROOM_TYPE))
+  type: RoomType;
 
   @ApiProperty({ example: 'c0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
   @IsOptional()
@@ -46,10 +51,11 @@ export class UpdateRoomDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ example: 'CLINIC', required: false })
+  @ApiProperty({ enum: ROOM_TYPE, example: ROOM_TYPE.CLINIC, required: false })
   @IsOptional()
   @IsString()
-  type?: string;
+  @IsIn(Object.values(ROOM_TYPE))
+  type?: RoomType;
 
   @ApiProperty({ example: 'c0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
   @IsOptional()

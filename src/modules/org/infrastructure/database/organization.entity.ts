@@ -1,5 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { BranchOrmEntity } from './branch.entity';
+import {
+  DEFAULT_COUNTRY_CODE,
+  DEFAULT_CURRENCY_CODE,
+} from '../../../../common/constants/global.constants';
 
 @Entity({ name: 'organizations' })
 export class OrganizationOrmEntity {
@@ -46,10 +50,10 @@ export class OrganizationOrmEntity {
   @Column({ default: 'Asia/Ho_Chi_Minh' })
   timezone: string;
 
-  @Column({ default: 'VN' })
+  @Column({ default: DEFAULT_COUNTRY_CODE })
   country: string;
 
-  @Column({ name: 'default_currency', default: 'VND' })
+  @Column({ name: 'default_currency', default: DEFAULT_CURRENCY_CODE })
   defaultCurrency: string;
 
   // Formats settings

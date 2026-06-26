@@ -3,6 +3,7 @@ import { RoleOrmEntity } from './role.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { LoginTimeWindowOrmEntity } from './login-time-window.entity';
 import { UserBranchScopeOrmEntity } from './user-branch-scope.entity';
+import { BranchScopeMode } from '../../domain/constants/auth.constants';
 
 @Entity({ name: 'users' })
 export class UserOrmEntity {
@@ -38,7 +39,7 @@ export class UserOrmEntity {
   @JoinColumn({ name: 'default_branch_id' })
   defaultBranch: BranchOrmEntity | null;
 
-  @Column({ name: 'branch_scope_mode', default: 'SPECIFIC' })
+  @Column({ name: 'branch_scope_mode', default: BranchScopeMode.SPECIFIC })
   branchScopeMode: string;
 
   @Column({ name: 'bypass_ip_restriction', default: true })

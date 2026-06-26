@@ -6,6 +6,7 @@ import { PatientVisit } from '../../domain/entities/patient-visit.model';
 import { PatientVisitOrmEntity } from '../database/patient-visit.entity';
 import { OrderOrmEntity } from '../../../billing/infrastructure/database/order.entity';
 import { OrderItemOrmEntity } from '../../../billing/infrastructure/database/order-item.entity';
+import { VISIT_PRIORITY } from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class PatientVisitRepository implements IPatientVisitRepository {
@@ -133,7 +134,7 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       .andWhere('visit.priorityLevel = :priorityLevel', { priorityLevel })
       .getCount();
     const nextNum = (count + 1).toString().padStart(3, '0');
-    const prefix = priorityLevel === 'EMERGENCY' ? 'E' : priorityLevel === 'PRIORITY' ? 'P' : 'W';
+    const prefix = priorityLevel === VISIT_PRIORITY.EMERGENCY ? 'E' : priorityLevel === VISIT_PRIORITY.PRIORITY ? 'P' : 'W';
     return `${prefix}${nextNum}`;
   }
 

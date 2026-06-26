@@ -16,6 +16,7 @@ import {
   ResolvedScheduleResponseDto,
   ResolvedScheduleShiftDto,
 } from '../dtos/schedule.dto';
+import { SCHEDULE_OVERRIDE_TYPE } from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class UpdateStaffScheduleTemplateUseCase {
@@ -103,7 +104,7 @@ export class CreateStaffScheduleOverrideUseCase {
     }
 
     // 2. Verify shift & branch if type is WORK
-    if (dto.overrideType === 'WORK') {
+    if (dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK) {
       if (!dto.shiftId || !dto.branchId) {
         throw new BadRequestException('Vui lòng cung cấp Ca trực và Chi nhánh làm việc');
       }
@@ -131,8 +132,8 @@ export class CreateStaffScheduleOverrideUseCase {
       dto.staffId,
       dto.date,
       dto.overrideType,
-      dto.overrideType === 'WORK' ? dto.branchId! : null,
-      dto.overrideType === 'WORK' ? dto.shiftId! : null,
+      dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK ? dto.branchId! : null,
+      dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK ? dto.shiftId! : null,
       dto.reason ?? null,
     );
 
@@ -211,7 +212,7 @@ export class GetStaffSchedulesUseCase {
         // A. Check override
         const dayOverride = staffOverrides.find((o) => o.date === dateStr);
         if (dayOverride) {
-          if (dayOverride.overrideType === 'LEAVE') {
+          if (dayOverride.overrideType === SCHEDULE_OVERRIDE_TYPE.LEAVE) {
             resolved.push({
               staffId,
               date: dateStr,

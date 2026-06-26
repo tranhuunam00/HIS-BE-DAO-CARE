@@ -7,6 +7,10 @@ import { GetStaffSchedulesUseCase } from './staff-schedule.use-cases';
 import { StaffAttendance } from '../../domain/entities/staff-attendance.model';
 import { CheckInDto, CheckOutDto } from '../dtos/attendance.dto';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
+import {
+  PATIENT_VISIT_STATUS,
+  STAFF_ATTENDANCE_STATUS,
+} from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class CheckInUseCase {
@@ -52,7 +56,7 @@ export class CheckInUseCase {
       new Date(), // checkInTime
       null, // checkOutTime
       null, // checkoutReason
-      'CHECKED_IN',
+      STAFF_ATTENDANCE_STATUS.CHECKED_IN,
       undefined,
       undefined,
       undefined,
@@ -80,7 +84,7 @@ export class CheckOutUseCase {
       throw new NotFoundException('Không tìm thấy bản ghi điểm danh');
     }
 
-    if (attendance.status === 'CHECKED_OUT' || attendance.checkOutTime) {
+    if (attendance.status === STAFF_ATTENDANCE_STATUS.CHECKED_OUT || attendance.checkOutTime) {
       throw new BadRequestException('Nhân viên đã check-out ca trực này trước đó');
     }
 
@@ -89,7 +93,7 @@ export class CheckOutUseCase {
       where: {
         currentDoctorId: attendance.staffId,
         branchId: attendance.branchId,
-        status: Not(In(['COMPLETED', 'CANCELLED'])),
+        status: Not(In([PATIENT_VISIT_STATUS.COMPLETED, PATIENT_VISIT_STATUS.CANCELLED])),
       },
     });
 
@@ -128,7 +132,7 @@ export class CheckOutUseCase {
       attendance.checkInTime,
       new Date(), // checkOutTime
       dto.checkoutReason,
-      'CHECKED_OUT',
+      STAFF_ATTENDANCE_STATUS.CHECKED_OUT,
       attendance.createdAt,
       attendance.updatedAt,
       attendance.staff,

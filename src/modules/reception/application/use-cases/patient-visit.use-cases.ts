@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Like } from 'typeorm';
 import { PatientVisit } from '../../domain/entities/patient-visit.model';
@@ -10,6 +10,15 @@ import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity'
 import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseDto } from '../dtos/patient-visit.dto';
 import type { IOrderRepository } from '../../../billing/domain/repositories/order.repository.interface';
 import { IOrderRepositoryToken } from '../../../billing/application/use-cases/list-orders.use-case';
+import {
+  APPOINTMENT_STATUS,
+  ORDER_ITEM_STATUS,
+  PATIENT_VISIT_STATUS,
+  ROOM_TYPE,
+  STAFF_ATTENDANCE_STATUS,
+  STAFF_TITLE,
+  VISIT_PRIORITY,
+} from '../../../../common/constants/workflow.constants';
 
 export const IPatientVisitRepositoryToken = 'IPatientVisitRepository';
 export const IAppointmentRepositoryToken = 'IAppointmentRepository';
@@ -19,7 +28,7 @@ export function mapVisitToDto(model: PatientVisit): PatientVisitResponseDto {
   let advice: string | undefined = undefined;
   let prescriptions: any[] | undefined = undefined;
 
-  if (model.status === 'COMPLETED') {
+  if (model.status === PATIENT_VISIT_STATUS.COMPLETED) {
     const reasonLower = (model.reason || '').toLowerCase();
     if (reasonLower.includes('dạ dày') || reasonLower.includes('bụng') || reasonLower.includes('tiêu hóa')) {
       diagnosis = 'Viêm loét dạ dày - tá tràng (K29.9)';
@@ -150,11 +159,11 @@ export class CheckInUseCase {
           staffId: doctorId,
           branchId,
           date: today,
-          status: 'CHECKED_IN',
+          status: STAFF_ATTENDANCE_STATUS.CHECKED_IN,
         },
         relations: { staff: true },
       });
-      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
+      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== STAFF_TITLE.DOCTOR) {
         throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
       }
       if (docAttendance.isAcceptingPatients === false) {
@@ -177,13 +186,13 @@ export class CheckInUseCase {
           staffId: In(staffIds),
           branchId,
           date: today,
-          status: 'CHECKED_IN',
+          status: STAFF_ATTENDANCE_STATUS.CHECKED_IN,
         },
         relations: { staff: true },
       });
 
       const activeDoctors = activeAttendances.filter(
-        (a) => a.staff && a.staff.title === 'DOCTOR',
+        (a) => a.staff && a.staff.title === STAFF_TITLE.DOCTOR,
       );
 
       if (activeDoctors.length === 0) {
@@ -210,7 +219,7 @@ export class CheckInUseCase {
 
     // 1. Get next sequential Queue Number for this branch today
     const queueNumber = await this.visitRepository.getNextQueueNumber(dto.branchId, today);
-    const priorityLevel = dto.priorityLevel || 'REGULAR';
+    const priorityLevel = dto.priorityLevel || VISIT_PRIORITY.REGULAR;
     const queueCode = await this.visitRepository.getNextQueueCode(dto.branchId, today, priorityLevel);
 
     // 2. Generate visit code
@@ -225,7 +234,7 @@ export class CheckInUseCase {
       if (appointment) {
         await this.appointmentRepository.save({
           ...appointment,
-          status: 'CHECKED_IN',
+          status: APPOINTMENT_STATUS.CHECKED_IN,
         });
       }
     }
@@ -242,7 +251,7 @@ export class CheckInUseCase {
       queueNumber,
       priorityLevel,
       queueCode,
-      status: 'ADMITTED',
+      status: PATIENT_VISIT_STATUS.ADMITTED,
       reason: dto.reason || null,
       pulse: dto.pulse || null,
       bloodPressure: dto.bloodPressure || null,
@@ -361,11 +370,11 @@ export class TransferRoomUseCase {
           staffId: doctorId,
           branchId,
           date: today,
-          status: 'CHECKED_IN',
+          status: STAFF_ATTENDANCE_STATUS.CHECKED_IN,
         },
         relations: { staff: true },
       });
-      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== 'DOCTOR') {
+      if (!docAttendance || !docAttendance.staff || docAttendance.staff.title !== STAFF_TITLE.DOCTOR) {
         throw new BadRequestException('Bác sĩ yêu cầu không có lịch trực hoặc chưa check-in hôm nay tại chi nhánh này');
       }
       if (docAttendance.isAcceptingPatients === false) {
@@ -388,13 +397,13 @@ export class TransferRoomUseCase {
           staffId: In(staffIds),
           branchId,
           date: today,
-          status: 'CHECKED_IN',
+          status: STAFF_ATTENDANCE_STATUS.CHECKED_IN,
         },
         relations: { staff: true },
       });
 
       const activeDoctors = activeAttendances.filter(
-        (a) => a.staff && a.staff.title === 'DOCTOR',
+        (a) => a.staff && a.staff.title === STAFF_TITLE.DOCTOR,
       );
 
       if (activeDoctors.length === 0) {
@@ -427,10 +436,26 @@ export class TransferRoomUseCase {
       currentRoomId: dto.roomId,
       currentDoctorId: dto.doctorId || null,
       currentNurseId: dto.nurseId || null,
-      status: dto.status || 'WAITING',
+      status: dto.status || this.resolveDefaultStatus(visit.status),
     });
 
     return this.mapToDto(updated);
+  }
+
+  private resolveDefaultStatus(currentStatus: string): string {
+    if (currentStatus === PATIENT_VISIT_STATUS.ADMITTED) {
+      return PATIENT_VISIT_STATUS.WAITING_CLINICAL_EXAM;
+    }
+
+    if (currentStatus === PATIENT_VISIT_STATUS.PENDING_PAYMENT || currentStatus === PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE) {
+      return PATIENT_VISIT_STATUS.WAITING_SERVICE;
+    }
+
+    if (currentStatus === PATIENT_VISIT_STATUS.WAITING_RESULTS) {
+      return PATIENT_VISIT_STATUS.WAITING_CONCLUSION;
+    }
+
+    return PATIENT_VISIT_STATUS.WAITING;
   }
 
   private mapToDto(model: PatientVisit): PatientVisitResponseDto {
@@ -477,13 +502,13 @@ export class ConfirmResultsWaitUseCase {
       throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
     }
 
-    if (visit.status !== 'ALL_SERVICES_DONE') {
+    if (visit.status !== PATIENT_VISIT_STATUS.ALL_SERVICES_DONE) {
       throw new BadRequestException('Lượt khám chưa ở trạng thái hoàn thành tất cả dịch vụ (ALL_SERVICES_DONE)');
     }
 
     const updated = await this.repository.save({
       ...visit,
-      status: 'WAITING_RESULTS',
+      status: PATIENT_VISIT_STATUS.WAITING_RESULTS,
     });
 
     return this.mapToDto(updated);
@@ -525,6 +550,9 @@ export class AcceptPatientUseCase {
   constructor(
     @Inject(IPatientVisitRepositoryToken)
     private readonly repository: IPatientVisitRepository,
+    @Optional()
+    @InjectRepository(StaffAttendanceOrmEntity)
+    private readonly attendanceRepository?: Repository<StaffAttendanceOrmEntity>,
   ) {}
 
   async execute(id: string, doctorId?: string): Promise<PatientVisitResponseDto> {
@@ -533,13 +561,15 @@ export class AcceptPatientUseCase {
       throw new NotFoundException('Không tìm thấy lượt khám bệnh nhân');
     }
 
+    await this.validateStaffCanAccept(visit, doctorId);
+
     let newStatus = visit.status;
-    if (visit.status === 'WAITING_CLINICAL_EXAM') {
-      newStatus = 'IN_CLINICAL_EXAM';
-    } else if (visit.status === 'WAITING_CONCLUSION') {
-      newStatus = 'IN_CONCLUSION';
-    } else if (visit.status === 'WAITING_SERVICE') {
-      newStatus = 'IN_SERVICE';
+    if (visit.status === PATIENT_VISIT_STATUS.WAITING_CLINICAL_EXAM) {
+      newStatus = PATIENT_VISIT_STATUS.IN_CLINICAL_EXAM;
+    } else if (visit.status === PATIENT_VISIT_STATUS.WAITING_CONCLUSION) {
+      newStatus = PATIENT_VISIT_STATUS.IN_CONCLUSION;
+    } else if (visit.status === PATIENT_VISIT_STATUS.WAITING_SERVICE) {
+      newStatus = PATIENT_VISIT_STATUS.IN_SERVICE;
     } else {
       throw new BadRequestException(`Bệnh nhân đang ở trạng thái ${visit.status}, không thể tiếp nhận vào khám.`);
     }
@@ -551,6 +581,53 @@ export class AcceptPatientUseCase {
     });
 
     return this.mapToDto(updated);
+  }
+
+  private async validateStaffCanAccept(visit: PatientVisit, doctorId?: string): Promise<void> {
+    const acceptingStaffId = doctorId || visit.currentDoctorId;
+    if (!acceptingStaffId) {
+      throw new BadRequestException('Chưa có nhân sự phụ trách để tiếp nhận bệnh nhân');
+    }
+
+    if (visit.currentDoctorId && acceptingStaffId !== visit.currentDoctorId) {
+      throw new BadRequestException('Nhân sự tiếp nhận không khớp với nhân sự đang được phân công cho lượt khám');
+    }
+
+    if (!visit.currentRoomId) {
+      throw new BadRequestException('Lượt khám chưa được điều phối vào phòng');
+    }
+
+    if (!this.attendanceRepository) {
+      throw new BadRequestException('Không thể xác thực trạng thái check-in của nhân sự');
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const attendance = await this.attendanceRepository.findOne({
+      where: {
+        staffId: acceptingStaffId,
+        branchId: visit.branchId,
+        date: today,
+        status: STAFF_ATTENDANCE_STATUS.CHECKED_IN,
+      },
+      relations: { staff: true },
+    });
+
+    if (!attendance) {
+      throw new BadRequestException('Nhân sự chỉ được tiếp nhận bệnh nhân sau khi đã check-in ca trực');
+    }
+
+    if (attendance.isAcceptingPatients === false) {
+      throw new BadRequestException('Nhân sự hiện không nhận thêm bệnh nhân mới');
+    }
+
+    const title = attendance.staff?.title;
+    if (
+      (visit.status === PATIENT_VISIT_STATUS.WAITING_CLINICAL_EXAM || visit.status === PATIENT_VISIT_STATUS.WAITING_CONCLUSION) &&
+      title &&
+      title !== STAFF_TITLE.DOCTOR
+    ) {
+      throw new BadRequestException('Chỉ bác sĩ mới được tiếp nhận khám lâm sàng/kết luận');
+    }
   }
 
   private mapToDto(model: PatientVisit): PatientVisitResponseDto {
@@ -605,22 +682,22 @@ export class CompletePatientUseCase {
     let nextRoomId = visit.currentRoomId;
     let nextDoctorId = visit.currentDoctorId;
 
-    if (visit.status === 'IN_CLINICAL_EXAM') {
+    if (visit.status === PATIENT_VISIT_STATUS.IN_CLINICAL_EXAM) {
       // Check if they ordered any service items that are PENDING
       const order = await this.orderRepository.findByVisitId(id);
       const hasPendingItems = order && order.items && order.items.some(
-        (item) => item.status === 'PENDING'
+        (item) => item.status === ORDER_ITEM_STATUS.PENDING
       );
 
       if (hasPendingItems) {
-        newStatus = 'CLINICAL_EXAM_DONE';
+        newStatus = PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE;
         // Transfer to coordination/reception room
         const coordRoom = await this.roomRepository.findOne({
           where: [
             { branchId: visit.branchId, code: 'PK105' },
-            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Tiếp Đón%') },
-            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Lễ Tân%') },
-            { branchId: visit.branchId, type: 'CLINIC', name: Like('%Điều phối%') }
+            { branchId: visit.branchId, type: ROOM_TYPE.CLINIC, name: Like('%Tiếp Đón%') },
+            { branchId: visit.branchId, type: ROOM_TYPE.CLINIC, name: Like('%Lễ Tân%') },
+            { branchId: visit.branchId, type: ROOM_TYPE.CLINIC, name: Like('%Điều phối%') }
           ]
         });
         if (coordRoom) {
@@ -628,10 +705,10 @@ export class CompletePatientUseCase {
           nextDoctorId = null;
         }
       } else {
-        newStatus = 'COMPLETED';
+        newStatus = PATIENT_VISIT_STATUS.COMPLETED;
       }
-    } else if (visit.status === 'IN_CONCLUSION') {
-      newStatus = 'COMPLETED';
+    } else if (visit.status === PATIENT_VISIT_STATUS.IN_CONCLUSION) {
+      newStatus = PATIENT_VISIT_STATUS.COMPLETED;
     } else {
       throw new BadRequestException(`Bệnh nhân đang ở trạng thái ${visit.status}, không thể kết thúc.`);
     }

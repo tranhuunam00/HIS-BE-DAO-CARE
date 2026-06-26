@@ -5,6 +5,12 @@ import { OrderOrmEntity } from '../../infrastructure/database/order.entity';
 import { PaymentOrmEntity } from '../../infrastructure/database/payment.entity';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { RefundOrderDto, OrderResponseDto } from '../dtos/order.dto';
+import {
+  ORDER_ITEM_STATUS,
+  ORDER_STATUS,
+  PATIENT_VISIT_STATUS,
+  PAYMENT_STATUS,
+} from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class RefundOrderUseCase {
@@ -23,7 +29,7 @@ export class RefundOrderUseCase {
       }
 
       // 2. Only paid orders can be refunded
-      if (order.status !== 'PAID') {
+      if (order.status !== ORDER_STATUS.PAID) {
         throw new BadRequestException('Chỉ có thể hoàn tiền cho hóa đơn đã thanh toán');
       }
 
@@ -35,12 +41,12 @@ export class RefundOrderUseCase {
 
       // 4. Validate clinical status of items (must be PENDING)
       for (const item of itemsToRefund) {
-        if (item.status === 'COMPLETED') {
+        if (item.status === ORDER_ITEM_STATUS.COMPLETED) {
           throw new BadRequestException(
             `Không thể hoàn tiền dịch vụ ${item.service?.name || ''} do đã thực hiện`,
           );
         }
-        if (item.status === 'CANCELLED') {
+        if (item.status === ORDER_ITEM_STATUS.CANCELLED) {
           throw new BadRequestException(
             `Dịch vụ ${item.service?.name || ''} đã được hủy/hoàn tiền trước đó`,
           );
@@ -50,7 +56,7 @@ export class RefundOrderUseCase {
       // 5. Update statuses and calculate total refund amount
       let refundAmount = 0;
       for (const item of itemsToRefund) {
-        item.status = 'CANCELLED';
+        item.status = ORDER_ITEM_STATUS.CANCELLED;
         refundAmount += Number(item.price) * item.quantity;
         await manager.save(item);
       }
@@ -68,7 +74,7 @@ export class RefundOrderUseCase {
         orderId,
         amount: -refundAmount,
         paymentMethod: dto.paymentMethod,
-        status: 'SUCCESS',
+        status: PAYMENT_STATUS.SUCCESS,
       });
       await manager.save(refundPayment);
 
@@ -76,9 +82,9 @@ export class RefundOrderUseCase {
       order.totalAmount = Number(order.totalAmount) - refundAmount;
 
       // 9. Update order status if all items are cancelled
-      const allCancelled = order.items.every((item) => item.status === 'CANCELLED');
+      const allCancelled = order.items.every((item) => item.status === ORDER_ITEM_STATUS.CANCELLED);
       if (allCancelled) {
-        order.status = 'CANCELLED';
+        order.status = ORDER_STATUS.CANCELLED;
 
         // Also revert visit status to CANCELLED if the entire visit's services are cancelled
         if (order.visitId) {
@@ -86,7 +92,7 @@ export class RefundOrderUseCase {
             where: { id: order.visitId },
           });
           if (visit) {
-            visit.status = 'CANCELLED';
+            visit.status = PATIENT_VISIT_STATUS.CANCELLED;
             await manager.save(visit);
           }
         }

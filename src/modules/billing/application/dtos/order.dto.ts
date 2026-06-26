@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, Min, IsArray } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, Min, IsArray, IsIn } from 'class-validator';
+import {
+  ORDER_ITEM_RESULT_STATUS,
+  ORDER_ITEM_STATUS,
+  PAYMENT_METHOD,
+  type OrderItemResultStatus,
+  type OrderItemStatus,
+  type PaymentMethod,
+} from '../../../../common/constants/workflow.constants';
 
 export class AddOrderItemDto {
   @ApiProperty({ description: 'ID của dịch vụ y tế' })
@@ -20,20 +28,22 @@ export class AddOrderItemDto {
 }
 
 export class UpdateOrderItemDto {
-  @ApiProperty({ description: 'Trạng thái của dịch vụ', enum: ['PENDING', 'COMPLETED', 'CANCELLED'] })
+  @ApiProperty({ description: 'Trạng thái của dịch vụ', enum: ORDER_ITEM_STATUS })
   @IsNotEmpty()
   @IsString()
-  status: string;
+  @IsIn(Object.values(ORDER_ITEM_STATUS))
+  status: OrderItemStatus;
 
   @ApiPropertyOptional({ description: 'Ghi chú kết quả thực hiện' })
   @IsOptional()
   @IsString()
   resultNotes?: string;
 
-  @ApiPropertyOptional({ description: 'Trạng thái trả kết quả', enum: ['NONE', 'PENDING', 'COMPLETED'] })
+  @ApiPropertyOptional({ description: 'Trạng thái trả kết quả', enum: ORDER_ITEM_RESULT_STATUS })
   @IsOptional()
   @IsString()
-  resultStatus?: string;
+  @IsIn(Object.values(ORDER_ITEM_RESULT_STATUS))
+  resultStatus?: OrderItemResultStatus;
 
   @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien (tinh KPI)' })
   @IsOptional()
@@ -129,8 +139,9 @@ export class RefundOrderDto {
   @IsString()
   reason: string;
 
-  @ApiProperty({ description: 'Phương thức hoàn tiền (CASH | TRANSFER | CARD)' })
+  @ApiProperty({ description: 'Phương thức hoàn tiền', enum: PAYMENT_METHOD })
   @IsNotEmpty()
   @IsString()
-  paymentMethod: string;
+  @IsIn(Object.values(PAYMENT_METHOD))
+  paymentMethod: PaymentMethod;
 }

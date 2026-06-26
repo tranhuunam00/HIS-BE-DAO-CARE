@@ -1,6 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, IsDateString, IsUUID, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, IsDateString, IsUUID, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  PATIENT_GENDER,
+  STAFF_TITLE,
+  type PatientGender,
+  type StaffTitle,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateStaffDto {
   @ApiProperty({ example: 'BS. Trần Hữu Nam' })
@@ -13,10 +18,11 @@ export class CreateStaffDto {
   @IsNotEmpty()
   dateOfBirth: string;
 
-  @ApiProperty({ example: 'MALE', description: 'MALE, FEMALE, OTHER' })
+  @ApiProperty({ enum: PATIENT_GENDER, example: PATIENT_GENDER.MALE })
   @IsString()
   @IsNotEmpty()
-  gender: string;
+  @IsIn(Object.values(PATIENT_GENDER))
+  gender: PatientGender;
 
   @ApiProperty({ example: '037090123456' })
   @IsString()
@@ -48,10 +54,11 @@ export class CreateStaffDto {
   @IsNotEmpty()
   joinDate: string;
 
-  @ApiProperty({ example: 'DOCTOR', description: 'DOCTOR, NURSE, TECHNICIAN, RECEPTIONIST, ADMINISTRATOR, OTHER' })
+  @ApiProperty({ enum: STAFF_TITLE, example: STAFF_TITLE.DOCTOR })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  @IsIn(Object.values(STAFF_TITLE))
+  title: StaffTitle;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
@@ -85,10 +92,11 @@ export class UpdateStaffDto {
   @IsDateString()
   dateOfBirth?: string;
 
-  @ApiProperty({ example: 'MALE', required: false })
+  @ApiProperty({ enum: PATIENT_GENDER, example: PATIENT_GENDER.MALE, required: false })
   @IsOptional()
   @IsString()
-  gender?: string;
+  @IsIn(Object.values(PATIENT_GENDER))
+  gender?: PatientGender;
 
   @ApiProperty({ example: '037090123456', required: false })
   @IsOptional()
@@ -110,10 +118,11 @@ export class UpdateStaffDto {
   @IsString()
   address?: string;
 
-  @ApiProperty({ example: 'DOCTOR', required: false })
+  @ApiProperty({ enum: STAFF_TITLE, example: STAFF_TITLE.DOCTOR, required: false })
   @IsOptional()
   @IsString()
-  title?: string;
+  @IsIn(Object.values(STAFF_TITLE))
+  title?: StaffTitle;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()

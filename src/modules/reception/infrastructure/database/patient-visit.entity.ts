@@ -4,6 +4,7 @@ import { AppointmentOrmEntity } from './appointment.entity';
 import { BranchOrmEntity } from '../../../../modules/org/infrastructure/database/branch.entity';
 import { StaffOrmEntity } from '../../../../modules/org/infrastructure/database/staff.entity';
 import { RoomOrmEntity } from '../../../../modules/org/infrastructure/database/room.entity';
+import { VISIT_PRIORITY } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'patient_visits' })
 export class PatientVisitOrmEntity {
@@ -58,7 +59,7 @@ export class PatientVisitOrmEntity {
   @Column({ name: 'queue_number' })
   queueNumber: number; // STT in the day
 
-  @Column({ name: 'priority_level', type: 'varchar', default: 'REGULAR' })
+  @Column({ name: 'priority_level', type: 'varchar', default: VISIT_PRIORITY.REGULAR })
   priorityLevel: string; // 'EMERGENCY' | 'PRIORITY' | 'REGULAR'
 
   @Column({ name: 'queue_code', type: 'varchar', nullable: true })

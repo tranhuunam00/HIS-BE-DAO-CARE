@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { ShiftOrmEntity } from './shift.entity';
+import { STAFF_ATTENDANCE_STATUS } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'staff_attendances' })
 export class StaffAttendanceOrmEntity {
@@ -41,7 +42,7 @@ export class StaffAttendanceOrmEntity {
   @Column({ name: 'checkout_reason', type: 'varchar', nullable: true })
   checkoutReason: string | null;
 
-  @Column({ default: 'CHECKED_IN' })
+  @Column({ default: STAFF_ATTENDANCE_STATUS.CHECKED_IN })
   status: string; // 'CHECKED_IN' | 'CHECKED_OUT'
 
   @Column({ name: 'is_accepting_patients', type: 'boolean', default: true })

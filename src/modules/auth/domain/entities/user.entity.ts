@@ -1,3 +1,5 @@
+import { BranchScopeMode } from '../constants/auth.constants';
+
 export class User {
   constructor(
     public readonly id: string,
@@ -29,7 +31,7 @@ export class User {
     roleId: string,
     isActive = true,
     defaultBranchId: string | null = null,
-    branchScopeMode = 'SPECIFIC',
+    branchScopeMode = BranchScopeMode.SPECIFIC,
     bypassIpRestriction = true,
     loginTimeWindowId: string | null = null,
     failedLoginLimit: number | null = null

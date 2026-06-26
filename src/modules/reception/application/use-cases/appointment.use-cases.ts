@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException, ConflictException } from '@nestj
 import { Appointment } from '../../domain/entities/appointment.model';
 import type { IAppointmentRepository } from '../../domain/repositories/appointment.repository.interface';
 import { CreateAppointmentDto, UpdateAppointmentDto, AppointmentResponseDto } from '../dtos/appointment.dto';
+import { APPOINTMENT_STATUS } from '../../../../common/constants/workflow.constants';
 
 export const IAppointmentRepositoryToken = 'IAppointmentRepository';
 
@@ -104,7 +105,7 @@ export class CreateAppointmentUseCase {
       appointmentDate: dto.appointmentDate,
       startTime: dto.startTime,
       endTime: dto.endTime,
-      status: 'BOOKED',
+      status: APPOINTMENT_STATUS.BOOKED,
       notes: dto.notes || null,
     });
 
@@ -148,7 +149,7 @@ export class UpdateAppointmentUseCase {
       throw new NotFoundException('Không tìm thấy lịch hẹn');
     }
 
-    if (appointment.status !== 'BOOKED' && appointment.status !== 'CONFIRMED') {
+    if (appointment.status !== APPOINTMENT_STATUS.BOOKED && appointment.status !== APPOINTMENT_STATUS.CONFIRMED) {
       throw new ConflictException('Không thể chỉnh sửa lịch hẹn đã tiếp nhận hoặc đã hủy');
     }
 

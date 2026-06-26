@@ -5,6 +5,11 @@ import type { IOrderRepository } from '../../domain/repositories/order.repositor
 import { ServiceOrmEntity } from '../../../medical/infrastructure/database/service.entity';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { AddOrderItemDto, OrderResponseDto } from '../dtos/order.dto';
+import {
+  ORDER_ITEM_STATUS,
+  PATIENT_VISIT_STATUS,
+  SERVICE_PRICE_TYPE,
+} from '../../../../common/constants/workflow.constants';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
 
@@ -39,7 +44,7 @@ export class AddOrderItemUseCase {
       price = dto.price;
     } else {
       // Find listed price or fallback to first price or 0
-      const listedPrice = service.prices?.find(p => p.priceType === 'LISTED');
+      const listedPrice = service.prices?.find(p => p.priceType === SERVICE_PRICE_TYPE.LISTED);
       price = listedPrice ? Number(listedPrice.amount) : (service.prices?.[0] ? Number(service.prices[0].amount) : 0);
     }
 
@@ -49,7 +54,7 @@ export class AddOrderItemUseCase {
       serviceId: dto.serviceId,
       quantity,
       price,
-      status: 'PENDING',
+      status: ORDER_ITEM_STATUS.PENDING,
     });
 
     // Recalculate order total amount
@@ -67,8 +72,8 @@ export class AddOrderItemUseCase {
 
     // Update patient visit status to PENDING_PAYMENT
     const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
-    if (visit) {
-      visit.status = 'PENDING_PAYMENT';
+    if (visit && visit.status !== PATIENT_VISIT_STATUS.PENDING_PAYMENT && this.shouldMoveVisitToPendingPayment(visit.status)) {
+      visit.status = PATIENT_VISIT_STATUS.PENDING_PAYMENT;
       await this.visitRepository.save(visit);
     }
 
@@ -97,5 +102,9 @@ export class AddOrderItemUseCase {
         service: item.service,
       })),
     };
+  }
+
+  private shouldMoveVisitToPendingPayment(status: string): boolean {
+    return status === PATIENT_VISIT_STATUS.ADMITTED || status === PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE || status === PATIENT_VISIT_STATUS.WAITING_RESULTS;
   }
 }

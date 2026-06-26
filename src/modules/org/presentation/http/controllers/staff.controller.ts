@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { JwtAuthGuard } from '../../../../auth/presentation/http/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../../auth/presentation/http/guards/permissions.guard';
 import { RequirePermissions } from '../../../../auth/presentation/http/decorators/require-permissions.decorator';
+import { STAFF_TITLE } from '../../../../../common/constants/workflow.constants';
 import { ListStaffUseCase } from '../../../application/use-cases/list-staff.use-case';
 import { GetStaffDetailUseCase } from '../../../application/use-cases/get-staff-detail.use-case';
 import { CreateStaffUseCase } from '../../../application/use-cases/create-staff.use-case';
@@ -31,7 +32,7 @@ export class StaffController {
   @RequirePermissions('staff:read')
   @ApiOperation({ summary: 'Tìm kiếm và lấy danh sách hồ sơ nhân sự' })
   @ApiQuery({ name: 'branchId', required: false, description: 'Lọc nhân viên theo ID chi nhánh' })
-  @ApiQuery({ name: 'title', required: false, description: 'Lọc theo chức danh (DOCTOR, NURSE, etc.)' })
+  @ApiQuery({ name: 'title', required: false, enum: STAFF_TITLE, description: 'Lọc theo chức danh' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Lọc trạng thái hoạt động' })
   @ApiQuery({ name: 'roomId', required: false, description: 'Lọc bác sĩ được phân công cho phòng khám cụ thể' })
   @ApiQuery({ name: 'specialtyId', required: false, description: 'Lọc bác sĩ theo chuyên khoa phân công' })

@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { OrganizationOrmEntity } from './organization.entity';
+import { BRANCH_TYPE } from '../../../../common/constants/workflow.constants';
+import { DEFAULT_COUNTRY_CODE } from '../../../../common/constants/global.constants';
 
 @Entity({ name: 'branches' })
 export class BranchOrmEntity {
@@ -15,7 +17,7 @@ export class BranchOrmEntity {
   @Column({ unique: true })
   code: string;
 
-  @Column({ default: 'CLINIC' })
+  @Column({ default: BRANCH_TYPE.CLINIC })
   type: string;
 
   @Column({ name: 'technical_director', type: 'varchar', nullable: true })
@@ -34,7 +36,7 @@ export class BranchOrmEntity {
   email: string | null;
 
   // Address
-  @Column({ default: 'VN' })
+  @Column({ default: DEFAULT_COUNTRY_CODE })
   country: string;
 
   @Column({ type: 'varchar', nullable: true })

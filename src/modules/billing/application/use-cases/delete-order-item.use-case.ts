@@ -4,6 +4,10 @@ import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { OrderResponseDto } from '../dtos/order.dto';
+import {
+  ORDER_ITEM_STATUS,
+  PATIENT_VISIT_STATUS,
+} from '../../../../common/constants/workflow.constants';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
 
@@ -27,7 +31,7 @@ export class DeleteOrderItemUseCase {
       throw new NotFoundException(`Order item with ID ${itemId} not found in this order`);
     }
 
-    if (item.status !== 'PENDING') {
+    if (item.status !== ORDER_ITEM_STATUS.PENDING) {
       throw new BadRequestException(`Only pending items can be deleted. Current status: ${item.status}`);
     }
 
@@ -50,13 +54,13 @@ export class DeleteOrderItemUseCase {
     // Update patient visit status
     if (savedOrder && savedOrder.items) {
       const allCompleted = savedOrder.items.length > 0 && savedOrder.items.every(
-        (i) => i.status === 'COMPLETED' || i.status === 'CANCELLED',
+        (i) => i.status === ORDER_ITEM_STATUS.COMPLETED || i.status === ORDER_ITEM_STATUS.CANCELLED,
       );
       const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
       if (visit) {
         if (allCompleted) {
-          if (visit.status !== 'ALL_SERVICES_DONE') {
-            visit.status = 'ALL_SERVICES_DONE';
+          if (visit.status !== PATIENT_VISIT_STATUS.ALL_SERVICES_DONE) {
+            visit.status = PATIENT_VISIT_STATUS.ALL_SERVICES_DONE;
             await this.visitRepository.save(visit);
           }
         }

@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, IsInt, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, IsInt, Min, Max, IsIn } from 'class-validator';
+import {
+  PATIENT_VISIT_STATUS,
+  VISIT_PRIORITY,
+  type PatientVisitStatus,
+  type VisitPriority,
+} from '../../../../common/constants/workflow.constants';
 
 export class CheckInDto {
   @ApiPropertyOptional({ description: 'ID của lịch hẹn đặt trước' })
@@ -60,10 +66,11 @@ export class CheckInDto {
   @IsNumber()
   height?: number;
 
-  @ApiPropertyOptional({ description: 'Cấp độ ưu tiên tiếp nhận (EMERGENCY, PRIORITY, REGULAR)' })
+  @ApiPropertyOptional({ description: 'Cấp độ ưu tiên tiếp nhận', enum: VISIT_PRIORITY })
   @IsOptional()
   @IsString()
-  priorityLevel?: string;
+  @IsIn(Object.values(VISIT_PRIORITY))
+  priorityLevel?: VisitPriority;
 }
 
 export class UpdateVitalSignsDto {
@@ -109,10 +116,11 @@ export class TransferRoomDto {
   @IsUUID()
   nurseId?: string;
 
-  @ApiPropertyOptional({ description: 'Trạng thái chuyển, mặc định WAITING' })
+  @ApiPropertyOptional({ description: 'Trạng thái chuyển', enum: PATIENT_VISIT_STATUS })
   @IsOptional()
   @IsString()
-  status?: string; // 'WAITING' | 'IN_ROOM' | 'COMPLETED'
+  @IsIn(Object.values(PATIENT_VISIT_STATUS))
+  status?: PatientVisitStatus;
 }
 
 export class PatientVisitResponseDto {

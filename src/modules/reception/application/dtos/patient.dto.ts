@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsEmail, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsEmail, IsDateString, IsIn } from 'class-validator';
+import {
+  PATIENT_GENDER,
+  type PatientGender,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreatePatientDto {
   @ApiProperty({ description: 'Họ và tên bệnh nhân' })
@@ -12,10 +16,11 @@ export class CreatePatientDto {
   @IsDateString()
   dob: string;
 
-  @ApiProperty({ description: 'Giới tính' })
+  @ApiProperty({ description: 'Giới tính', enum: PATIENT_GENDER })
   @IsNotEmpty()
   @IsString()
-  gender: string; // 'MALE' | 'FEMALE' | 'OTHER'
+  @IsIn(Object.values(PATIENT_GENDER))
+  gender: PatientGender;
 
   @ApiProperty({ description: 'Số điện thoại liên hệ' })
   @IsNotEmpty()
@@ -69,10 +74,11 @@ export class UpdatePatientDto {
   @IsDateString()
   dob?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ enum: PATIENT_GENDER })
   @IsOptional()
   @IsString()
-  gender?: string;
+  @IsIn(Object.values(PATIENT_GENDER))
+  gender?: PatientGender;
 
   @ApiPropertyOptional()
   @IsOptional()

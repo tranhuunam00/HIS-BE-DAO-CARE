@@ -3,7 +3,10 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
-import { BranchScopeMode } from '../../domain/constants/auth.constants';
+import {
+  BranchScopeMode,
+  PASSWORD_HASH_ROUNDS,
+} from '../../domain/constants/auth.constants';
 import { UserOrmEntity } from '../../infrastructure/database/user.entity';
 import { CreateManagedUserDto, ManagedUserResponseDto } from '../dtos/user-admin.dto';
 import {
@@ -36,7 +39,7 @@ export class CreateManagedUserUseCase {
       dto.branchScopeMode ?? BranchScopeMode.SPECIFIC,
       dto.branchIds
     );
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, PASSWORD_HASH_ROUNDS);
     const userRepository = this.dataSource.getRepository(UserOrmEntity);
 
     const user = userRepository.create({

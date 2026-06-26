@@ -1,5 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  MEDICATION_ROUTE,
+  type MedicationRoute,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateMedicationDto {
   @ApiProperty({ example: 'TH_PARACET_500' })
@@ -37,10 +41,11 @@ export class CreateMedicationDto {
   @IsString()
   usageUnit?: string;
 
-  @ApiProperty({ example: 'ORAL', description: 'ORAL | INJECTION | TOPICAL | INHALATION | OTHER' })
+  @ApiProperty({ enum: MEDICATION_ROUTE, example: MEDICATION_ROUTE.ORAL })
   @IsString()
   @IsNotEmpty()
-  routeOfAdministration: string;
+  @IsIn(Object.values(MEDICATION_ROUTE))
+  routeOfAdministration: MedicationRoute;
 
   @ApiProperty({ example: '4000mg/ngày', required: false })
   @IsOptional()
@@ -84,10 +89,11 @@ export class UpdateMedicationDto {
   @IsString()
   usageUnit?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ enum: MEDICATION_ROUTE, required: false })
   @IsOptional()
   @IsString()
-  routeOfAdministration?: string;
+  @IsIn(Object.values(MEDICATION_ROUTE))
+  routeOfAdministration?: MedicationRoute;
 
   @ApiProperty({ required: false })
   @IsOptional()

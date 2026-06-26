@@ -4,6 +4,10 @@ import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entit
 import { UserOrmEntity } from '../../infrastructure/database/user.entity';
 import { ManagedUserResponseDto } from '../dtos/user-admin.dto';
 import { mapManagedUserResponse } from './user-admin.mapper';
+import {
+  MANAGED_USER_STATUS,
+  type ManagedUserStatus,
+} from '../../domain/constants/auth.constants';
 
 @Injectable()
 export class ListManagedUsersUseCase {
@@ -12,7 +16,7 @@ export class ListManagedUsersUseCase {
   async execute(filters?: {
     search?: string;
     roleId?: string;
-    status?: 'ACTIVE' | 'LOCKED';
+    status?: ManagedUserStatus;
   }): Promise<ManagedUserResponseDto[]> {
     const query = this.dataSource
       .getRepository(UserOrmEntity)
@@ -33,11 +37,11 @@ export class ListManagedUsersUseCase {
       query.andWhere('user.roleId = :roleId', { roleId: filters.roleId });
     }
 
-    if (filters?.status === 'ACTIVE') {
+    if (filters?.status === MANAGED_USER_STATUS.ACTIVE) {
       query.andWhere('user.isActive = true AND user.lockedAt IS NULL');
     }
 
-    if (filters?.status === 'LOCKED') {
+    if (filters?.status === MANAGED_USER_STATUS.LOCKED) {
       query.andWhere('(user.isActive = false OR user.lockedAt IS NOT NULL)');
     }
 

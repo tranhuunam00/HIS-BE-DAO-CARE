@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BranchOrmEntity } from './branch.entity';
 import { ResourceOrmEntity } from './resource.entity';
+import { ROOM_TYPE } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'rooms' })
 export class RoomOrmEntity {
@@ -16,7 +17,7 @@ export class RoomOrmEntity {
   @Column({ unique: true })
   code: string;
 
-  @Column({ default: 'CLINIC' })
+  @Column({ default: ROOM_TYPE.CLINIC })
   type: string; // CLINIC, TREATMENT, PROCEDURE, LABORATORY, IMAGING
 
   @Column({ name: 'specialty_id', type: 'uuid', nullable: true })

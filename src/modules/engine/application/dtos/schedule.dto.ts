@@ -1,6 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsUUID, IsArray, IsDateString, IsEnum, ValidateNested, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsArray, IsDateString, IsEnum, ValidateNested, Matches, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  SCHEDULE_OVERRIDE_TYPE,
+  type ScheduleOverrideType,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateShiftDto {
   @ApiProperty({ example: 'Ca sáng' })
@@ -97,10 +101,10 @@ export class CreateOverrideDto {
   @IsNotEmpty()
   date: string;
 
-  @ApiProperty({ example: 'LEAVE', description: 'LEAVE | WORK' })
-  @IsEnum(['LEAVE', 'WORK'])
+  @ApiProperty({ enum: SCHEDULE_OVERRIDE_TYPE, example: SCHEDULE_OVERRIDE_TYPE.LEAVE })
+  @IsIn(Object.values(SCHEDULE_OVERRIDE_TYPE))
   @IsNotEmpty()
-  overrideType: string;
+  overrideType: ScheduleOverrideType;
 
   @ApiProperty({ example: 'branch-uuid', required: false })
   @IsOptional()

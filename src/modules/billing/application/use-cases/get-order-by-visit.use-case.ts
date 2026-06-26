@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { OrderResponseDto } from '../dtos/order.dto';
+import { ORDER_STATUS } from '../../../../common/constants/workflow.constants';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
 
@@ -35,7 +36,7 @@ export class GetOrderByVisitUseCase {
         orderCode,
         visitId,
         patientId: visit.patientId,
-        status: 'PENDING',
+        status: ORDER_STATUS.PENDING,
         totalAmount: 0,
       });
     }

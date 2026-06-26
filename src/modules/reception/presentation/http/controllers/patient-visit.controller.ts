@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { JwtAuthGuard } from '../../../../auth/presentation/http/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../../auth/presentation/http/guards/permissions.guard';
 import { RequirePermissions } from '../../../../auth/presentation/http/decorators/require-permissions.decorator';
+import { PATIENT_VISIT_STATUS } from '../../../../../common/constants/workflow.constants';
 import {
   ListPatientVisitsUseCase,
   GetPatientVisitUseCase,
@@ -36,7 +37,7 @@ export class PatientVisitController {
   @ApiOperation({ summary: 'Lấy danh sách hàng đợi điều phối lượt khám' })
   @ApiQuery({ name: 'branchId', required: false })
   @ApiQuery({ name: 'roomId', required: false, description: 'Lọc theo phòng khám hiện tại' })
-  @ApiQuery({ name: 'status', required: false, description: 'Lọc trạng thái hàng đợi: WAITING, IN_ROOM, COMPLETED' })
+  @ApiQuery({ name: 'status', required: false, enum: PATIENT_VISIT_STATUS, description: 'Lọc trạng thái hàng đợi' })
   @ApiQuery({ name: 'date', required: false, description: 'Lọc ngày tạo lượt khám (YYYY-MM-DD)' })
   @ApiQuery({ name: 'doctorId', required: false, description: 'Lọc worklist theo bác sĩ đang/đã nhận ca' })
   @ApiQuery({ name: 'serviceId', required: false, description: 'Lọc worklist theo dịch vụ được chỉ định' })

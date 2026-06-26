@@ -4,6 +4,7 @@ import { Repository, In } from 'typeorm';
 import { IStaffAttendanceRepository } from '../../domain/repositories/staff-attendance.repository.interface';
 import { StaffAttendance } from '../../domain/entities/staff-attendance.model';
 import { StaffAttendanceOrmEntity } from '../database/staff-attendance.entity';
+import { STAFF_ATTENDANCE_STATUS } from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class StaffAttendanceRepository implements IStaffAttendanceRepository {
@@ -41,7 +42,7 @@ export class StaffAttendanceRepository implements IStaffAttendanceRepository {
   async findActiveAttendancesByStaffsAndDate(staffIds: string[], date: string): Promise<StaffAttendance[]> {
     if (staffIds.length === 0) return [];
     const orms = await this.attendanceOrmRepository.find({
-      where: { staffId: In(staffIds), date, status: 'CHECKED_IN' },
+      where: { staffId: In(staffIds), date, status: STAFF_ATTENDANCE_STATUS.CHECKED_IN },
       relations: { staff: true, branch: true, shift: true },
     });
     return orms.map((o) => this.toDomain(o));

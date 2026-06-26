@@ -4,6 +4,10 @@ import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { UpdateOrderItemDto, OrderResponseDto } from '../dtos/order.dto';
+import {
+  ORDER_ITEM_STATUS,
+  PATIENT_VISIT_STATUS,
+} from '../../../../common/constants/workflow.constants';
 
 export const IOrderRepositoryToken = 'IOrderRepository';
 
@@ -41,20 +45,20 @@ export class UpdateOrderItemUseCase {
     // Update patient visit status
     if (savedOrder && savedOrder.items) {
       const allCompleted = savedOrder.items.length > 0 && savedOrder.items.every(
-        (i) => i.status === 'COMPLETED' || i.status === 'CANCELLED',
+        (i) => i.status === ORDER_ITEM_STATUS.COMPLETED || i.status === ORDER_ITEM_STATUS.CANCELLED,
       );
       const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
       if (visit) {
         if (allCompleted) {
-          if (visit.status !== 'ALL_SERVICES_DONE') {
-            visit.status = 'ALL_SERVICES_DONE';
+          if (visit.status !== PATIENT_VISIT_STATUS.ALL_SERVICES_DONE) {
+            visit.status = PATIENT_VISIT_STATUS.ALL_SERVICES_DONE;
             await this.visitRepository.save(visit);
           }
         } else {
           // If some items are completed (or executing), set visit status to IN_SERVICE
-          const hasCompleted = savedOrder.items.some((i) => i.status === 'COMPLETED');
-          if (hasCompleted && visit.status === 'WAITING_SERVICE') {
-            visit.status = 'IN_SERVICE';
+          const hasCompleted = savedOrder.items.some((i) => i.status === ORDER_ITEM_STATUS.COMPLETED);
+          if (hasCompleted && visit.status === PATIENT_VISIT_STATUS.WAITING_SERVICE) {
+            visit.status = PATIENT_VISIT_STATUS.IN_SERVICE;
             await this.visitRepository.save(visit);
           }
         }

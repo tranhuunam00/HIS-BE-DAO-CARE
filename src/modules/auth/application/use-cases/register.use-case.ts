@@ -7,6 +7,10 @@ import { AppDataSource } from '../../../../infrastructure/database/data-source';
 import { RoleOrmEntity } from '../../infrastructure/database/role.entity';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
+import {
+  DEFAULT_STAFF_ROLE_NAME,
+  PASSWORD_HASH_ROUNDS,
+} from '../../domain/constants/auth.constants';
 
 @Injectable()
 export class RegisterUseCase {
@@ -21,14 +25,14 @@ export class RegisterUseCase {
       throw new ConflictException('Email này đã được sử dụng');
     }
 
-    const roleName = dto.roleName || 'DOCTOR';
+    const roleName = dto.roleName || DEFAULT_STAFF_ROLE_NAME;
     const roleRepository = AppDataSource.getRepository(RoleOrmEntity);
     const role = await roleRepository.findOneBy({ name: roleName });
     if (!role) {
       throw new NotFoundException(`Không tìm thấy vai trò ${roleName}`);
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, PASSWORD_HASH_ROUNDS);
     const userId = randomUUID();
 
     const user = User.create(userId, dto.email, null, passwordHash, role.id, true);

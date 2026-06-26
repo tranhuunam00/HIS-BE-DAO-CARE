@@ -4,6 +4,7 @@ import { IUserRepositoryToken } from '../../domain/repositories/user.repository.
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { TokenResponseDto } from '../dtos/token-response.dto';
 import * as bcrypt from 'bcrypt';
+import { PASSWORD_HASH_ROUNDS } from '../../domain/constants/auth.constants';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -47,7 +48,7 @@ export class RefreshTokenUseCase {
     });
 
     // Hash và lưu Refresh Token mới vào DB
-    const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 10);
+    const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, PASSWORD_HASH_ROUNDS);
     const updatedUser = user.updateRefreshToken(newRefreshTokenHash);
     await this.userRepository.save(updatedUser);
 

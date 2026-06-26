@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
+import { PASSWORD_HASH_ROUNDS } from '../../domain/constants/auth.constants';
 
 @Injectable()
 export class ResetManagedUserPasswordUseCase {
@@ -16,7 +17,7 @@ export class ResetManagedUserPasswordUseCase {
       throw new NotFoundException('Không tìm thấy user');
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, PASSWORD_HASH_ROUNDS);
     await this.userRepository.save(user.changePassword(passwordHash));
   }
 }

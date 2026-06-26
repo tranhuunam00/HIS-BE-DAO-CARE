@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsIn } from 'class-validator';
+import {
+  APPOINTMENT_STATUS,
+  type AppointmentStatus,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateAppointmentDto {
   @ApiProperty({ description: 'ID của bệnh nhân' })
@@ -79,10 +83,11 @@ export class UpdateAppointmentDto {
   @IsString()
   endTime?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ enum: APPOINTMENT_STATUS })
   @IsOptional()
   @IsString()
-  status?: string; // 'BOOKED' | 'CONFIRMED' | 'CHECKED_IN' | 'CANCELLED'
+  @IsIn(Object.values(APPOINTMENT_STATUS))
+  status?: AppointmentStatus;
 
   @ApiPropertyOptional()
   @IsOptional()

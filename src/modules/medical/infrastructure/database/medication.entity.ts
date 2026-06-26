@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { MEDICATION_ROUTE } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'medications' })
 export class MedicationOrmEntity {
@@ -32,7 +33,7 @@ export class MedicationOrmEntity {
   @Column({ name: 'usage_unit', type: 'varchar', nullable: true })
   usageUnit: string | null;
 
-  @Column({ name: 'route_of_administration', default: 'ORAL' })
+  @Column({ name: 'route_of_administration', default: MEDICATION_ROUTE.ORAL })
   routeOfAdministration: string; // ORAL | INJECTION | TOPICAL | INHALATION | OTHER
 
   @Column({ name: 'max_dose_per_day', type: 'varchar', nullable: true })

@@ -4,6 +4,7 @@ import { ListSpecialtiesUseCase } from './modules/medical/application/use-cases/
 import { ListServicesUseCase } from './modules/medical/application/use-cases/list-services.use-case';
 import { ListMedicationsUseCase } from './modules/medical/application/use-cases/list-medications.use-case';
 import { ListIcd10UseCase } from './modules/medical/application/use-cases/list-icd10.use-case';
+import { SERVICE_PRICE_TYPE } from './common/constants/workflow.constants';
 
 async function main() {
   console.log('🔄 Bootstrapping NestJS context for BA Verification...');
@@ -26,8 +27,8 @@ async function main() {
     
     // Print first 15 services as samples
     const sampleServices = services.map(s => {
-      const listed = s.prices?.find(p => p.priceType === 'LISTED')?.amount ?? 0;
-      const insurance = s.prices?.find(p => p.priceType === 'INSURANCE')?.amount ?? 0;
+      const listed = s.prices?.find(p => p.priceType === SERVICE_PRICE_TYPE.LISTED)?.amount ?? 0;
+      const insurance = s.prices?.find(p => p.priceType === SERVICE_PRICE_TYPE.INSURANCE)?.amount ?? 0;
       return {
         Code: s.code,
         Name: s.name,

@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { OrderOrmEntity } from './order.entity';
+import { PAYMENT_STATUS } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'payments', schema: 'his' })
 export class PaymentOrmEntity {
@@ -30,7 +31,7 @@ export class PaymentOrmEntity {
   @Column({ name: 'payment_method' })
   paymentMethod: string; // CASH | TRANSFER | CARD
 
-  @Column({ default: 'SUCCESS' })
+  @Column({ default: PAYMENT_STATUS.SUCCESS })
   status: string; // SUCCESS | FAILED
 
   @Column({ name: 'paid_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

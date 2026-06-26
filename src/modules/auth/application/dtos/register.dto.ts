@@ -1,5 +1,9 @@
 import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  AUTH_ROLE_NAME,
+  DEFAULT_STAFF_ROLE_NAME,
+} from '../../domain/constants/auth.constants';
 
 export class RegisterDto {
   @ApiProperty({ example: 'doctor@hisdaocare.com', description: 'Email đăng ký' })
@@ -12,7 +16,7 @@ export class RegisterDto {
   @MinLength(6, { message: 'Mật khẩu phải dài tối thiểu 6 ký tự' })
   password: string;
 
-  @ApiProperty({ example: 'DOCTOR', description: 'Tên vai trò (ADMIN, DOCTOR, RECEPTION, NURSE)', required: false })
+  @ApiProperty({ enum: AUTH_ROLE_NAME, example: DEFAULT_STAFF_ROLE_NAME, description: 'Tên vai trò', required: false })
   @IsOptional()
   @IsString()
   roleName?: string;

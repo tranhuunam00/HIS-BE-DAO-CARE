@@ -1,3 +1,5 @@
+import { BRANCH_TYPE } from '../../../../common/constants/workflow.constants';
+
 export class Branch {
   constructor(
     public readonly id: string,
@@ -31,7 +33,7 @@ export class Branch {
     organizationId: string,
     name: string,
     code: string,
-    type = 'CLINIC',
+    type = BRANCH_TYPE.CLINIC,
     technicalDirector?: string,
     hotline?: string,
     email?: string,

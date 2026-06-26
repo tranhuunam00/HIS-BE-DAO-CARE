@@ -23,7 +23,26 @@ import { FormTemplateOrmEntity } from '../../../modules/forms/infrastructure/dat
 import { PatientOrmEntity } from '../../../modules/reception/infrastructure/database/patient.entity';
 import { AppointmentOrmEntity } from '../../../modules/reception/infrastructure/database/appointment.entity';
 import { PatientVisitOrmEntity } from '../../../modules/reception/infrastructure/database/patient-visit.entity';
-import { PATIENT_ROLE_DESCRIPTION, PATIENT_ROLE_NAME } from '../../../modules/auth/domain/constants/auth.constants';
+import {
+  AUTH_ROLE_NAME,
+  BranchScopeMode,
+  PATIENT_ROLE_DESCRIPTION,
+  PATIENT_ROLE_NAME,
+  PASSWORD_HASH_ROUNDS,
+} from '../../../modules/auth/domain/constants/auth.constants';
+import {
+  APPOINTMENT_STATUS,
+  BRANCH_TYPE,
+  FORM_TEMPLATE_CATEGORY,
+  FORM_TEMPLATE_TYPE,
+  MEDICATION_ROUTE,
+  PATIENT_GENDER,
+  PATIENT_VISIT_STATUS,
+  ROOM_TYPE,
+  SERVICE_CATEGORY,
+  SERVICE_PRICE_TYPE,
+  STAFF_TITLE,
+} from '../../../common/constants/workflow.constants';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -114,11 +133,11 @@ async function seed() {
 
   // 2. Seed Roles
   const rolesList = [
-    { name: 'ADMIN', description: 'Quản trị viên toàn hệ thống' },
-    { name: 'DOCTOR', description: 'Bác sĩ lâm sàng' },
-    { name: 'RECEPTION', description: 'Lễ tân tiếp đón' },
-    { name: 'NURSE', description: 'Điều dưỡng viên' },
-    { name: 'TECHNICIAN', description: 'Kỹ thuật viên' },
+    { name: AUTH_ROLE_NAME.ADMIN, description: 'Quản trị viên toàn hệ thống' },
+    { name: AUTH_ROLE_NAME.DOCTOR, description: 'Bác sĩ lâm sàng' },
+    { name: AUTH_ROLE_NAME.RECEPTION, description: 'Lễ tân tiếp đón' },
+    { name: AUTH_ROLE_NAME.NURSE, description: 'Điều dưỡng viên' },
+    { name: AUTH_ROLE_NAME.TECHNICIAN, description: 'Kỹ thuật viên' },
     { name: PATIENT_ROLE_NAME, description: PATIENT_ROLE_DESCRIPTION },
   ];
 
@@ -138,9 +157,9 @@ async function seed() {
     }
 
     // Assign all permissions to ADMIN
-    if (r.name === 'ADMIN') {
+    if (r.name === AUTH_ROLE_NAME.ADMIN) {
       role.permissions = dbPermissions;
-    } else if (['DOCTOR', 'NURSE', 'TECHNICIAN', 'RECEPTION'].includes(r.name)) {
+    } else if ([AUTH_ROLE_NAME.DOCTOR, AUTH_ROLE_NAME.NURSE, AUTH_ROLE_NAME.TECHNICIAN, AUTH_ROLE_NAME.RECEPTION].includes(r.name)) {
       role.permissions = dbPermissions.filter((p) =>
         ['org:read', 'branch:read', 'user:read', 'room:read', 'resource:read', 'staff:read', 'schedule:read'].includes(p.name)
       );
@@ -159,13 +178,13 @@ async function seed() {
   const adminEmail = 'admin@hisdaocare.com';
   let adminUser = await userRepository.findOneBy({ email: adminEmail });
   if (!adminUser) {
-    const passwordHash = await bcrypt.hash('Admin@HIS2026!', 10);
+    const passwordHash = await bcrypt.hash('Admin@HIS2026!', PASSWORD_HASH_ROUNDS);
     adminUser = userRepository.create({
       email: adminEmail,
       username: 'admin',
       passwordHash: passwordHash,
       isActive: true,
-      roleId: dbRoles['ADMIN'].id,
+      roleId: dbRoles[AUTH_ROLE_NAME.ADMIN].id,
       bypassIpRestriction: true,
       failedLoginCount: 0,
     });
@@ -207,7 +226,7 @@ async function seed() {
       organizationId: org.id,
       name: 'Cơ sở Hà Nội - Hai Bà Trưng',
       code: branchCode,
-      type: 'CLINIC',
+      type: BRANCH_TYPE.CLINIC,
       technicalDirector: 'BS. Trần Hữu Nam',
       hotline: '024777888',
       email: 'hbt@daocare.vn',
@@ -240,7 +259,7 @@ async function seed() {
 
   if (!adminUser.defaultBranchId) {
     adminUser.defaultBranchId = branch.id;
-    adminUser.branchScopeMode = 'ALL';
+    adminUser.branchScopeMode = BranchScopeMode.ALL;
     adminUser.bypassIpRestriction = true;
     adminUser = await userRepository.save(adminUser);
   }
@@ -316,12 +335,12 @@ async function seed() {
 
   // ─── 8. Seed Rooms ───────────────────────────────────────────────────────────
   const roomsList = [
-    { code: 'PK101', name: 'Phòng khám Nội 101', type: 'CLINIC', floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK102', name: 'Phòng Cận Lâm Sàng Siêu Âm', type: 'IMAGING', floor: 'Tầng 1', capacity: 1 },
-    { code: 'PK103', name: 'Phòng khám Sản Phụ khoa 103', type: 'CLINIC', floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK104', name: 'Phòng khám Nhi 104', type: 'CLINIC', floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK105', name: 'Quầy Lễ Tân & Tiếp Đón', type: 'CLINIC', floor: 'Tầng 1', capacity: 5 },
-    { code: 'PK106', name: 'Phòng Xét Nghiệm Trung Tâm', type: 'IMAGING', floor: 'Tầng 1', capacity: 3 }
+    { code: 'PK101', name: 'Phòng khám Nội 101', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
+    { code: 'PK102', name: 'Phòng Cận Lâm Sàng Siêu Âm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1', capacity: 1 },
+    { code: 'PK103', name: 'Phòng khám Sản Phụ khoa 103', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
+    { code: 'PK104', name: 'Phòng khám Nhi 104', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
+    { code: 'PK105', name: 'Quầy Lễ Tân & Tiếp Đón', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 5 },
+    { code: 'PK106', name: 'Phòng Xét Nghiệm Trung Tâm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1', capacity: 3 }
   ];
 
   const dbRooms: Record<string, RoomOrmEntity> = {};
@@ -370,20 +389,20 @@ async function seed() {
   }
 
   // ─── 10. Seed Staff & User accounts ──────────────────────────────────────────
-  const passwordHash = await bcrypt.hash('Staff@HIS2026!', 10);
+  const passwordHash = await bcrypt.hash('Staff@HIS2026!', PASSWORD_HASH_ROUNDS);
 
   const staffDataList = [
     {
       staffCode: 'NV0001',
       fullName: 'BS. Trần Hữu Nam',
       dateOfBirth: '1988-06-15',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       identityNumber: '037088123456',
       phone: '0988888999',
       email: 'namth@hisdaocare.com',
       address: 'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-01-01',
-      title: 'DOCTOR',
+      title: STAFF_TITLE.DOCTOR,
       isClinical: true,
       nickname: 'BS Nam TH',
       deptCode: 'DEPT_NOI',
@@ -401,13 +420,13 @@ async function seed() {
       staffCode: 'NV0002',
       fullName: 'ThS.BS. Nguyễn Thị Mai',
       dateOfBirth: '1990-04-20',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037090222333',
       phone: '0987111222',
       email: 'maitn@hisdaocare.com',
       address: 'Giải Phóng, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-03-01',
-      title: 'DOCTOR',
+      title: STAFF_TITLE.DOCTOR,
       isClinical: true,
       nickname: 'BS Mai NT',
       deptCode: 'DEPT_SAN',
@@ -417,7 +436,7 @@ async function seed() {
         scopeOfPractice: 'Khám bệnh, chữa bệnh chuyên khoa Sản phụ khoa',
       },
       userEmail: 'maitn@hisdaocare.com',
-      roleName: 'DOCTOR',
+      roleName: AUTH_ROLE_NAME.DOCTOR,
       templateShifts: ['Ca sáng', 'Ca chiều'],
       templateDays: ['Monday', 'Wednesday', 'Friday']
     },
@@ -425,13 +444,13 @@ async function seed() {
       staffCode: 'NV0003',
       fullName: 'BSCKI. Lê Hoàng Long',
       dateOfBirth: '1985-09-12',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       identityNumber: '037085333444',
       phone: '0987333444',
       email: 'longlh@hisdaocare.com',
       address: 'Lò Đúc, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-02-15',
-      title: 'DOCTOR',
+      title: STAFF_TITLE.DOCTOR,
       isClinical: true,
       nickname: 'BS Long LH',
       deptCode: 'DEPT_NHI',
@@ -441,7 +460,7 @@ async function seed() {
         scopeOfPractice: 'Khám bệnh, chữa bệnh chuyên khoa Nhi',
       },
       userEmail: 'longlh@hisdaocare.com',
-      roleName: 'DOCTOR',
+      roleName: AUTH_ROLE_NAME.DOCTOR,
       templateShifts: ['Ca sáng', 'Ca chiều'],
       templateDays: ['Tuesday', 'Thursday', 'Saturday']
     },
@@ -449,13 +468,13 @@ async function seed() {
       staffCode: 'NV0004',
       fullName: 'BS. Phạm Minh Đức',
       dateOfBirth: '1987-11-30',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       identityNumber: '037087444555',
       phone: '0987444555',
       email: 'duchm@hisdaocare.com',
       address: 'Trần Đại Nghĩa, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-05-01',
-      title: 'DOCTOR',
+      title: STAFF_TITLE.DOCTOR,
       isClinical: true,
       nickname: 'BS Đức PM',
       deptCode: 'DEPT_NGOAI',
@@ -465,7 +484,7 @@ async function seed() {
         scopeOfPractice: 'Khám bệnh, chữa bệnh chuyên khoa Ngoại',
       },
       userEmail: 'duchm@hisdaocare.com',
-      roleName: 'DOCTOR',
+      roleName: AUTH_ROLE_NAME.DOCTOR,
       templateShifts: ['Ca chiều', 'Ca tối'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     },
@@ -473,13 +492,13 @@ async function seed() {
       staffCode: 'NV0005',
       fullName: 'BS. Vũ Thị Hồng',
       dateOfBirth: '1992-02-05',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037092555666',
       phone: '0987555666',
       email: 'hongvt@hisdaocare.com',
       address: 'Bạch Mai, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-06-01',
-      title: 'DOCTOR',
+      title: STAFF_TITLE.DOCTOR,
       isClinical: true,
       nickname: 'BS Hồng VT',
       deptCode: 'DEPT_KB',
@@ -489,7 +508,7 @@ async function seed() {
         scopeOfPractice: 'Khám bệnh, chữa bệnh đa khoa',
       },
       userEmail: 'hongvt@hisdaocare.com',
-      roleName: 'DOCTOR',
+      roleName: AUTH_ROLE_NAME.DOCTOR,
       templateShifts: ['Ca sáng', 'Ca chiều'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     },
@@ -497,18 +516,18 @@ async function seed() {
       staffCode: 'NV0006',
       fullName: 'ĐD. Nguyễn Văn Hải',
       dateOfBirth: '1995-08-18',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       identityNumber: '037095666777',
       phone: '0987666777',
       email: 'hainv@hisdaocare.com',
       address: 'Minh Khai, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-01-10',
-      title: 'NURSE',
+      title: STAFF_TITLE.NURSE,
       isClinical: true,
       deptCode: 'DEPT_NOI',
       roomCode: 'PK101',
       userEmail: 'hainv@hisdaocare.com',
-      roleName: 'NURSE',
+      roleName: AUTH_ROLE_NAME.NURSE,
       templateShifts: ['Ca hành chính'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     },
@@ -516,18 +535,18 @@ async function seed() {
       staffCode: 'NV0007',
       fullName: 'ĐD. Trần Thị Thu',
       dateOfBirth: '1997-03-25',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037097777888',
       phone: '0987777888',
       email: 'thutt@hisdaocare.com',
       address: 'Kim Ngưu, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-03-15',
-      title: 'NURSE',
+      title: STAFF_TITLE.NURSE,
       isClinical: true,
       deptCode: 'DEPT_SAN',
       roomCode: 'PK103',
       userEmail: 'thutt@hisdaocare.com',
-      roleName: 'NURSE',
+      roleName: AUTH_ROLE_NAME.NURSE,
       templateShifts: ['Ca hành chính'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     },
@@ -535,18 +554,18 @@ async function seed() {
       staffCode: 'NV0008',
       fullName: 'KTV. Lê Minh Quân',
       dateOfBirth: '1993-07-30',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       identityNumber: '037093888999',
       phone: '0987888999',
       email: 'quanlm@hisdaocare.com',
       address: 'Trương Định, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-02-01',
-      title: 'TECHNICIAN',
+      title: STAFF_TITLE.TECHNICIAN,
       isClinical: true,
       deptCode: 'DEPT_CDHA',
       roomCode: 'PK102',
       userEmail: 'quanlm@hisdaocare.com',
-      roleName: 'TECHNICIAN',
+      roleName: AUTH_ROLE_NAME.TECHNICIAN,
       templateShifts: ['Ca sáng', 'Ca chiều'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     },
@@ -554,18 +573,18 @@ async function seed() {
       staffCode: 'NV0009',
       fullName: 'KTV. Hoàng Thị Lan',
       dateOfBirth: '1996-05-15',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037096999000',
       phone: '0987999000',
       email: 'lanht@hisdaocare.com',
       address: 'Đại La, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-04-10',
-      title: 'TECHNICIAN',
+      title: STAFF_TITLE.TECHNICIAN,
       isClinical: true,
       deptCode: 'DEPT_XN',
       roomCode: 'PK106',
       userEmail: 'lanht@hisdaocare.com',
-      roleName: 'TECHNICIAN',
+      roleName: AUTH_ROLE_NAME.TECHNICIAN,
       templateShifts: ['Ca hành chính'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     },
@@ -573,18 +592,18 @@ async function seed() {
       staffCode: 'NV0010',
       fullName: 'LT. Phạm Ngọc Ánh',
       dateOfBirth: '1998-10-10',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037098000111',
       phone: '0987000111',
       email: 'anhpn@hisdaocare.com',
       address: 'Tương Mai, Hoàng Mai, Hà Nội',
       joinDate: '2025-01-05',
-      title: 'RECEPTIONIST',
+      title: STAFF_TITLE.RECEPTIONIST,
       isClinical: false,
       deptCode: 'DEPT_LT',
       roomCode: 'PK105',
       userEmail: 'anhpn@hisdaocare.com',
-      roleName: 'RECEPTION',
+      roleName: AUTH_ROLE_NAME.RECEPTION,
       templateShifts: ['Ca sáng'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     },
@@ -592,18 +611,18 @@ async function seed() {
       staffCode: 'NV0011',
       fullName: 'LT. Nguyễn Thùy Linh',
       dateOfBirth: '1999-12-12',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       identityNumber: '037099111222',
       phone: '0987111222',
       email: 'linhnt@hisdaocare.com',
       address: 'Mai Động, Hoàng Mai, Hà Nội',
       joinDate: '2025-02-20',
-      title: 'RECEPTIONIST',
+      title: STAFF_TITLE.RECEPTIONIST,
       isClinical: false,
       deptCode: 'DEPT_LT',
       roomCode: 'PK105',
       userEmail: 'linhnt@hisdaocare.com',
-      roleName: 'RECEPTION',
+      roleName: AUTH_ROLE_NAME.RECEPTION,
       templateShifts: ['Ca chiều'],
       templateDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     }
@@ -644,17 +663,17 @@ async function seed() {
     let user = await userRepository.findOneBy({ email: item.userEmail });
     if (!user && !item.useExistingAdmin) {
       const username = item.userEmail.split('@')[0];
-      const role = dbRoles[item.roleName || 'NURSE'];
+      const role = dbRoles[item.roleName || AUTH_ROLE_NAME.NURSE];
       user = userRepository.create({
         email: item.userEmail,
         username,
         passwordHash,
         isActive: true,
-        roleId: role ? role.id : dbRoles['NURSE'].id,
+        roleId: role ? role.id : dbRoles[AUTH_ROLE_NAME.NURSE].id,
         bypassIpRestriction: false,
         failedLoginCount: 0,
         defaultBranchId: branch.id,
-        branchScopeMode: 'SPECIFIC',
+        branchScopeMode: BranchScopeMode.SPECIFIC,
       });
       user = await userRepository.save(user);
 
@@ -672,7 +691,7 @@ async function seed() {
     }
 
     // Seed Practicing Certificate if clinical doctor
-    if (item.cert && item.isClinical && item.title === 'DOCTOR') {
+    if (item.cert && item.isClinical && item.title === STAFF_TITLE.DOCTOR) {
       let cert = await certRepository.findOneBy({ staffId: staff.id });
       if (!cert) {
         cert = certRepository.create({
@@ -758,123 +777,123 @@ async function seed() {
   // ─── 10. Seed Services ─────────────────────────────────────────────────────
   const servicesList = [
     // --- KHÁM BỆNH ---
-    { code: 'DV_KN_NOI', name: 'Khám Nội tổng quát', category: 'EXAMINATION', specialty: 'NOI', duration: 20, insuranceCode: '01.105', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KN_TIMMACH', name: 'Khám Tim mạch', category: 'EXAMINATION', specialty: 'TIMMACH', duration: 30, insuranceCode: '01.201', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KN_NHI', name: 'Khám Nhi khoa', category: 'EXAMINATION', specialty: 'NHI', duration: 20, insuranceCode: '01.301', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KSK_TQ', name: 'Khám sức khỏe tổng quát', category: 'EXAMINATION', specialty: 'NOI', duration: 30, insuranceCode: '01.001', listedPrice: 300000, insurancePrice: 220000, vipPrice: 450000 },
-    { code: 'DV_KDK', name: 'Khám định kỳ', category: 'EXAMINATION', specialty: 'NOI', duration: 20, insuranceCode: '01.002', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
-    { code: 'DV_KN_NHI_TQ', name: 'Khám nhi tổng quát', category: 'EXAMINATION', specialty: 'NHI', duration: 20, insuranceCode: '01.302', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KTT_NHI', name: 'Khám tăng trưởng trẻ em', category: 'EXAMINATION', specialty: 'NHI', duration: 30, insuranceCode: '01.303', listedPrice: 250000, insurancePrice: 180000, vipPrice: 400000 },
-    { code: 'DV_KN_HOHAP', name: 'Khám Hô hấp', category: 'EXAMINATION', specialty: 'HOHAP', duration: 20, insuranceCode: '01.202', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KN_NOITIET', name: 'Khám Nội tiết', category: 'EXAMINATION', specialty: 'NOITIET', duration: 20, insuranceCode: '01.203', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KN_NGOAI_TQ', name: 'Khám Ngoại tổng quát', category: 'EXAMINATION', specialty: 'NGOAI', duration: 20, insuranceCode: '01.106', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
-    { code: 'DV_KN_CHINH_HINH', name: 'Khám Chấn thương chỉnh hình', category: 'EXAMINATION', specialty: 'NGOAI', duration: 20, insuranceCode: '01.107', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_KN_TMH', name: 'Khám Tai Mũi Họng', category: 'EXAMINATION', specialty: 'TMH', duration: 20, insuranceCode: '01.405', listedPrice: 150000, insurancePrice: 110000, vipPrice: 250000 },
-    { code: 'DV_KN_NHA_TQ', name: 'Khám nha tổng quát', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 20, insuranceCode: '01.401', listedPrice: 100000, insurancePrice: 70000, vipPrice: 200000 },
-    { code: 'DV_NHA_CHINH', name: 'Chỉnh nha', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 40, insuranceCode: '01.402', listedPrice: 500000, insurancePrice: 400000, vipPrice: 800000 },
-    { code: 'DV_NHA_IMPLANT', name: 'Cấy ghép Implant', category: 'EXAMINATION', specialty: 'RANGHAM', duration: 60, insuranceCode: '01.403', listedPrice: 1500000, insurancePrice: 1200000, vipPrice: 2500000 },
+    { code: 'DV_KN_NOI', name: 'Khám Nội tổng quát', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NOI', duration: 20, insuranceCode: '01.105', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KN_TIMMACH', name: 'Khám Tim mạch', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'TIMMACH', duration: 30, insuranceCode: '01.201', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KN_NHI', name: 'Khám Nhi khoa', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NHI', duration: 20, insuranceCode: '01.301', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KSK_TQ', name: 'Khám sức khỏe tổng quát', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NOI', duration: 30, insuranceCode: '01.001', listedPrice: 300000, insurancePrice: 220000, vipPrice: 450000 },
+    { code: 'DV_KDK', name: 'Khám định kỳ', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NOI', duration: 20, insuranceCode: '01.002', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
+    { code: 'DV_KN_NHI_TQ', name: 'Khám nhi tổng quát', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NHI', duration: 20, insuranceCode: '01.302', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KTT_NHI', name: 'Khám tăng trưởng trẻ em', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NHI', duration: 30, insuranceCode: '01.303', listedPrice: 250000, insurancePrice: 180000, vipPrice: 400000 },
+    { code: 'DV_KN_HOHAP', name: 'Khám Hô hấp', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'HOHAP', duration: 20, insuranceCode: '01.202', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KN_NOITIET', name: 'Khám Nội tiết', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NOITIET', duration: 20, insuranceCode: '01.203', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KN_NGOAI_TQ', name: 'Khám Ngoại tổng quát', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NGOAI', duration: 20, insuranceCode: '01.106', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
+    { code: 'DV_KN_CHINH_HINH', name: 'Khám Chấn thương chỉnh hình', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'NGOAI', duration: 20, insuranceCode: '01.107', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_KN_TMH', name: 'Khám Tai Mũi Họng', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'TMH', duration: 20, insuranceCode: '01.405', listedPrice: 150000, insurancePrice: 110000, vipPrice: 250000 },
+    { code: 'DV_KN_NHA_TQ', name: 'Khám nha tổng quát', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'RANGHAM', duration: 20, insuranceCode: '01.401', listedPrice: 100000, insurancePrice: 70000, vipPrice: 200000 },
+    { code: 'DV_NHA_CHINH', name: 'Chỉnh nha', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'RANGHAM', duration: 40, insuranceCode: '01.402', listedPrice: 500000, insurancePrice: 400000, vipPrice: 800000 },
+    { code: 'DV_NHA_IMPLANT', name: 'Cấy ghép Implant', category: SERVICE_CATEGORY.EXAMINATION, specialty: 'RANGHAM', duration: 60, insuranceCode: '01.403', listedPrice: 1500000, insurancePrice: 1200000, vipPrice: 2500000 },
 
     // --- XÉT NGHIỆM ---
     // Huyết học
-    { code: 'DV_XN_CBC', name: 'Tổng phân tích tế bào máu ngoại vi - CBC', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.002', listedPrice: 80000, insurancePrice: 60000, vipPrice: 120000 },
-    { code: 'DV_XN_DONGMAU', name: 'Đông máu cơ bản PT/APTT/INR', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.003', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XN_CBC', name: 'Tổng phân tích tế bào máu ngoại vi - CBC', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.002', listedPrice: 80000, insurancePrice: 60000, vipPrice: 120000 },
+    { code: 'DV_XN_DONGMAU', name: 'Đông máu cơ bản PT/APTT/INR', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.003', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
     // Sinh hóa
-    { code: 'DV_XN_GAN_AST', name: 'Định lượng AST - SGOT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.004', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
-    { code: 'DV_XN_GAN_ALT', name: 'Định lượng ALT - SGPT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.005', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
-    { code: 'DV_XN_GAN_GGT', name: 'Định lượng GGT', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.006', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
-    { code: 'DV_XN_GAN_BILI', name: 'Định lượng Bilirubin toàn phần', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.007', listedPrice: 50000, insurancePrice: 38000, vipPrice: 80000 },
-    { code: 'DV_XN_URE', name: 'Định lượng Ure', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.008', listedPrice: 45000, insurancePrice: 35000, vipPrice: 70000 },
-    { code: 'DV_XN_CREATININ', name: 'Định lượng Creatinin', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.009', listedPrice: 45000, insurancePrice: 35000, vipPrice: 70000 },
-    { code: 'DV_XN_EGFR', name: 'Định lượng mức lọc cầu thận - eGFR', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.016', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
-    { code: 'DV_XN_GLUCOSE', name: 'Định lượng Glucose máu', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.010', listedPrice: 40000, insurancePrice: 30000, vipPrice: 60000 },
-    { code: 'DV_XN_HBA1C', name: 'Định lượng HbA1c', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.011', listedPrice: 150000, insurancePrice: 120000, vipPrice: 220000 },
-    { code: 'DV_XN_CHOL', name: 'Định lượng Cholesterol toàn phần', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.012', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
-    { code: 'DV_XN_TRIGLY', name: 'Định lượng Triglycerid', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.013', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
-    { code: 'DV_XN_HDL', name: 'Định lượng HDL-Cholesterol', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.017', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
-    { code: 'DV_XN_LDL', name: 'Định lượng LDL-Cholesterol', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.018', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
-    { code: 'DV_XN_URIC', name: 'Định lượng Acid Uric', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.014', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_GAN_AST', name: 'Định lượng AST - SGOT', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.004', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_GAN_ALT', name: 'Định lượng ALT - SGPT', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.005', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_GAN_GGT', name: 'Định lượng GGT', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.006', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
+    { code: 'DV_XN_GAN_BILI', name: 'Định lượng Bilirubin toàn phần', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.007', listedPrice: 50000, insurancePrice: 38000, vipPrice: 80000 },
+    { code: 'DV_XN_URE', name: 'Định lượng Ure', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.008', listedPrice: 45000, insurancePrice: 35000, vipPrice: 70000 },
+    { code: 'DV_XN_CREATININ', name: 'Định lượng Creatinin', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.009', listedPrice: 45000, insurancePrice: 35000, vipPrice: 70000 },
+    { code: 'DV_XN_EGFR', name: 'Định lượng mức lọc cầu thận - eGFR', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.016', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_GLUCOSE', name: 'Định lượng Glucose máu', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.010', listedPrice: 40000, insurancePrice: 30000, vipPrice: 60000 },
+    { code: 'DV_XN_HBA1C', name: 'Định lượng HbA1c', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.011', listedPrice: 150000, insurancePrice: 120000, vipPrice: 220000 },
+    { code: 'DV_XN_CHOL', name: 'Định lượng Cholesterol toàn phần', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.012', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_TRIGLY', name: 'Định lượng Triglycerid', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.013', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
+    { code: 'DV_XN_HDL', name: 'Định lượng HDL-Cholesterol', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.017', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
+    { code: 'DV_XN_LDL', name: 'Định lượng LDL-Cholesterol', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.018', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
+    { code: 'DV_XN_URIC', name: 'Định lượng Acid Uric', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.014', listedPrice: 50000, insurancePrice: 40000, vipPrice: 80000 },
     // Miễn dịch
-    { code: 'DV_XN_CRP', name: 'Định lượng CRP (C-Reactive Protein)', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.019', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
-    { code: 'DV_XN_PCT', name: 'Định lượng Procalcitonin', category: 'LAB_TEST', specialty: 'NOI', duration: 10, insuranceCode: 'XN.020', listedPrice: 350000, insurancePrice: 280000, vipPrice: 500000 },
-    { code: 'DV_XN_TSH', name: 'Định lượng TSH', category: 'LAB_TEST', specialty: 'NOI', duration: 10, insuranceCode: 'XN.021', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
-    { code: 'DV_XN_FT3', name: 'Định lượng FT3', category: 'LAB_TEST', specialty: 'NOI', duration: 10, insuranceCode: 'XN.022', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
-    { code: 'DV_XN_FT4', name: 'Định lượng FT4', category: 'LAB_TEST', specialty: 'NOI', duration: 10, insuranceCode: 'XN.023', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
+    { code: 'DV_XN_CRP', name: 'Định lượng CRP (C-Reactive Protein)', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.019', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XN_PCT', name: 'Định lượng Procalcitonin', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 10, insuranceCode: 'XN.020', listedPrice: 350000, insurancePrice: 280000, vipPrice: 500000 },
+    { code: 'DV_XN_TSH', name: 'Định lượng TSH', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 10, insuranceCode: 'XN.021', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
+    { code: 'DV_XN_FT3', name: 'Định lượng FT3', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 10, insuranceCode: 'XN.022', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
+    { code: 'DV_XN_FT4', name: 'Định lượng FT4', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 10, insuranceCode: 'XN.023', listedPrice: 100000, insurancePrice: 80000, vipPrice: 150000 },
     // Nước tiểu / Vi sinh
-    { code: 'DV_XN_NUOCTIEU_10', name: 'Tổng phân tích nước tiểu 10 thông số', category: 'LAB_TEST', specialty: 'NOI', duration: 5, insuranceCode: 'XN.015', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
-    { code: 'DV_XN_CAY_NUOCTIEU', name: 'Cấy nước tiểu tìm vi khuẩn & Kháng sinh đồ', category: 'LAB_TEST', specialty: 'NOI', duration: 120, insuranceCode: 'XN.024', listedPrice: 250000, insurancePrice: 180000, vipPrice: 350000 },
+    { code: 'DV_XN_NUOCTIEU_10', name: 'Tổng phân tích nước tiểu 10 thông số', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 5, insuranceCode: 'XN.015', listedPrice: 60000, insurancePrice: 45000, vipPrice: 90000 },
+    { code: 'DV_XN_CAY_NUOCTIEU', name: 'Cấy nước tiểu tìm vi khuẩn & Kháng sinh đồ', category: SERVICE_CATEGORY.LAB_TEST, specialty: 'NOI', duration: 120, insuranceCode: 'XN.024', listedPrice: 250000, insurancePrice: 180000, vipPrice: 350000 },
 
     // --- CHẨN ĐOÁN HÌNH ẢNH ---
     // X-quang
-    { code: 'DV_XQ_NGUC', name: 'X-quang ngực thẳng', category: 'IMAGING', specialty: 'NOI', duration: 10, insuranceCode: 'XQ.001', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
-    { code: 'DV_XQ_NGUC_NGHIENG', name: 'X-quang ngực nghiêng', category: 'IMAGING', specialty: 'NOI', duration: 10, insuranceCode: 'XQ.004', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
-    { code: 'DV_XQ_COTSONG_CO', name: 'X-quang cột sống cổ', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.002', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
-    { code: 'DV_XQ_COTSONG_NGUC', name: 'X-quang cột sống ngực', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.005', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
-    { code: 'DV_XQ_COTSONG_TL', name: 'X-quang cột sống thắt lưng', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.003', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
-    { code: 'DV_XQ_COTAY', name: 'X-quang cổ tay', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.006', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
-    { code: 'DV_XQ_COCHAN', name: 'X-quang cổ chân', category: 'IMAGING', specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.007', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
-    { code: 'DV_XQ_PANO', name: 'X-quang răng Panorama (Toàn cảnh)', category: 'IMAGING', specialty: 'RANGHAM', duration: 15, insuranceCode: 'XQ.008', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_XQ_CEPHALO', name: 'X-quang răng Cephalometric', category: 'IMAGING', specialty: 'RANGHAM', duration: 15, insuranceCode: 'XQ.009', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_XQ_BITEWING', name: 'X-quang răng Bitewing (Cánh cắn)', category: 'IMAGING', specialty: 'RANGHAM', duration: 10, insuranceCode: 'XQ.010', listedPrice: 80000, insurancePrice: 60000, vipPrice: 120000 },
-    { code: 'DV_XQ_PERIAPICAL', name: 'X-quang răng quanh chóp (Periapical)', category: 'IMAGING', specialty: 'RANGHAM', duration: 10, insuranceCode: 'XQ.011', listedPrice: 50000, insurancePrice: 35000, vipPrice: 80000 },
+    { code: 'DV_XQ_NGUC', name: 'X-quang ngực thẳng', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 10, insuranceCode: 'XQ.001', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XQ_NGUC_NGHIENG', name: 'X-quang ngực nghiêng', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 10, insuranceCode: 'XQ.004', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XQ_COTSONG_CO', name: 'X-quang cột sống cổ', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.002', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
+    { code: 'DV_XQ_COTSONG_NGUC', name: 'X-quang cột sống ngực', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.005', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
+    { code: 'DV_XQ_COTSONG_TL', name: 'X-quang cột sống thắt lưng', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.003', listedPrice: 140000, insurancePrice: 110000, vipPrice: 200000 },
+    { code: 'DV_XQ_COTAY', name: 'X-quang cổ tay', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.006', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XQ_COCHAN', name: 'X-quang cổ chân', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 10, insuranceCode: 'XQ.007', listedPrice: 120000, insurancePrice: 90000, vipPrice: 180000 },
+    { code: 'DV_XQ_PANO', name: 'X-quang răng Panorama (Toàn cảnh)', category: SERVICE_CATEGORY.IMAGING, specialty: 'RANGHAM', duration: 15, insuranceCode: 'XQ.008', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_XQ_CEPHALO', name: 'X-quang răng Cephalometric', category: SERVICE_CATEGORY.IMAGING, specialty: 'RANGHAM', duration: 15, insuranceCode: 'XQ.009', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_XQ_BITEWING', name: 'X-quang răng Bitewing (Cánh cắn)', category: SERVICE_CATEGORY.IMAGING, specialty: 'RANGHAM', duration: 10, insuranceCode: 'XQ.010', listedPrice: 80000, insurancePrice: 60000, vipPrice: 120000 },
+    { code: 'DV_XQ_PERIAPICAL', name: 'X-quang răng quanh chóp (Periapical)', category: SERVICE_CATEGORY.IMAGING, specialty: 'RANGHAM', duration: 10, insuranceCode: 'XQ.011', listedPrice: 50000, insurancePrice: 35000, vipPrice: 80000 },
     // Siêu âm
-    { code: 'DV_SIEAM_BNG', name: 'Siêu âm bụng tổng quát', category: 'IMAGING', specialty: 'NOI', duration: 20, insuranceCode: '35.01', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_SA_GAN_MAT', name: 'Siêu âm gan mật chuyên sâu', category: 'IMAGING', specialty: 'NOI', duration: 15, insuranceCode: 'SA.004', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
-    { code: 'DV_SA_THAN_TIETNIEU', name: 'Siêu âm thận tiết niệu', category: 'IMAGING', specialty: 'NOI', duration: 15, insuranceCode: 'SA.005', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
-    { code: 'DV_SA_GIAP', name: 'Siêu âm tuyến giáp', category: 'IMAGING', specialty: 'NOI', duration: 15, insuranceCode: 'SA.001', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
-    { code: 'DV_SA_VU', name: 'Siêu âm vú hai bên', category: 'IMAGING', specialty: 'SAN', duration: 15, insuranceCode: 'SA.002', listedPrice: 180000, insurancePrice: 130000, vipPrice: 270000 },
-    { code: 'DV_SA_TIM', name: 'Siêu âm tim Doppler màu', category: 'IMAGING', specialty: 'TIMMACH', duration: 30, insuranceCode: 'SA.003', listedPrice: 350000, insurancePrice: 280000, vipPrice: 500000 },
-    { code: 'DV_SA_THAI', name: 'Siêu âm thai Doppler màu', category: 'IMAGING', specialty: 'SAN', duration: 25, insuranceCode: 'SA.006', listedPrice: 250000, insurancePrice: 180000, vipPrice: 380000 },
-    { code: 'DV_SA_PHU_KHOA', name: 'Siêu âm phụ khoa (Đầu dò âm đạo)', category: 'IMAGING', specialty: 'SAN', duration: 20, insuranceCode: 'SA.007', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_SIEAM_BNG', name: 'Siêu âm bụng tổng quát', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 20, insuranceCode: '35.01', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_SA_GAN_MAT', name: 'Siêu âm gan mật chuyên sâu', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 15, insuranceCode: 'SA.004', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
+    { code: 'DV_SA_THAN_TIETNIEU', name: 'Siêu âm thận tiết niệu', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 15, insuranceCode: 'SA.005', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
+    { code: 'DV_SA_GIAP', name: 'Siêu âm tuyến giáp', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 15, insuranceCode: 'SA.001', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
+    { code: 'DV_SA_VU', name: 'Siêu âm vú hai bên', category: SERVICE_CATEGORY.IMAGING, specialty: 'SAN', duration: 15, insuranceCode: 'SA.002', listedPrice: 180000, insurancePrice: 130000, vipPrice: 270000 },
+    { code: 'DV_SA_TIM', name: 'Siêu âm tim Doppler màu', category: SERVICE_CATEGORY.IMAGING, specialty: 'TIMMACH', duration: 30, insuranceCode: 'SA.003', listedPrice: 350000, insurancePrice: 280000, vipPrice: 500000 },
+    { code: 'DV_SA_THAI', name: 'Siêu âm thai Doppler màu', category: SERVICE_CATEGORY.IMAGING, specialty: 'SAN', duration: 25, insuranceCode: 'SA.006', listedPrice: 250000, insurancePrice: 180000, vipPrice: 380000 },
+    { code: 'DV_SA_PHU_KHOA', name: 'Siêu âm phụ khoa (Đầu dò âm đạo)', category: SERVICE_CATEGORY.IMAGING, specialty: 'SAN', duration: 20, insuranceCode: 'SA.007', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
     // CT
-    { code: 'DV_CT_SO_NAO', name: 'Chụp CT sọ não không cản quang', category: 'IMAGING', specialty: 'NOI', duration: 20, insuranceCode: 'CT.001', listedPrice: 800000, insurancePrice: 600000, vipPrice: 1200000 },
-    { code: 'DV_CT_XOANG', name: 'Chụp CT xoang', category: 'IMAGING', specialty: 'TMH', duration: 20, insuranceCode: 'CT.002', listedPrice: 800000, insurancePrice: 600000, vipPrice: 1200000 },
-    { code: 'DV_CT_NGUC', name: 'Chụp CT lồng ngực', category: 'IMAGING', specialty: 'NOI', duration: 25, insuranceCode: 'CT.003', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
-    { code: 'DV_CT_BUNG', name: 'Chụp CT ổ bụng', category: 'IMAGING', specialty: 'NOI', duration: 25, insuranceCode: 'CT.004', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
-    { code: 'DV_CTA_NAO', name: 'Chụp CTA mạch máu não', category: 'IMAGING', specialty: 'TIMMACH', duration: 30, insuranceCode: 'CT.005', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
-    { code: 'DV_CTA_VANH', name: 'Chụp CTA động mạch vành', category: 'IMAGING', specialty: 'TIMMACH', duration: 40, insuranceCode: 'CT.006', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
+    { code: 'DV_CT_SO_NAO', name: 'Chụp CT sọ não không cản quang', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 20, insuranceCode: 'CT.001', listedPrice: 800000, insurancePrice: 600000, vipPrice: 1200000 },
+    { code: 'DV_CT_XOANG', name: 'Chụp CT xoang', category: SERVICE_CATEGORY.IMAGING, specialty: 'TMH', duration: 20, insuranceCode: 'CT.002', listedPrice: 800000, insurancePrice: 600000, vipPrice: 1200000 },
+    { code: 'DV_CT_NGUC', name: 'Chụp CT lồng ngực', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 25, insuranceCode: 'CT.003', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
+    { code: 'DV_CT_BUNG', name: 'Chụp CT ổ bụng', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 25, insuranceCode: 'CT.004', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
+    { code: 'DV_CTA_NAO', name: 'Chụp CTA mạch máu não', category: SERVICE_CATEGORY.IMAGING, specialty: 'TIMMACH', duration: 30, insuranceCode: 'CT.005', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
+    { code: 'DV_CTA_VANH', name: 'Chụp CTA động mạch vành', category: SERVICE_CATEGORY.IMAGING, specialty: 'TIMMACH', duration: 40, insuranceCode: 'CT.006', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
     // MRI
-    { code: 'DV_MRI_NAO', name: 'Chụp MRI sọ não không cản từ', category: 'IMAGING', specialty: 'NOI', duration: 30, insuranceCode: 'MR.001', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
-    { code: 'DV_MRI_CS_CO', name: 'Chụp MRI cột sống cổ', category: 'IMAGING', specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.002', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
-    { code: 'DV_MRI_CS_TL', name: 'Chụp MRI cột sống thắt lưng', category: 'IMAGING', specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.003', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
-    { code: 'DV_MRI_KHOP_GOI', name: 'Chụp MRI khớp gối', category: 'IMAGING', specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.004', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 2800000 },
-    { code: 'DV_MRI_KHOP_VAI', name: 'Chụp MRI khớp vai', category: 'IMAGING', specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.005', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 2800000 },
-    { code: 'DV_MRI_GAN', name: 'Chụp MRI gan chuyên sâu', category: 'IMAGING', specialty: 'NOI', duration: 35, insuranceCode: 'MR.006', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
-    { code: 'DV_MRI_TUY', name: 'Chụp MRI tụy', category: 'IMAGING', specialty: 'NOI', duration: 35, insuranceCode: 'MR.007', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
+    { code: 'DV_MRI_NAO', name: 'Chụp MRI sọ não không cản từ', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 30, insuranceCode: 'MR.001', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
+    { code: 'DV_MRI_CS_CO', name: 'Chụp MRI cột sống cổ', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.002', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
+    { code: 'DV_MRI_CS_TL', name: 'Chụp MRI cột sống thắt lưng', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.003', listedPrice: 1800000, insurancePrice: 1400000, vipPrice: 2500000 },
+    { code: 'DV_MRI_KHOP_GOI', name: 'Chụp MRI khớp gối', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.004', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 2800000 },
+    { code: 'DV_MRI_KHOP_VAI', name: 'Chụp MRI khớp vai', category: SERVICE_CATEGORY.IMAGING, specialty: 'NGOAI', duration: 30, insuranceCode: 'MR.005', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 2800000 },
+    { code: 'DV_MRI_GAN', name: 'Chụp MRI gan chuyên sâu', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 35, insuranceCode: 'MR.006', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
+    { code: 'DV_MRI_TUY', name: 'Chụp MRI tụy', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 35, insuranceCode: 'MR.007', listedPrice: 2200000, insurancePrice: 1700000, vipPrice: 3000000 },
     // Nội soi
-    { code: 'DV_NS_DADA_Y', name: 'Nội soi dạ dày ống mềm', category: 'IMAGING', specialty: 'NOI', duration: 20, insuranceCode: 'NS.001', listedPrice: 600000, insurancePrice: 450000, vipPrice: 900000 },
-    { code: 'DV_NS_DAITRANG', name: 'Nội soi đại tràng ống mềm', category: 'IMAGING', specialty: 'NOI', duration: 30, insuranceCode: 'NS.002', listedPrice: 900000, insurancePrice: 700000, vipPrice: 1300000 },
-    { code: 'DV_NS_TMH', name: 'Nội soi tai mũi họng', category: 'IMAGING', specialty: 'TMH', duration: 15, insuranceCode: 'NS.003', listedPrice: 200000, insurancePrice: 160000, vipPrice: 300000 },
+    { code: 'DV_NS_DADA_Y', name: 'Nội soi dạ dày ống mềm', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 20, insuranceCode: 'NS.001', listedPrice: 600000, insurancePrice: 450000, vipPrice: 900000 },
+    { code: 'DV_NS_DAITRANG', name: 'Nội soi đại tràng ống mềm', category: SERVICE_CATEGORY.IMAGING, specialty: 'NOI', duration: 30, insuranceCode: 'NS.002', listedPrice: 900000, insurancePrice: 700000, vipPrice: 1300000 },
+    { code: 'DV_NS_TMH', name: 'Nội soi tai mũi họng', category: SERVICE_CATEGORY.IMAGING, specialty: 'TMH', duration: 15, insuranceCode: 'NS.003', listedPrice: 200000, insurancePrice: 160000, vipPrice: 300000 },
 
     // --- THĂM DÒ CHỨC NĂNG ---
-    { code: 'DV_TDCN_ECG', name: 'Điện tim thường (ECG 12 chuyển đạo)', category: 'PROCEDURE', specialty: 'TIMMACH', duration: 15, insuranceCode: 'TD.001', listedPrice: 100000, insurancePrice: 75000, vipPrice: 150000 },
-    { code: 'DV_TDCN_HOLTER24', name: 'Điện tim Holter 24 giờ', category: 'PROCEDURE', specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.002', listedPrice: 500000, insurancePrice: 400000, vipPrice: 750000 },
-    { code: 'DV_TDCN_HOLTER48', name: 'Điện tim Holter 48 giờ', category: 'PROCEDURE', specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.003', listedPrice: 800000, insurancePrice: 650000, vipPrice: 1100000 },
-    { code: 'DV_TDCN_HOLTER_HA', name: 'Theo dõi huyết áp liên tục 24 giờ (Holter huyết áp)', category: 'PROCEDURE', specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.004', listedPrice: 400000, insurancePrice: 320000, vipPrice: 600000 },
-    { code: 'DV_TDCN_SPIRO', name: 'Đo chức năng thông khí phổi (Hô hấp ký)', category: 'PROCEDURE', specialty: 'HOHAP', duration: 20, insuranceCode: 'TD.005', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
-    { code: 'DV_TDCN_POLY', name: 'Đo đa ký hô hấp chẩn đoán ngưng thở khi ngủ', category: 'PROCEDURE', specialty: 'HOHAP', duration: 40, insuranceCode: 'TD.006', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
-    { code: 'DV_TDCN_PSG', name: 'Đo đa ký giấc ngủ (Polysomnography)', category: 'PROCEDURE', specialty: 'HOHAP', duration: 60, insuranceCode: 'TD.007', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 3000000 },
-    { code: 'DV_TDCN_EEG', name: 'Điện não đồ (EEG)', category: 'PROCEDURE', specialty: 'NOI', duration: 30, insuranceCode: 'TD.008', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
-    { code: 'DV_TDCN_EMG', name: 'Điện cơ và tốc độ dẫn truyền thần kinh (EMG)', category: 'PROCEDURE', specialty: 'NOI', duration: 30, insuranceCode: 'TD.009', listedPrice: 300000, insurancePrice: 220000, vipPrice: 450000 },
+    { code: 'DV_TDCN_ECG', name: 'Điện tim thường (ECG 12 chuyển đạo)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TIMMACH', duration: 15, insuranceCode: 'TD.001', listedPrice: 100000, insurancePrice: 75000, vipPrice: 150000 },
+    { code: 'DV_TDCN_HOLTER24', name: 'Điện tim Holter 24 giờ', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.002', listedPrice: 500000, insurancePrice: 400000, vipPrice: 750000 },
+    { code: 'DV_TDCN_HOLTER48', name: 'Điện tim Holter 48 giờ', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.003', listedPrice: 800000, insurancePrice: 650000, vipPrice: 1100000 },
+    { code: 'DV_TDCN_HOLTER_HA', name: 'Theo dõi huyết áp liên tục 24 giờ (Holter huyết áp)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TIMMACH', duration: 30, insuranceCode: 'TD.004', listedPrice: 400000, insurancePrice: 320000, vipPrice: 600000 },
+    { code: 'DV_TDCN_SPIRO', name: 'Đo chức năng thông khí phổi (Hô hấp ký)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'HOHAP', duration: 20, insuranceCode: 'TD.005', listedPrice: 150000, insurancePrice: 110000, vipPrice: 220000 },
+    { code: 'DV_TDCN_POLY', name: 'Đo đa ký hô hấp chẩn đoán ngưng thở khi ngủ', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'HOHAP', duration: 40, insuranceCode: 'TD.006', listedPrice: 1200000, insurancePrice: 900000, vipPrice: 1800000 },
+    { code: 'DV_TDCN_PSG', name: 'Đo đa ký giấc ngủ (Polysomnography)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'HOHAP', duration: 60, insuranceCode: 'TD.007', listedPrice: 2000000, insurancePrice: 1500000, vipPrice: 3000000 },
+    { code: 'DV_TDCN_EEG', name: 'Điện não đồ (EEG)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NOI', duration: 30, insuranceCode: 'TD.008', listedPrice: 200000, insurancePrice: 150000, vipPrice: 300000 },
+    { code: 'DV_TDCN_EMG', name: 'Điện cơ và tốc độ dẫn truyền thần kinh (EMG)', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NOI', duration: 30, insuranceCode: 'TD.009', listedPrice: 300000, insurancePrice: 220000, vipPrice: 450000 },
 
     // --- THỦ THUẬT ---
-    { code: 'DV_TT_LAYCAORANG', name: 'Lấy cao răng và đánh bóng', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 30, insuranceCode: 'TT.001', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
-    { code: 'DV_TT_NHORANG_SUA', name: 'Nhổ răng sữa bôi/tê', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 15, insuranceCode: 'TT.002', listedPrice: 50000, insurancePrice: 30000, vipPrice: 100000 },
-    { code: 'DV_TT_NHORANG_KHON', name: 'Nhổ răng khôn mọc lệch', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 45, insuranceCode: 'TT.003', listedPrice: 1000000, insurancePrice: 800000, vipPrice: 1500000 },
-    { code: 'DV_TT_TRAMRANG', name: 'Trám răng thẩm mỹ Composite', category: 'PROCEDURE', specialty: 'RANGHAM', duration: 20, insuranceCode: 'TT.004', listedPrice: 200000, insurancePrice: 150000, vipPrice: 350000 },
-    { code: 'DV_TT_NOISOI_TMH', name: 'Nội soi Tai Mũi Họng ống cứng', category: 'PROCEDURE', specialty: 'TMH', duration: 15, insuranceCode: 'TT.005', listedPrice: 200000, insurancePrice: 160000, vipPrice: 300000 },
-    { code: 'DV_TT_HUTDICH_MUI', name: 'Hút dịch mũi bằng máy', category: 'PROCEDURE', specialty: 'TMH', duration: 10, insuranceCode: 'TT.006', listedPrice: 50000, insurancePrice: 35000, vipPrice: 100000 },
-    { code: 'DV_TT_KHAUVT', name: 'Khâu vết thương phần mềm dưới 5cm', category: 'PROCEDURE', specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.007', listedPrice: 300000, insurancePrice: 220000, vipPrice: 500000 },
-    { code: 'DV_TT_CATCHI', name: 'Cắt chỉ vết thương', category: 'PROCEDURE', specialty: 'NGOAI', duration: 10, insuranceCode: 'TT.008', listedPrice: 50000, insurancePrice: 30000, vipPrice: 100000 },
-    { code: 'DV_TT_CAT_NOTRUOI', name: 'Cắt nốt ruồi bằng Laser/Tiểu phẫu', category: 'PROCEDURE', specialty: 'NGOAI', duration: 20, insuranceCode: 'TT.009', listedPrice: 200000, insurancePrice: 150000, vipPrice: 350000 },
-    { code: 'DV_TT_SINHTHIET_DA', name: 'Sinh thiết da chẩn đoán u/bệnh lý', category: 'PROCEDURE', specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.010', listedPrice: 400000, insurancePrice: 300000, vipPrice: 600000 },
-    { code: 'DV_TT_CAT_NANGBA', name: 'Tiểu phẫu cắt nang bã/u bã đậu', category: 'PROCEDURE', specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.011', listedPrice: 500000, insurancePrice: 380000, vipPrice: 750000 },
+    { code: 'DV_TT_LAYCAORANG', name: 'Lấy cao răng và đánh bóng', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'RANGHAM', duration: 30, insuranceCode: 'TT.001', listedPrice: 150000, insurancePrice: 100000, vipPrice: 250000 },
+    { code: 'DV_TT_NHORANG_SUA', name: 'Nhổ răng sữa bôi/tê', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'RANGHAM', duration: 15, insuranceCode: 'TT.002', listedPrice: 50000, insurancePrice: 30000, vipPrice: 100000 },
+    { code: 'DV_TT_NHORANG_KHON', name: 'Nhổ răng khôn mọc lệch', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'RANGHAM', duration: 45, insuranceCode: 'TT.003', listedPrice: 1000000, insurancePrice: 800000, vipPrice: 1500000 },
+    { code: 'DV_TT_TRAMRANG', name: 'Trám răng thẩm mỹ Composite', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'RANGHAM', duration: 20, insuranceCode: 'TT.004', listedPrice: 200000, insurancePrice: 150000, vipPrice: 350000 },
+    { code: 'DV_TT_NOISOI_TMH', name: 'Nội soi Tai Mũi Họng ống cứng', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TMH', duration: 15, insuranceCode: 'TT.005', listedPrice: 200000, insurancePrice: 160000, vipPrice: 300000 },
+    { code: 'DV_TT_HUTDICH_MUI', name: 'Hút dịch mũi bằng máy', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'TMH', duration: 10, insuranceCode: 'TT.006', listedPrice: 50000, insurancePrice: 35000, vipPrice: 100000 },
+    { code: 'DV_TT_KHAUVT', name: 'Khâu vết thương phần mềm dưới 5cm', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.007', listedPrice: 300000, insurancePrice: 220000, vipPrice: 500000 },
+    { code: 'DV_TT_CATCHI', name: 'Cắt chỉ vết thương', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NGOAI', duration: 10, insuranceCode: 'TT.008', listedPrice: 50000, insurancePrice: 30000, vipPrice: 100000 },
+    { code: 'DV_TT_CAT_NOTRUOI', name: 'Cắt nốt ruồi bằng Laser/Tiểu phẫu', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NGOAI', duration: 20, insuranceCode: 'TT.009', listedPrice: 200000, insurancePrice: 150000, vipPrice: 350000 },
+    { code: 'DV_TT_SINHTHIET_DA', name: 'Sinh thiết da chẩn đoán u/bệnh lý', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.010', listedPrice: 400000, insurancePrice: 300000, vipPrice: 600000 },
+    { code: 'DV_TT_CAT_NANGBA', name: 'Tiểu phẫu cắt nang bã/u bã đậu', category: SERVICE_CATEGORY.PROCEDURE, specialty: 'NGOAI', duration: 30, insuranceCode: 'TT.011', listedPrice: 500000, insurancePrice: 380000, vipPrice: 750000 },
 
     // --- PHẦN PHẪU THUẬT & CAN THIỆP ---
-    { code: 'DV_PT_CAT_U', name: 'Phẫu thuật cắt u lành phần mềm lớn', category: 'SURGERY', specialty: 'NGOAI', duration: 60, insuranceCode: 'PT.001', listedPrice: 2000000, insurancePrice: 1600000, vipPrice: 3500000 },
-    { code: 'DV_PT_THOATVI', name: 'Phẫu thuật khâu/tái tạo thoát vị bẹn', category: 'SURGERY', specialty: 'NGOAI', duration: 90, insuranceCode: 'PT.002', listedPrice: 4000000, insurancePrice: 3200000, vipPrice: 6000000 },
-    { code: 'DV_PT_KETHOP_XUONG', name: 'Phẫu thuật kết hợp xương chi', category: 'SURGERY', specialty: 'NGOAI', duration: 120, insuranceCode: 'PT.003', listedPrice: 6000000, insurancePrice: 4800000, vipPrice: 9000000 },
-    { code: 'DV_PT_STENT', name: 'Can thiệp nong & đặt Stent động mạch vành', category: 'SURGERY', specialty: 'TIMMACH', duration: 90, insuranceCode: 'PT.004', listedPrice: 15000000, insurancePrice: 12000000, vipPrice: 22000000 },
-    { code: 'DV_PT_NS_PHEQUAN', name: 'Nội soi phế quản sinh thiết/can thiệp', category: 'SURGERY', specialty: 'HOHAP', duration: 45, insuranceCode: 'PT.005', listedPrice: 1500000, insurancePrice: 1100000, vipPrice: 2500000 },
+    { code: 'DV_PT_CAT_U', name: 'Phẫu thuật cắt u lành phần mềm lớn', category: SERVICE_CATEGORY.SURGERY, specialty: 'NGOAI', duration: 60, insuranceCode: 'PT.001', listedPrice: 2000000, insurancePrice: 1600000, vipPrice: 3500000 },
+    { code: 'DV_PT_THOATVI', name: 'Phẫu thuật khâu/tái tạo thoát vị bẹn', category: SERVICE_CATEGORY.SURGERY, specialty: 'NGOAI', duration: 90, insuranceCode: 'PT.002', listedPrice: 4000000, insurancePrice: 3200000, vipPrice: 6000000 },
+    { code: 'DV_PT_KETHOP_XUONG', name: 'Phẫu thuật kết hợp xương chi', category: SERVICE_CATEGORY.SURGERY, specialty: 'NGOAI', duration: 120, insuranceCode: 'PT.003', listedPrice: 6000000, insurancePrice: 4800000, vipPrice: 9000000 },
+    { code: 'DV_PT_STENT', name: 'Can thiệp nong & đặt Stent động mạch vành', category: SERVICE_CATEGORY.SURGERY, specialty: 'TIMMACH', duration: 90, insuranceCode: 'PT.004', listedPrice: 15000000, insurancePrice: 12000000, vipPrice: 22000000 },
+    { code: 'DV_PT_NS_PHEQUAN', name: 'Nội soi phế quản sinh thiết/can thiệp', category: SERVICE_CATEGORY.SURGERY, specialty: 'HOHAP', duration: 45, insuranceCode: 'PT.005', listedPrice: 1500000, insurancePrice: 1100000, vipPrice: 2500000 },
   ];
 
   for (const sv of servicesList) {
@@ -895,9 +914,9 @@ async function seed() {
 
     // Seed/Ensure 3 price tiers (LISTED + INSURANCE + VIP)
     const priceTypes = [
-      { type: 'LISTED', amount: sv.listedPrice ?? 200000, vat: 5 },
-      { type: 'INSURANCE', amount: sv.insurancePrice ?? 150000, vat: 0 },
-      { type: 'VIP', amount: sv.vipPrice ?? Math.round((sv.listedPrice ?? 200000) * 1.5), vat: 5 }
+      { type: SERVICE_PRICE_TYPE.LISTED, amount: sv.listedPrice ?? 200000, vat: 5 },
+      { type: SERVICE_PRICE_TYPE.INSURANCE, amount: sv.insurancePrice ?? 150000, vat: 0 },
+      { type: SERVICE_PRICE_TYPE.VIP, amount: sv.vipPrice ?? Math.round((sv.listedPrice ?? 200000) * 1.5), vat: 5 }
     ];
 
     for (const pt of priceTypes) {
@@ -966,7 +985,7 @@ async function seed() {
       concentration: '500mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '4000mg/ngày',
       groupName: 'Giảm đau - Hạ sốt',
     },
@@ -978,7 +997,7 @@ async function seed() {
       concentration: '500mg',
       unit: 'Viên nang',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '3000mg/ngày',
       groupName: 'Kháng sinh',
     },
@@ -990,7 +1009,7 @@ async function seed() {
       concentration: '20mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '40mg/ngày',
       groupName: 'Tiêu hóa - Dạ dày',
     },
@@ -1002,7 +1021,7 @@ async function seed() {
       concentration: '5mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '10mg/ngày',
       groupName: 'Tim mạch - Huyết áp',
     },
@@ -1014,7 +1033,7 @@ async function seed() {
       concentration: '500mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '2000mg/ngày',
       groupName: 'Nội tiết - Đái tháo đường',
     },
@@ -1028,7 +1047,7 @@ async function seed() {
       concentration: '500mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '1000mg/ngày',
       groupName: 'Kháng sinh',
     },
@@ -1040,7 +1059,7 @@ async function seed() {
       concentration: '1000mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '2000mg/ngày',
       groupName: 'Kháng sinh',
     },
@@ -1052,7 +1071,7 @@ async function seed() {
       concentration: '400mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '1200mg/ngày',
       groupName: 'Giảm đau - Kháng viêm',
     },
@@ -1064,7 +1083,7 @@ async function seed() {
       concentration: '500mg',
       unit: 'Viên sủi',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '4000mg/ngày',
       groupName: 'Giảm đau - Hạ sốt',
     },
@@ -1076,7 +1095,7 @@ async function seed() {
       concentration: '5mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '60mg/ngày',
       groupName: 'Kháng viêm Steroid',
     },
@@ -1088,7 +1107,7 @@ async function seed() {
       concentration: '16mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '64mg/ngày',
       groupName: 'Kháng viêm Steroid',
     },
@@ -1100,7 +1119,7 @@ async function seed() {
       concentration: '40mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '40mg/ngày',
       groupName: 'Tiêu hóa - Dạ dày',
     },
@@ -1112,7 +1131,7 @@ async function seed() {
       concentration: '5mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '40mg/ngày',
       groupName: 'Tim mạch - Huyết áp',
     },
@@ -1124,7 +1143,7 @@ async function seed() {
       concentration: '60mg',
       unit: 'Viên',
       usageUnit: 'mg',
-      routeOfAdministration: 'ORAL',
+      routeOfAdministration: MEDICATION_ROUTE.ORAL,
       maxDosePerDay: '120mg/ngày',
       groupName: 'Nội tiết - Đái tháo đường',
     },
@@ -1146,8 +1165,8 @@ async function seed() {
     {
       name: 'Mẫu hóa đơn thanh toán chi phí',
       code: 'INVOICE_TEMPLATE',
-      type: 'PRINT_TEMPLATE',
-      category: 'INVOICE',
+      type: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE,
+      category: FORM_TEMPLATE_CATEGORY.INVOICE,
       htmlContent: `<div class="print-container" style="font-family: 'Inter', sans-serif; color: #1f2937; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; background: white;">
   <div class="header" style="display: flex; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
     <div>
@@ -1225,8 +1244,8 @@ async function seed() {
     {
       name: 'Mẫu đơn thuốc điện tử',
       code: 'PRESCRIPTION_TEMPLATE',
-      type: 'PRINT_TEMPLATE',
-      category: 'PRESCRIPTION',
+      type: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE,
+      category: FORM_TEMPLATE_CATEGORY.PRESCRIPTION,
       htmlContent: `<div class="print-container" style="font-family: 'Inter', sans-serif; color: #1f2937; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; background: white;">
   <div class="header" style="display: flex; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
     <div>
@@ -1285,8 +1304,8 @@ async function seed() {
     {
       name: 'Mẫu phiếu kết quả xét nghiệm',
       code: 'LAB_RESULT_TEMPLATE',
-      type: 'PRINT_TEMPLATE',
-      category: 'LAB_RESULT',
+      type: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE,
+      category: FORM_TEMPLATE_CATEGORY.LAB_RESULT,
       htmlContent: `<div class="print-container" style="font-family: 'Inter', sans-serif; color: #1f2937; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; background: white;">
   <div class="header" style="display: flex; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
     <div>
@@ -1350,8 +1369,8 @@ async function seed() {
     {
       name: 'Mẫu phiếu kết quả siêu âm',
       code: 'ULTRASOUND_RESULT_TEMPLATE',
-      type: 'PRINT_TEMPLATE',
-      category: 'ULTRASOUND_RESULT',
+      type: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE,
+      category: FORM_TEMPLATE_CATEGORY.ULTRASOUND_RESULT,
       htmlContent: `<div class="print-container" style="font-family: 'Inter', sans-serif; color: #1f2937; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; background: white;">
   <div class="header" style="display: flex; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
     <div>
@@ -1422,7 +1441,7 @@ async function seed() {
       patientCode: 'BN-2026-0001',
       fullName: 'Trần Quốc Bảo',
       dob: '1988-08-15',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       phone: '0905123456',
       email: 'baotq@gmail.com',
       address: '72 Nguyễn Chí Thanh, Láng Thượng, Đống Đa, Hà Nội',
@@ -1432,7 +1451,7 @@ async function seed() {
       patientCode: 'BN-2026-0002',
       fullName: 'Nguyễn Thị Kim Chi',
       dob: '1995-10-12',
-      gender: 'FEMALE',
+      gender: PATIENT_GENDER.FEMALE,
       phone: '0988223344',
       email: 'chintk@gmail.com',
       address: '15 Cầu Giấy, Láng Thượng, Đống Đa, Hà Nội',
@@ -1442,7 +1461,7 @@ async function seed() {
       patientCode: 'BN-2026-0003',
       fullName: 'Phạm Minh Hoàng',
       dob: '2012-05-20',
-      gender: 'MALE',
+      gender: PATIENT_GENDER.MALE,
       phone: '0977112233',
       email: null,
       address: '120 Minh Khai, Hai Bà Trưng, Hà Nội',
@@ -1486,7 +1505,7 @@ async function seed() {
         appointmentDate: todayStr,
         startTime: '09:00',
         endTime: '09:30',
-        status: 'CHECKED_IN',
+        status: APPOINTMENT_STATUS.CHECKED_IN,
         notes: 'Khám dạ dày định kỳ',
       },
       {
@@ -1499,7 +1518,7 @@ async function seed() {
         appointmentDate: todayStr,
         startTime: '10:00',
         endTime: '10:30',
-        status: 'BOOKED',
+        status: APPOINTMENT_STATUS.BOOKED,
         notes: 'Tư vấn sức khỏe sản phụ',
       },
       {
@@ -1512,7 +1531,7 @@ async function seed() {
         appointmentDate: todayStr,
         startTime: '14:00',
         endTime: '14:30',
-        status: 'CONFIRMED',
+        status: APPOINTMENT_STATUS.CONFIRMED,
         notes: 'Khám ho, sốt nhẹ ở trẻ em',
       },
     ];
@@ -1538,7 +1557,7 @@ async function seed() {
         currentRoomId: room101.id,
         currentDoctorId: docNam.id,
         queueNumber: 1,
-        status: 'WAITING',
+        status: PATIENT_VISIT_STATUS.WAITING,
         reason: 'Đau dạ dày, đầy hơi chướng bụng',
         pulse: 78,
         bloodPressure: '120/80',
@@ -1554,7 +1573,7 @@ async function seed() {
         currentRoomId: room101.id,
         currentDoctorId: docNam.id,
         queueNumber: 2,
-        status: 'IN_ROOM',
+        status: PATIENT_VISIT_STATUS.IN_CLINICAL_EXAM,
         reason: 'Khám ho và sốt ở trẻ em',
         pulse: 90,
         bloodPressure: '110/70',
@@ -1570,7 +1589,7 @@ async function seed() {
         currentRoomId: room101.id,
         currentDoctorId: docNam.id,
         queueNumber: 10,
-        status: 'COMPLETED',
+        status: PATIENT_VISIT_STATUS.COMPLETED,
         reason: 'Đau dạ dày, đầy bụng khó tiêu kéo dài',
         pulse: 80,
         bloodPressure: '125/80',
@@ -1586,7 +1605,7 @@ async function seed() {
         currentRoomId: room101.id,
         currentDoctorId: docNam.id,
         queueNumber: 12,
-        status: 'COMPLETED',
+        status: PATIENT_VISIT_STATUS.COMPLETED,
         reason: 'Ho khan, đau họng, sốt nhẹ vào chiều tối',
         pulse: 84,
         bloodPressure: '120/75',
@@ -1602,7 +1621,7 @@ async function seed() {
         currentRoomId: room101.id,
         currentDoctorId: docMai.id,
         queueNumber: 8,
-        status: 'COMPLETED',
+        status: PATIENT_VISIT_STATUS.COMPLETED,
         reason: 'Định kỳ kiểm tra huyết áp và tim mạch',
         pulse: 72,
         bloodPressure: '135/85',

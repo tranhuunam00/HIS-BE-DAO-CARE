@@ -1,12 +1,19 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, ValidateNested, IsArray, IsDateString, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsUUID, ValidateNested, IsArray, IsDateString, Min, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  SERVICE_CATEGORY,
+  SERVICE_PRICE_TYPE,
+  type ServiceCategory,
+  type ServicePriceType,
+} from '../../../../common/constants/workflow.constants';
 
 export class ServicePriceDto {
-  @ApiProperty({ example: 'LISTED', description: 'LISTED | INSURANCE | VIP' })
+  @ApiProperty({ enum: SERVICE_PRICE_TYPE, example: SERVICE_PRICE_TYPE.LISTED })
   @IsString()
   @IsNotEmpty()
-  priceType: string;
+  @IsIn(Object.values(SERVICE_PRICE_TYPE))
+  priceType: ServicePriceType;
 
   @ApiProperty({ example: 200000 })
   @IsNumber()
@@ -51,10 +58,11 @@ export class CreateServiceDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'EXAMINATION', description: 'EXAMINATION | LAB_TEST | IMAGING | PROCEDURE | SURGERY | THERAPY' })
+  @ApiProperty({ enum: SERVICE_CATEGORY, example: SERVICE_CATEGORY.EXAMINATION })
   @IsString()
   @IsNotEmpty()
-  category: string;
+  @IsIn(Object.values(SERVICE_CATEGORY))
+  category: ServiceCategory;
 
   @ApiProperty({ example: '01.105', required: false })
   @IsOptional()
@@ -96,10 +104,11 @@ export class UpdateServiceDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ enum: SERVICE_CATEGORY, required: false })
   @IsOptional()
   @IsString()
-  category?: string;
+  @IsIn(Object.values(SERVICE_CATEGORY))
+  category?: ServiceCategory;
 
   @ApiProperty({ required: false })
   @IsOptional()

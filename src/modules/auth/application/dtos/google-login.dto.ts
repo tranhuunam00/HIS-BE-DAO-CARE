@@ -2,6 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PatientResponseDto } from '../../../reception/application/dtos/patient.dto';
 import { TokenResponseDto } from './token-response.dto';
+import {
+  PATIENT_GENDER,
+  type PatientGender,
+} from '../../../../common/constants/workflow.constants';
 
 export class GoogleLoginDto {
   @ApiProperty({ description: 'Google Identity Services ID token' })
@@ -24,10 +28,10 @@ export class GoogleLoginDto {
   @IsDateString()
   dob?: string;
 
-  @ApiPropertyOptional({ enum: ['MALE', 'FEMALE', 'OTHER'] })
+  @ApiPropertyOptional({ enum: PATIENT_GENDER })
   @IsOptional()
-  @IsIn(['MALE', 'FEMALE', 'OTHER'])
-  gender?: string;
+  @IsIn(Object.values(PATIENT_GENDER))
+  gender?: PatientGender;
 
   @ApiPropertyOptional({ description: 'Patient address' })
   @IsOptional()

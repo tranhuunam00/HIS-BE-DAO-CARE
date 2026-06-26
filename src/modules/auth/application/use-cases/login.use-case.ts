@@ -7,7 +7,11 @@ import { LoginDto } from '../dtos/login.dto';
 import { TokenResponseDto } from '../dtos/token-response.dto';
 import { BranchAllowedIpOrmEntity } from '../../infrastructure/database/branch-allowed-ip.entity';
 import { LoginTimeWindowOrmEntity } from '../../infrastructure/database/login-time-window.entity';
-import { DEFAULT_FAILED_LOGIN_LIMIT, DEFAULT_LOGIN_TIMEZONE } from '../../domain/constants/auth.constants';
+import {
+  DEFAULT_FAILED_LOGIN_LIMIT,
+  DEFAULT_LOGIN_TIMEZONE,
+  PASSWORD_HASH_ROUNDS,
+} from '../../domain/constants/auth.constants';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -57,7 +61,7 @@ export class LoginUseCase {
       expiresIn: '7d',
     });
 
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    const refreshTokenHash = await bcrypt.hash(refreshToken, PASSWORD_HASH_ROUNDS);
     const updatedUser = user.resetFailedLoginCount().updateRefreshToken(refreshTokenHash);
     await this.userRepository.save(updatedUser);
 

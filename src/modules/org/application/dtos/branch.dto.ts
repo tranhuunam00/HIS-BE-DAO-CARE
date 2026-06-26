@@ -1,5 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsNumber, IsArray, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  BRANCH_TYPE,
+  type BranchType,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateBranchDto {
   @ApiProperty({ example: 'Cơ sở Hà Nội - Hai Bà Trưng' })
@@ -12,10 +16,11 @@ export class CreateBranchDto {
   @IsNotEmpty()
   code: string;
 
-  @ApiProperty({ example: 'CLINIC', required: false })
+  @ApiProperty({ enum: BRANCH_TYPE, example: BRANCH_TYPE.CLINIC, required: false })
   @IsOptional()
   @IsString()
-  type?: string;
+  @IsIn(Object.values(BRANCH_TYPE))
+  type?: BranchType;
 
   @ApiProperty({ example: 'BS. Trần Hữu Nam', required: false })
   @IsOptional()
@@ -105,10 +110,11 @@ export class UpdateBranchDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ example: 'CLINIC', required: false })
+  @ApiProperty({ enum: BRANCH_TYPE, example: BRANCH_TYPE.CLINIC, required: false })
   @IsOptional()
   @IsString()
-  type?: string;
+  @IsIn(Object.values(BRANCH_TYPE))
+  type?: BranchType;
 
   @ApiProperty({ example: 'BS. Trần Hữu Nam', required: false })
   @IsOptional()

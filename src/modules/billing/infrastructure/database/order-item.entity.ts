@@ -10,6 +10,10 @@ import {
 import { OrderOrmEntity } from './order.entity';
 import { ServiceOrmEntity } from '../../../medical/infrastructure/database/service.entity';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
+import {
+  ORDER_ITEM_RESULT_STATUS,
+  ORDER_ITEM_STATUS,
+} from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'order_items', schema: 'his' })
 export class OrderItemOrmEntity {
@@ -36,7 +40,7 @@ export class OrderItemOrmEntity {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   price: number;
 
-  @Column({ default: 'PENDING' })
+  @Column({ default: ORDER_ITEM_STATUS.PENDING })
   status: string; // 'PENDING' | 'COMPLETED' | 'CANCELLED'
 
   @Column({ name: 'result_notes', type: 'text', nullable: true })
@@ -49,7 +53,7 @@ export class OrderItemOrmEntity {
   @JoinColumn({ name: 'performed_by_id' })
   performedBy: StaffOrmEntity | null;
 
-  @Column({ name: 'result_status', type: 'varchar', default: 'NONE' })
+  @Column({ name: 'result_status', type: 'varchar', default: ORDER_ITEM_RESULT_STATUS.NONE })
   resultStatus: string; // 'NONE' | 'PENDING' | 'COMPLETED'
 
   @CreateDateColumn({ name: 'created_at' })

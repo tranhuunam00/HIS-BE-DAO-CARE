@@ -1,5 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  FORM_TEMPLATE_CATEGORY,
+  FORM_TEMPLATE_TYPE,
+  type FormTemplateCategory,
+  type FormTemplateType,
+} from '../../../../common/constants/workflow.constants';
 
 export class CreateFormTemplateDto {
   @ApiProperty({ example: 'Mẫu đơn thuốc chuẩn' })
@@ -12,15 +18,17 @@ export class CreateFormTemplateDto {
   @IsNotEmpty()
   code: string;
 
-  @ApiProperty({ example: 'PRINT_TEMPLATE', description: 'PRINT_TEMPLATE | CLINICAL_TEMPLATE' })
+  @ApiProperty({ enum: FORM_TEMPLATE_TYPE, example: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE })
   @IsString()
   @IsNotEmpty()
-  type: string;
+  @IsIn(Object.values(FORM_TEMPLATE_TYPE))
+  type: FormTemplateType;
 
-  @ApiProperty({ example: 'PRESCRIPTION', description: 'INVOICE | PRESCRIPTION | LAB_RESULT | ULTRASOUND_RESULT' })
+  @ApiProperty({ enum: FORM_TEMPLATE_CATEGORY, example: FORM_TEMPLATE_CATEGORY.PRESCRIPTION })
   @IsString()
   @IsNotEmpty()
-  category: string;
+  @IsIn(Object.values(FORM_TEMPLATE_CATEGORY))
+  category: FormTemplateCategory;
 
   @ApiProperty({ example: '<html>...</html>' })
   @IsString()
@@ -44,15 +52,17 @@ export class UpdateFormTemplateDto {
   @IsString()
   code?: string;
 
-  @ApiProperty({ example: 'PRINT_TEMPLATE', required: false })
+  @ApiProperty({ enum: FORM_TEMPLATE_TYPE, example: FORM_TEMPLATE_TYPE.PRINT_TEMPLATE, required: false })
   @IsOptional()
   @IsString()
-  type?: string;
+  @IsIn(Object.values(FORM_TEMPLATE_TYPE))
+  type?: FormTemplateType;
 
-  @ApiProperty({ example: 'PRESCRIPTION', required: false })
+  @ApiProperty({ enum: FORM_TEMPLATE_CATEGORY, example: FORM_TEMPLATE_CATEGORY.PRESCRIPTION, required: false })
   @IsOptional()
   @IsString()
-  category?: string;
+  @IsIn(Object.values(FORM_TEMPLATE_CATEGORY))
+  category?: FormTemplateCategory;
 
   @ApiProperty({ example: '<html>...</html>', required: false })
   @IsOptional()

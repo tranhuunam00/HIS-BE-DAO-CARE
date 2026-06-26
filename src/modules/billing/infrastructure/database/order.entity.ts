@@ -11,6 +11,7 @@ import {
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { PatientOrmEntity } from '../../../reception/infrastructure/database/patient.entity';
 import { OrderItemOrmEntity } from './order-item.entity';
+import { ORDER_STATUS } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'orders', schema: 'his' })
 export class OrderOrmEntity {
@@ -34,7 +35,7 @@ export class OrderOrmEntity {
   @JoinColumn({ name: 'patient_id' })
   patient: PatientOrmEntity;
 
-  @Column({ default: 'PENDING' })
+  @Column({ default: ORDER_STATUS.PENDING })
   status: string; // 'PENDING' | 'PAID' | 'CANCELLED'
 
   @Column({ name: 'total_amount', type: 'decimal', precision: 15, scale: 2, default: 0 })
