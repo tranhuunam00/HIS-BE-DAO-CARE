@@ -40,13 +40,17 @@ export class UserAdminController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'roleId', required: false })
   @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'LOCKED'] })
+  @ApiQuery({ name: 'excludeRoles', required: false, description: 'Danh sách các nhóm quyền muốn loại bỏ, phân cách bằng dấu phẩy' })
+  @ApiQuery({ name: 'roleNames', required: false, description: 'Danh sách các nhóm quyền muốn lấy, phân cách bằng dấu phẩy' })
   @ApiResponse({ status: 200, type: [ManagedUserResponseDto] })
   async getAll(
     @Query('search') search?: string,
     @Query('roleId') roleId?: string,
-    @Query('status') status?: 'ACTIVE' | 'LOCKED'
+    @Query('status') status?: 'ACTIVE' | 'LOCKED',
+    @Query('excludeRoles') excludeRoles?: string,
+    @Query('roleNames') roleNames?: string
   ): Promise<ManagedUserResponseDto[]> {
-    return await this.listManagedUsersUseCase.execute({ search, roleId, status });
+    return await this.listManagedUsersUseCase.execute({ search, roleId, status, excludeRoles, roleNames });
   }
 
   @Get(':id')

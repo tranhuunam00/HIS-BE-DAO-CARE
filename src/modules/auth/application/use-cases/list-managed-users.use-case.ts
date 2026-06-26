@@ -17,6 +17,8 @@ export class ListManagedUsersUseCase {
     search?: string;
     roleId?: string;
     status?: ManagedUserStatus;
+    excludeRoles?: string;
+    roleNames?: string;
   }): Promise<ManagedUserResponseDto[]> {
     const query = this.dataSource
       .getRepository(UserOrmEntity)
@@ -35,6 +37,20 @@ export class ListManagedUsersUseCase {
 
     if (filters?.roleId) {
       query.andWhere('user.roleId = :roleId', { roleId: filters.roleId });
+    }
+
+    if (filters?.excludeRoles) {
+      const excluded = filters.excludeRoles.split(',').map((r) => r.trim()).filter(Boolean);
+      if (excluded.length > 0) {
+        query.andWhere('role.name NOT IN (:...excluded)', { excluded });
+      }
+    }
+
+    if (filters?.roleNames) {
+      const included = filters.roleNames.split(',').map((r) => r.trim()).filter(Boolean);
+      if (included.length > 0) {
+        query.andWhere('role.name IN (:...included)', { included });
+      }
     }
 
     if (filters?.status === MANAGED_USER_STATUS.ACTIVE) {
