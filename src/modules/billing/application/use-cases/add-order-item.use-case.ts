@@ -43,9 +43,7 @@ export class AddOrderItemUseCase {
     if (dto.price !== undefined) {
       price = dto.price;
     } else {
-      // Find listed price or fallback to first price or 0
-      const listedPrice = service.prices?.find(p => p.priceType === SERVICE_PRICE_TYPE.LISTED);
-      price = listedPrice ? Number(listedPrice.amount) : (service.prices?.[0] ? Number(service.prices[0].amount) : 0);
+      price = this.getActivePriceAtDate(service.prices || [], order.createdAt || new Date());
     }
 
     // Save item
@@ -106,5 +104,36 @@ export class AddOrderItemUseCase {
 
   private shouldMoveVisitToPendingPayment(status: string): boolean {
     return status === PATIENT_VISIT_STATUS.ADMITTED || status === PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE || status === PATIENT_VISIT_STATUS.WAITING_RESULTS;
+  }
+
+  private getActivePriceAtDate(prices: any[], targetDate: Date): number {
+    if (!prices || prices.length === 0) {
+      return 0;
+    }
+
+    const listedPrices = prices.filter(p => p.priceType === 'LISTED');
+    if (listedPrices.length === 0) {
+      return prices[0] ? Number(prices[0].amount) : 0;
+    }
+
+    const targetTime = new Date(targetDate).setHours(0, 0, 0, 0);
+
+    const eligiblePrices = listedPrices.filter(p => {
+      const effTime = new Date(p.effectiveDate).setHours(0, 0, 0, 0);
+      return effTime <= targetTime;
+    });
+
+    if (eligiblePrices.length === 0) {
+      const sortedByDateAsc = [...listedPrices].sort((a, b) => 
+        new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
+      );
+      return Number(sortedByDateAsc[0].amount);
+    }
+
+    const sortedByDateDesc = eligiblePrices.sort((a, b) => 
+      new Date(b.effectiveDate).getTime() - new Date(a.effectiveDate).getTime()
+    );
+
+    return Number(sortedByDateDesc[0].amount);
   }
 }
