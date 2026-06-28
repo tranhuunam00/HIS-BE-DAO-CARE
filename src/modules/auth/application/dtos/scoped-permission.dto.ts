@@ -74,6 +74,111 @@ export class SaveRoleScopedPermissionDto {
   @IsBoolean()
   @IsOptional()
   canViewHistory?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canRegisterPatient?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canUpdatePatient?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canDeletePatient?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canManageAppointment?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canCheckIn?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canPerformExam?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canOrderServices?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canPrescribeMedicine?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canConcludeExam?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canExecuteLaboratory?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canApproveResult?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canCollectPayment?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canRefundPayment?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canViewFinancialReports?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canViewClinicalReports?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canManagePharmacyStock?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canDispenseMedicine?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canManageSchedules?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canManageHR?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canConfigureCatalog?: boolean;
+
+  @ApiProperty({ default: false })
+  @IsBoolean()
+  @IsOptional()
+  canConfigureSystem?: boolean;
 }
 
 export class SaveUserCustomPermissionDto extends SaveRoleScopedPermissionDto {}
@@ -132,6 +237,69 @@ export class ScopedPermissionResponseDto {
 
   @ApiProperty()
   canViewHistory: boolean;
+
+  @ApiProperty()
+  canRegisterPatient: boolean;
+
+  @ApiProperty()
+  canUpdatePatient: boolean;
+
+  @ApiProperty()
+  canDeletePatient: boolean;
+
+  @ApiProperty()
+  canManageAppointment: boolean;
+
+  @ApiProperty()
+  canCheckIn: boolean;
+
+  @ApiProperty()
+  canPerformExam: boolean;
+
+  @ApiProperty()
+  canOrderServices: boolean;
+
+  @ApiProperty()
+  canPrescribeMedicine: boolean;
+
+  @ApiProperty()
+  canConcludeExam: boolean;
+
+  @ApiProperty()
+  canExecuteLaboratory: boolean;
+
+  @ApiProperty()
+  canApproveResult: boolean;
+
+  @ApiProperty()
+  canCollectPayment: boolean;
+
+  @ApiProperty()
+  canRefundPayment: boolean;
+
+  @ApiProperty()
+  canViewFinancialReports: boolean;
+
+  @ApiProperty()
+  canViewClinicalReports: boolean;
+
+  @ApiProperty()
+  canManagePharmacyStock: boolean;
+
+  @ApiProperty()
+  canDispenseMedicine: boolean;
+
+  @ApiProperty()
+  canManageSchedules: boolean;
+
+  @ApiProperty()
+  canManageHR: boolean;
+
+  @ApiProperty()
+  canConfigureCatalog: boolean;
+
+  @ApiProperty()
+  canConfigureSystem: boolean;
 }
 
 export class UserScopedPermissionsListDto {

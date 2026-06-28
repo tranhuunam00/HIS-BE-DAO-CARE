@@ -76,7 +76,7 @@
           PayDirect --> CashierOK{Thu ngân xác nhận đóng tiền?}
           
           %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH A)
-          CashierOK -->|Đã đóng tiền| DispatchDirect[6A. Điều phối phân phòng & bác sĩ thực hiện dịch vụ]
+          CashierOK -->|Đã đóng tiền| DispatchDirect[6A. Điều phối phân phòng & bác sĩ <br> Tự động mở popup điều phối tại Cashier]
           DispatchDirect --> CheckStaffDirect{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
           CheckStaffDirect -->|Đạt điều kiện| GoServiceDirect[7A. Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           CheckStaffDirect -->|Không đạt| ReAssignDirect[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
@@ -101,7 +101,7 @@
           PayCLS --> CashierOK_CLS{Thu ngân xác nhận đóng tiền?}
           
           %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH B)
-          CashierOK_CLS -->|Đã đóng tiền| DispatchCLS[10. Điều phối phân phòng & bác sĩ cho từng dịch vụ CLS]
+          CashierOK_CLS -->|Đã đóng tiền| DispatchCLS[10. Điều phối phân phòng & bác sĩ <br> Tự động mở popup điều phối tại Cashier]
           DispatchCLS --> CheckStaffCLS{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
           CheckStaffCLS -->|Đạt điều kiện| GoServiceCLS[11. Chờ làm dịch vụ: Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           CheckStaffCLS -->|Không đạt| ReAssignCLS[Điều phối chọn phòng khác hoặc Hủy dịch vụ]

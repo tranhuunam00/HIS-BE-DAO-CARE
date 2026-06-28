@@ -21,6 +21,7 @@ export const AUTH_ROLE_NAME = {
   NURSE: STAFF_TITLE.NURSE,
   TECHNICIAN: STAFF_TITLE.TECHNICIAN,
   PATIENT: PATIENT_ROLE_NAME,
+  ACCOUNTANT: 'ACCOUNTANT',
 } as const;
 export const GOOGLE_TOKEN_INFO_URL = 'https://oauth2.googleapis.com/tokeninfo';
 export const GOOGLE_TOKEN_ISSUERS = ['accounts.google.com', 'https://accounts.google.com'];

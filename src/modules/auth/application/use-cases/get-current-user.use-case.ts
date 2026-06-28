@@ -4,6 +4,7 @@ import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entit
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { BranchScopeMode } from '../../domain/constants/auth.constants';
 import { UserOrmEntity } from '../../infrastructure/database/user.entity';
+import { ScopedPermissionOrmEntity } from '../../infrastructure/database/scoped-permission.entity';
 import { mapManagedUserResponse } from './user-admin.mapper';
 
 @Injectable()
@@ -34,6 +35,39 @@ export class GetCurrentUserUseCase {
           .map((scope) => scope.branch)
           .filter((branch): branch is BranchOrmEntity => Boolean(branch?.isActive));
 
+    // Fetch and merge user + role scoped permissions
+    const rawPermissions = await this.dataSource.getRepository(ScopedPermissionOrmEntity).find({
+      where: [
+        { userId: userId },
+        { roleId: user.roleId },
+      ],
+    });
+
+    const permissionKeys = [
+      'canView', 'canRead', 'canApprove', 'canConsult', 'canCancelConsult',
+      'canEdit', 'canDelete', 'canUpdateHis', 'canShare', 'canStats',
+      'canCancelApprove', 'canDeleteSeries', 'canViewHistory',
+      'canRegisterPatient', 'canUpdatePatient', 'canDeletePatient', 'canManageAppointment',
+      'canCheckIn', 'canPerformExam', 'canOrderServices', 'canPrescribeMedicine',
+      'canConcludeExam', 'canExecuteLaboratory', 'canApproveResult', 'canCollectPayment',
+      'canRefundPayment', 'canViewFinancialReports', 'canViewClinicalReports', 'canManagePharmacyStock',
+      'canDispenseMedicine', 'canManageSchedules', 'canManageHR', 'canConfigureCatalog',
+      'canConfigureSystem'
+    ];
+
+    const mergedMap = new Map<string, any>();
+    for (const perm of rawPermissions) {
+      const bId = perm.branchId;
+      if (!mergedMap.has(bId)) {
+        mergedMap.set(bId, { branchId: bId });
+      }
+      const existing = mergedMap.get(bId);
+      for (const key of permissionKeys) {
+        existing[key] = (existing[key] || (perm as any)[key]) === true;
+      }
+    }
+    const scopedPermissions = Array.from(mergedMap.values());
+
     return {
       ...mapManagedUserResponse(user, staff),
       staff: staff ? {
@@ -49,6 +83,7 @@ export class GetCurrentUserUseCase {
         name: branch.name,
         code: branch.code,
       })),
+      scopedPermissions,
     };
   }
 }

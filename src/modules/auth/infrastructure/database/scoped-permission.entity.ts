@@ -70,6 +70,69 @@ export class ScopedPermissionOrmEntity {
   @Column({ name: 'can_view_history', default: false })
   canViewHistory: boolean;
 
+  @Column({ name: 'can_register_patient', default: false })
+  canRegisterPatient: boolean;
+
+  @Column({ name: 'can_update_patient', default: false })
+  canUpdatePatient: boolean;
+
+  @Column({ name: 'can_delete_patient', default: false })
+  canDeletePatient: boolean;
+
+  @Column({ name: 'can_manage_appointment', default: false })
+  canManageAppointment: boolean;
+
+  @Column({ name: 'can_check_in', default: false })
+  canCheckIn: boolean;
+
+  @Column({ name: 'can_perform_exam', default: false })
+  canPerformExam: boolean;
+
+  @Column({ name: 'can_order_services', default: false })
+  canOrderServices: boolean;
+
+  @Column({ name: 'can_prescribe_medicine', default: false })
+  canPrescribeMedicine: boolean;
+
+  @Column({ name: 'can_conclude_exam', default: false })
+  canConcludeExam: boolean;
+
+  @Column({ name: 'can_execute_laboratory', default: false })
+  canExecuteLaboratory: boolean;
+
+  @Column({ name: 'can_approve_result', default: false })
+  canApproveResult: boolean;
+
+  @Column({ name: 'can_collect_payment', default: false })
+  canCollectPayment: boolean;
+
+  @Column({ name: 'can_refund_payment', default: false })
+  canRefundPayment: boolean;
+
+  @Column({ name: 'can_view_financial_reports', default: false })
+  canViewFinancialReports: boolean;
+
+  @Column({ name: 'can_view_clinical_reports', default: false })
+  canViewClinicalReports: boolean;
+
+  @Column({ name: 'can_manage_pharmacy_stock', default: false })
+  canManagePharmacyStock: boolean;
+
+  @Column({ name: 'can_dispense_medicine', default: false })
+  canDispenseMedicine: boolean;
+
+  @Column({ name: 'can_manage_schedules', default: false })
+  canManageSchedules: boolean;
+
+  @Column({ name: 'can_manage_hr', default: false })
+  canManageHR: boolean;
+
+  @Column({ name: 'can_configure_catalog', default: false })
+  canConfigureCatalog: boolean;
+
+  @Column({ name: 'can_configure_system', default: false })
+  canConfigureSystem: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -40,7 +40,13 @@ export class ListUserScopedPermissionsUseCase {
     const permissionKeys = [
       'canView', 'canRead', 'canApprove', 'canConsult', 'canCancelConsult',
       'canEdit', 'canDelete', 'canUpdateHis', 'canShare', 'canStats',
-      'canCancelApprove', 'canDeleteSeries', 'canViewHistory'
+      'canCancelApprove', 'canDeleteSeries', 'canViewHistory',
+      'canRegisterPatient', 'canUpdatePatient', 'canDeletePatient', 'canManageAppointment',
+      'canCheckIn', 'canPerformExam', 'canOrderServices', 'canPrescribeMedicine',
+      'canConcludeExam', 'canExecuteLaboratory', 'canApproveResult', 'canCollectPayment',
+      'canRefundPayment', 'canViewFinancialReports', 'canViewClinicalReports', 'canManagePharmacyStock',
+      'canDispenseMedicine', 'canManageSchedules', 'canManageHR', 'canConfigureCatalog',
+      'canConfigureSystem'
     ];
 
     for (const user of staffUsers) {
@@ -136,6 +142,27 @@ export class ListRoleScopedPermissionsUseCase {
       canCancelApprove: p.canCancelApprove,
       canDeleteSeries: p.canDeleteSeries,
       canViewHistory: p.canViewHistory,
+      canRegisterPatient: p.canRegisterPatient,
+      canUpdatePatient: p.canUpdatePatient,
+      canDeletePatient: p.canDeletePatient,
+      canManageAppointment: p.canManageAppointment,
+      canCheckIn: p.canCheckIn,
+      canPerformExam: p.canPerformExam,
+      canOrderServices: p.canOrderServices,
+      canPrescribeMedicine: p.canPrescribeMedicine,
+      canConcludeExam: p.canConcludeExam,
+      canExecuteLaboratory: p.canExecuteLaboratory,
+      canApproveResult: p.canApproveResult,
+      canCollectPayment: p.canCollectPayment,
+      canRefundPayment: p.canRefundPayment,
+      canViewFinancialReports: p.canViewFinancialReports,
+      canViewClinicalReports: p.canViewClinicalReports,
+      canManagePharmacyStock: p.canManagePharmacyStock,
+      canDispenseMedicine: p.canDispenseMedicine,
+      canManageSchedules: p.canManageSchedules,
+      canManageHR: p.canManageHR,
+      canConfigureCatalog: p.canConfigureCatalog,
+      canConfigureSystem: p.canConfigureSystem,
     }));
   }
 }
@@ -174,7 +201,13 @@ export class SaveRoleScopedPermissionsUseCase {
     const permissionKeys = [
       'canView', 'canRead', 'canApprove', 'canConsult', 'canCancelConsult',
       'canEdit', 'canDelete', 'canUpdateHis', 'canShare', 'canStats',
-      'canCancelApprove', 'canDeleteSeries', 'canViewHistory'
+      'canCancelApprove', 'canDeleteSeries', 'canViewHistory',
+      'canRegisterPatient', 'canUpdatePatient', 'canDeletePatient', 'canManageAppointment',
+      'canCheckIn', 'canPerformExam', 'canOrderServices', 'canPrescribeMedicine',
+      'canConcludeExam', 'canExecuteLaboratory', 'canApproveResult', 'canCollectPayment',
+      'canRefundPayment', 'canViewFinancialReports', 'canViewClinicalReports', 'canManagePharmacyStock',
+      'canDispenseMedicine', 'canManageSchedules', 'canManageHR', 'canConfigureCatalog',
+      'canConfigureSystem'
     ];
 
     for (const k of permissionKeys) {
@@ -221,7 +254,13 @@ export class SaveUserCustomPermissionsUseCase {
     const permissionKeys = [
       'canView', 'canRead', 'canApprove', 'canConsult', 'canCancelConsult',
       'canEdit', 'canDelete', 'canUpdateHis', 'canShare', 'canStats',
-      'canCancelApprove', 'canDeleteSeries', 'canViewHistory'
+      'canCancelApprove', 'canDeleteSeries', 'canViewHistory',
+      'canRegisterPatient', 'canUpdatePatient', 'canDeletePatient', 'canManageAppointment',
+      'canCheckIn', 'canPerformExam', 'canOrderServices', 'canPrescribeMedicine',
+      'canConcludeExam', 'canExecuteLaboratory', 'canApproveResult', 'canCollectPayment',
+      'canRefundPayment', 'canViewFinancialReports', 'canViewClinicalReports', 'canManagePharmacyStock',
+      'canDispenseMedicine', 'canManageSchedules', 'canManageHR', 'canConfigureCatalog',
+      'canConfigureSystem'
     ];
 
     for (const k of permissionKeys) {

@@ -139,6 +139,7 @@ async function seed() {
     { name: AUTH_ROLE_NAME.NURSE, description: 'Điều dưỡng viên' },
     { name: AUTH_ROLE_NAME.TECHNICIAN, description: 'Kỹ thuật viên' },
     { name: PATIENT_ROLE_NAME, description: PATIENT_ROLE_DESCRIPTION },
+    { name: AUTH_ROLE_NAME.ACCOUNTANT, description: 'Kế toán / Thu ngân phòng khám' },
   ];
 
   const dbRoles: Record<string, RoleOrmEntity> = {};
@@ -159,7 +160,7 @@ async function seed() {
     // Assign all permissions to ADMIN
     if (r.name === AUTH_ROLE_NAME.ADMIN) {
       role.permissions = dbPermissions;
-    } else if ([AUTH_ROLE_NAME.DOCTOR, AUTH_ROLE_NAME.NURSE, AUTH_ROLE_NAME.TECHNICIAN, AUTH_ROLE_NAME.RECEPTION].includes(r.name as any)) {
+    } else if ([AUTH_ROLE_NAME.DOCTOR, AUTH_ROLE_NAME.NURSE, AUTH_ROLE_NAME.TECHNICIAN, AUTH_ROLE_NAME.RECEPTION, AUTH_ROLE_NAME.ACCOUNTANT].includes(r.name as any)) {
       role.permissions = dbPermissions.filter((p) =>
         ['org:read', 'branch:read', 'user:read', 'room:read', 'resource:read', 'staff:read', 'schedule:read'].includes(p.name)
       );
