@@ -28,7 +28,9 @@ export class UpdateRoomUseCase {
       dto.capacity !== undefined ? dto.capacity : room.capacity,
       room.isActive,
       room.createdAt,
-      new Date()
+      new Date(),
+      room.resources || [],
+      dto.serviceIds !== undefined ? dto.serviceIds : room.serviceIds,
     );
 
     const saved = await this.roomRepository.save(updatedRoom);
@@ -53,6 +55,7 @@ export class UpdateRoomUseCase {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt
       })) : [],
+      serviceIds: saved.serviceIds || [],
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

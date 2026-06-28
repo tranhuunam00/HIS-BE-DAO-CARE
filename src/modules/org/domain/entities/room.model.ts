@@ -13,6 +13,7 @@ export class Room {
     public readonly isActive: boolean,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
-    public readonly resources?: Resource[]
+    public readonly resources?: Resource[],
+    public readonly serviceIds?: string[],
   ) {}
 }

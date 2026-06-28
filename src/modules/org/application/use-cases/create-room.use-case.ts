@@ -41,7 +41,8 @@ export class CreateRoomUseCase {
       true,
       now,
       now,
-      []
+      [],
+      dto.serviceIds || [],
     );
 
     const saved = await this.roomRepository.save(room);
@@ -56,6 +57,7 @@ export class CreateRoomUseCase {
       capacity: saved.capacity,
       isActive: saved.isActive,
       resources: [],
+      serviceIds: saved.serviceIds || [],
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

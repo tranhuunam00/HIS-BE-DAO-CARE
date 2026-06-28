@@ -41,7 +41,7 @@ export class OrderItemOrmEntity {
   price: number;
 
   @Column({ default: ORDER_ITEM_STATUS.PENDING })
-  status: string; // 'PENDING' | 'COMPLETED' | 'CANCELLED'
+  status: string; // 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
   @Column({ name: 'result_notes', type: 'text', nullable: true })
   resultNotes: string | null;

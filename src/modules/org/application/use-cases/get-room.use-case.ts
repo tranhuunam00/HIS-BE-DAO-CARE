@@ -37,6 +37,7 @@ export class GetRoomUseCase {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt
       })) : [],
+      serviceIds: room.serviceIds || [],
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
     };

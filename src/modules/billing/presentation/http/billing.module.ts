@@ -5,6 +5,7 @@ import { OrderItemOrmEntity } from '../../infrastructure/database/order-item.ent
 import { PaymentOrmEntity } from '../../infrastructure/database/payment.entity';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
 import { ServiceOrmEntity } from '../../../medical/infrastructure/database/service.entity';
+import { RoomServiceCapabilityOrmEntity } from '../../../org/infrastructure/database/room-service-capability.entity';
 
 import { OrderRepository } from '../../infrastructure/repositories/order.repository';
 import { PaymentRepository } from '../../infrastructure/repositories/payment.repository';
@@ -29,6 +30,7 @@ import { RefundOrderUseCase } from '../../application/use-cases/refund-order.use
       PaymentOrmEntity,
       PatientVisitOrmEntity,
       ServiceOrmEntity,
+      RoomServiceCapabilityOrmEntity,
     ]),
   ],
   controllers: [

@@ -8,6 +8,7 @@ import { StaffOrmEntity } from '../../infrastructure/database/staff.entity';
 import { PracticingCertificateOrmEntity } from '../../infrastructure/database/practicing-certificate.entity';
 import { StaffAssignmentOrmEntity } from '../../infrastructure/database/staff-assignment.entity';
 import { DepartmentOrmEntity } from '../../infrastructure/database/department.entity';
+import { RoomServiceCapabilityOrmEntity } from '../../infrastructure/database/room-service-capability.entity';
 
 import { OrganizationController } from './controllers/organization.controller';
 import { BranchController } from './controllers/branch.controller';
@@ -76,6 +77,7 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
       PracticingCertificateOrmEntity,
       StaffAssignmentOrmEntity,
       DepartmentOrmEntity,
+      RoomServiceCapabilityOrmEntity,
     ]),
   ],
   controllers: [

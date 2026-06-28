@@ -1,8 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { IOrderRepository } from '../../domain/repositories/order.repository.interface';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
+import { RoomServiceCapabilityOrmEntity } from '../../../org/infrastructure/database/room-service-capability.entity';
 import { UpdateOrderItemDto, OrderResponseDto } from '../dtos/order.dto';
 import {
   ORDER_ITEM_STATUS,
@@ -18,6 +19,8 @@ export class UpdateOrderItemUseCase {
     private readonly orderRepository: IOrderRepository,
     @InjectRepository(PatientVisitOrmEntity)
     private readonly visitRepository: Repository<PatientVisitOrmEntity>,
+    @InjectRepository(RoomServiceCapabilityOrmEntity)
+    private readonly roomServiceCapabilityRepository?: Repository<RoomServiceCapabilityOrmEntity>,
   ) {}
 
   async execute(orderId: string, itemId: string, dto: UpdateOrderItemDto): Promise<OrderResponseDto> {
@@ -29,6 +32,18 @@ export class UpdateOrderItemUseCase {
     const item = await this.orderRepository.findItemById(itemId);
     if (!item || item.orderId !== orderId) {
       throw new NotFoundException(`Order item with ID ${itemId} not found in this order`);
+    }
+
+    const currentRoomId = order.visit?.currentRoomId;
+    if (currentRoomId && this.roomServiceCapabilityRepository) {
+      const capabilities = await this.roomServiceCapabilityRepository.find({
+        where: { roomId: currentRoomId },
+        select: { serviceId: true },
+      });
+      const allowedServiceIds = capabilities.map((capability) => capability.serviceId);
+      if (allowedServiceIds.length > 0 && !allowedServiceIds.includes(item.serviceId)) {
+        throw new BadRequestException('Dich vu nay khong thuoc danh sach duoc thuc hien tai phong hien tai');
+      }
     }
 
     // Save updated status
@@ -55,9 +70,10 @@ export class UpdateOrderItemUseCase {
             await this.visitRepository.save(visit);
           }
         } else {
-          // If some items are completed (or executing), set visit status to IN_SERVICE
-          const hasCompleted = savedOrder.items.some((i) => i.status === ORDER_ITEM_STATUS.COMPLETED);
-          if (hasCompleted && visit.status === PATIENT_VISIT_STATUS.WAITING_SERVICE) {
+          const hasActiveService = savedOrder.items.some(
+            (i) => i.status === ORDER_ITEM_STATUS.IN_PROGRESS || i.status === ORDER_ITEM_STATUS.COMPLETED,
+          );
+          if (hasActiveService && visit.status === PATIENT_VISIT_STATUS.WAITING_SERVICE) {
             visit.status = PATIENT_VISIT_STATUS.IN_SERVICE;
             await this.visitRepository.save(visit);
           }
@@ -86,6 +102,7 @@ export class UpdateOrderItemUseCase {
         resultNotes: i.resultNotes,
         resultStatus: i.resultStatus,
         performedById: i.performedById,
+        performedBy: i.performedBy,
         createdAt: i.createdAt!,
         updatedAt: i.updatedAt!,
         service: i.service,

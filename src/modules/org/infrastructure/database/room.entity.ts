@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BranchOrmEntity } from './branch.entity';
 import { ResourceOrmEntity } from './resource.entity';
+import { RoomServiceCapabilityOrmEntity } from './room-service-capability.entity';
 import { ROOM_TYPE } from '../../../../common/constants/workflow.constants';
 
 @Entity({ name: 'rooms' })
@@ -38,6 +39,9 @@ export class RoomOrmEntity {
 
   @OneToMany(() => ResourceOrmEntity, (resource) => resource.room)
   resources: ResourceOrmEntity[];
+
+  @OneToMany(() => RoomServiceCapabilityOrmEntity, (capability) => capability.room, { cascade: true })
+  serviceCapabilities: RoomServiceCapabilityOrmEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

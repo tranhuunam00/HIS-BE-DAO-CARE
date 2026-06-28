@@ -36,6 +36,7 @@ export const ORDER_STATUS = {
 
 export const ORDER_ITEM_STATUS = {
   PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
 } as const;

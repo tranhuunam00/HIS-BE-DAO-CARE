@@ -46,6 +46,11 @@ export class RefundOrderUseCase {
             `Không thể hoàn tiền dịch vụ ${item.service?.name || ''} do đã thực hiện`,
           );
         }
+        if (item.status === ORDER_ITEM_STATUS.IN_PROGRESS) {
+          throw new BadRequestException(
+            `KhÃ´ng thá»ƒ hoÃ n tiá»n dá»‹ch vá»¥ ${item.service?.name || ''} do Ä‘ang thá»±c hiá»‡n`,
+          );
+        }
         if (item.status === ORDER_ITEM_STATUS.CANCELLED) {
           throw new BadRequestException(
             `Dịch vụ ${item.service?.name || ''} đã được hủy/hoàn tiền trước đó`,
