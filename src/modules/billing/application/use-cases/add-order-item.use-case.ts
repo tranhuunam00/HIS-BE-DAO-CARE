@@ -66,7 +66,6 @@ export class AddOrderItemUseCase {
     const savedOrder = await this.orderRepository.save({
       ...updatedOrder,
       totalAmount,
-      status: 'PENDING',
     });
 
     // Update patient visit status to PENDING_PAYMENT
@@ -94,6 +93,7 @@ export class AddOrderItemUseCase {
         quantity: item.quantity,
         price: item.price,
         status: item.status,
+        isPaid: item.isPaid ?? false,
         resultNotes: item.resultNotes,
         resultStatus: item.resultStatus,
         createdAt: item.createdAt!,

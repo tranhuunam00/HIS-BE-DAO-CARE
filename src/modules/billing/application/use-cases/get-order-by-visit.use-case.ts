@@ -59,6 +59,7 @@ export class GetOrderByVisitUseCase {
         quantity: item.quantity,
         price: item.price,
         status: item.status,
+        isPaid: item.isPaid ?? false,
         resultNotes: item.resultNotes,
         resultStatus: item.resultStatus,
         createdAt: item.createdAt!,

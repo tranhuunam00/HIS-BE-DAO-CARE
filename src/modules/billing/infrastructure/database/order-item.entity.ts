@@ -56,6 +56,9 @@ export class OrderItemOrmEntity {
   @Column({ name: 'result_status', type: 'varchar', default: ORDER_ITEM_RESULT_STATUS.NONE })
   resultStatus: string; // 'NONE' | 'PENDING' | 'COMPLETED'
 
+  @Column({ name: 'is_paid', type: 'boolean', default: false })
+  isPaid: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

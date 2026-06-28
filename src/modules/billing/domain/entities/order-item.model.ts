@@ -13,5 +13,7 @@ export class OrderItem {
     public readonly resultStatus?: string, // 'NONE' | 'PENDING' | 'COMPLETED'
     public readonly performedById?: string | null,
     public readonly performedBy?: any,
+    public readonly isPaid?: boolean,
   ) {}
 }
+

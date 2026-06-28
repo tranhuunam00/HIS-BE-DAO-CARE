@@ -47,6 +47,7 @@ export class OrderRepository implements IOrderRepository {
       entity.resultStatus,
       entity.performedById,
       entity.performedBy,
+      entity.isPaid,
     );
   }
 

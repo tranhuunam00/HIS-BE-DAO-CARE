@@ -21,6 +21,7 @@ import { BillingModule } from './modules/billing/presentation/http/billing.modul
     TypeOrmModule.forRoot({
       ...AppDataSource.options,
       autoLoadEntities: true,
+      migrationsRun: true,
     }),
     AuthModule,
     OrgModule,
