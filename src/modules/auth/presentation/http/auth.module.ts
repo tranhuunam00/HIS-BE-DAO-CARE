@@ -41,6 +41,15 @@ import { UserAdminController } from './controllers/user-admin.controller';
 import { RoleController } from './controllers/role.controller';
 import { LoginTimeWindowController } from './controllers/login-time-window.controller';
 import { BranchAllowedIpController } from './controllers/branch-allowed-ip.controller';
+import { ScopedPermissionController } from './controllers/scoped-permission.controller';
+import { ScopedPermissionOrmEntity } from '../../infrastructure/database/scoped-permission.entity';
+import {
+  ListUserScopedPermissionsUseCase,
+  ListRoleScopedPermissionsUseCase,
+  SaveRoleScopedPermissionsUseCase,
+  SaveUserCustomPermissionsUseCase,
+  DeleteScopedPermissionUseCase,
+} from '../../application/use-cases/manage-scoped-permissions.use-case';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -59,6 +68,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
       StaffOrmEntity,
       BranchOrmEntity,
       PatientOrmEntity,
+      ScopedPermissionOrmEntity,
     ]),
     JwtModule.register({
       global: true,
@@ -72,6 +82,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
     RoleController,
     LoginTimeWindowController,
     BranchAllowedIpController,
+    ScopedPermissionController,
   ],
   providers: [
     LoginUseCase,
@@ -94,6 +105,11 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
     ToggleLoginTimeWindowUseCase,
     ListBranchAllowedIpsUseCase,
     UpsertBranchAllowedIpsUseCase,
+    ListUserScopedPermissionsUseCase,
+    ListRoleScopedPermissionsUseCase,
+    SaveRoleScopedPermissionsUseCase,
+    SaveUserCustomPermissionsUseCase,
+    DeleteScopedPermissionUseCase,
     {
       provide: IUserRepositoryToken,
       useClass: UserRepository,
