@@ -70,6 +70,9 @@ export class OrderItemResponseDto {
   @ApiProperty()
   status: string;
 
+  @ApiProperty({ description: 'Trang thai thanh toan cua dong dich vu' })
+  isPaid: boolean;
+
   @ApiPropertyOptional()
   resultNotes?: string | null;
 

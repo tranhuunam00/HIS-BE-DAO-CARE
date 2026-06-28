@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { IPaymentRepository } from '../../domain/repositories/payment.repository.interface';
@@ -27,6 +27,11 @@ export class CreatePaymentUseCase {
       throw new NotFoundException(`Order with ID ${dto.orderId} not found`);
     }
 
+    const unpaidItems = order.items?.filter((item) => !item.isPaid) || [];
+    if (unpaidItems.length === 0) {
+      throw new BadRequestException('Order has no unpaid items');
+    }
+
     const paymentCode = await this.paymentRepository.generatePaymentCode();
 
     const payment = await this.paymentRepository.save({
@@ -37,17 +42,18 @@ export class CreatePaymentUseCase {
       status: PAYMENT_STATUS.SUCCESS,
     });
 
+    // Update order status first. Saving the loaded order cascades its current
+    // item snapshot, so item payment flags must be written after this save.
+    await this.orderRepository.save({
+      ...order,
+      status: ORDER_STATUS.PAID,
+    });
+
     // Mark all current unpaid items of this order as isPaid = true
     await this.itemRepository.update(
       { orderId: dto.orderId, isPaid: false },
       { isPaid: true },
     );
-
-    // Update order status to PAID
-    await this.orderRepository.save({
-      ...order,
-      status: ORDER_STATUS.PAID,
-    });
 
     return {
       id: payment.id,

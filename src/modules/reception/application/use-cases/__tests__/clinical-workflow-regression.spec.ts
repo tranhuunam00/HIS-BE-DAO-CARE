@@ -492,10 +492,13 @@ describe('Clinical workflow regression from BE HTML flow', () => {
         findOne: jest.fn(async () => visitEntity),
         save: jest.fn(async (visit: any) => visit),
       };
+      const itemRepository = {
+        update: jest.fn(async () => ({ affected: 1 })),
+      };
       const useCase = new (CreatePaymentUseCase as any)(
         paymentRepository,
         orderRepository,
-        visitRepository,
+        itemRepository,
       );
 
       await useCase.execute({
@@ -506,6 +509,10 @@ describe('Clinical workflow regression from BE HTML flow', () => {
 
       expect(orderRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ status: ORDER_STATUS.PAID }),
+      );
+      expect(itemRepository.update).toHaveBeenCalledWith(
+        { orderId: 'order-1', isPaid: false },
+        { isPaid: true },
       );
       expect(visitRepository.save).not.toHaveBeenCalled();
       expect(visitEntity.status).toBe(PATIENT_VISIT_STATUS.PENDING_PAYMENT);

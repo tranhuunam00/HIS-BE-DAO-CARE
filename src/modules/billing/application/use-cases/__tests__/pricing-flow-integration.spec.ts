@@ -7,6 +7,7 @@ import { DeleteOrderItemUseCase } from '../delete-order-item.use-case';
 import { CreatePaymentUseCase } from '../create-payment.use-case';
 import { ServiceOrmEntity } from '../../../../medical/infrastructure/database/service.entity';
 import { PatientVisitOrmEntity } from '../../../../reception/infrastructure/database/patient-visit.entity';
+import { OrderItemOrmEntity } from '../../../infrastructure/database/order-item.entity';
 import { ServicePrice } from '../../../../medical/domain/entities/service-price.model';
 import { Service } from '../../../../medical/domain/entities/service.model';
 import { Order } from '../../../domain/entities/order.model';
@@ -155,6 +156,12 @@ describe('Pricing History and Billing Flow Integration Test', () => {
           item.status || ORDER_ITEM_STATUS.PENDING,
           new Date(),
           new Date(),
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          item.isPaid ?? false,
         );
         if (existingIndex >= 0) {
           orderItemsDb[existingIndex] = newItem;
@@ -239,6 +246,36 @@ describe('Pricing History and Billing Flow Integration Test', () => {
             save: jest.fn(async (v) => {
               visitDb = { ...visitDb, ...v };
               return visitDb;
+            }),
+          },
+        },
+        {
+          provide: getRepositoryToken(OrderItemOrmEntity),
+          useValue: {
+            update: jest.fn(async (criteria, patch) => {
+              orderItemsDb = orderItemsDb.map((item) => {
+                const matchesOrder = item.orderId === criteria.orderId;
+                const matchesPaid = criteria.isPaid === undefined || item.isPaid === criteria.isPaid;
+                return matchesOrder && matchesPaid
+                  ? new OrderItem(
+                      item.id,
+                      item.orderId,
+                      item.serviceId,
+                      item.quantity,
+                      item.price,
+                      item.status,
+                      item.createdAt,
+                      item.updatedAt,
+                      item.service,
+                      item.resultNotes,
+                      item.resultStatus,
+                      item.performedById,
+                      item.performedBy,
+                      patch.isPaid ?? item.isPaid,
+                    )
+                  : item;
+              });
+              return { affected: orderItemsDb.length };
             }),
           },
         },
@@ -355,6 +392,9 @@ describe('Pricing History and Billing Flow Integration Test', () => {
     expect(payment.status).toBe(PAYMENT_STATUS.SUCCESS);
     expect(payment.amount).toBe(120000);
     expect(orderDb.status).toBe(ORDER_STATUS.PAID);
+    expect(orderItemsDb).toHaveLength(1);
+    expect(orderItemsDb[0].isPaid).toBe(true);
+    expect(orderItemsDb[0].status).toBe(ORDER_ITEM_STATUS.PENDING);
 
     jest.useRealTimers();
   });

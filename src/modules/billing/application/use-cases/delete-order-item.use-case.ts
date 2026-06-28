@@ -85,6 +85,7 @@ export class DeleteOrderItemUseCase {
         quantity: i.quantity,
         price: i.price,
         status: i.status,
+        isPaid: i.isPaid ?? false,
         createdAt: i.createdAt!,
         updatedAt: i.updatedAt!,
         service: i.service,

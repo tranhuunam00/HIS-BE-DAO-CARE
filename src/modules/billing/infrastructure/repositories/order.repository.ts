@@ -6,6 +6,7 @@ import { Order } from '../../domain/entities/order.model';
 import { OrderItem } from '../../domain/entities/order-item.model';
 import { OrderOrmEntity } from '../database/order.entity';
 import { OrderItemOrmEntity } from '../database/order-item.entity';
+import { ORDER_STATUS } from '../../../../common/constants/workflow.constants';
 
 @Injectable()
 export class OrderRepository implements IOrderRepository {
@@ -17,12 +18,14 @@ export class OrderRepository implements IOrderRepository {
   ) {}
 
   private mapToDomain(entity: OrderOrmEntity): Order {
+    const hasUnpaidItems = entity.status !== ORDER_STATUS.CANCELLED && entity.items?.some((i) => !i.isPaid);
+
     return new Order(
       entity.id,
       entity.orderCode,
       entity.visitId,
       entity.patientId,
-      entity.status,
+      hasUnpaidItems ? ORDER_STATUS.PENDING : entity.status,
       Number(entity.totalAmount),
       entity.createdAt,
       entity.updatedAt,
@@ -60,7 +63,19 @@ export class OrderRepository implements IOrderRepository {
       .leftJoinAndSelect('items.service', 'service')
       .leftJoinAndSelect('items.performedBy', 'performedBy');
 
-    if (filters?.status) {
+    if (filters?.status === ORDER_STATUS.PENDING) {
+      queryBuilder.andWhere(
+        '(order.status = :status OR (order.status = :paidStatus AND EXISTS ' +
+          '(SELECT 1 FROM his.order_items unpaid_items WHERE unpaid_items.order_id = order.id AND unpaid_items.is_paid = false)))',
+        { status: ORDER_STATUS.PENDING, paidStatus: ORDER_STATUS.PAID },
+      );
+    } else if (filters?.status === ORDER_STATUS.PAID) {
+      queryBuilder.andWhere(
+        'order.status = :status AND NOT EXISTS ' +
+          '(SELECT 1 FROM his.order_items unpaid_items WHERE unpaid_items.order_id = order.id AND unpaid_items.is_paid = false)',
+        { status: ORDER_STATUS.PAID },
+      );
+    } else if (filters?.status) {
       queryBuilder.andWhere('order.status = :status', { status: filters.status });
     }
 

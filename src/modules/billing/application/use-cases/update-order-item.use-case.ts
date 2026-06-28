@@ -82,6 +82,7 @@ export class UpdateOrderItemUseCase {
         quantity: i.quantity,
         price: i.price,
         status: i.status,
+        isPaid: i.isPaid ?? false,
         resultNotes: i.resultNotes,
         resultStatus: i.resultStatus,
         performedById: i.performedById,

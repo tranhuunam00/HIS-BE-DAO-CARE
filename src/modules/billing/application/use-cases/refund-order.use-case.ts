@@ -124,6 +124,7 @@ export class RefundOrderUseCase {
           quantity: item.quantity,
           price: Number(item.price),
           status: item.status,
+          isPaid: item.isPaid ?? false,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
           service: item.service,
