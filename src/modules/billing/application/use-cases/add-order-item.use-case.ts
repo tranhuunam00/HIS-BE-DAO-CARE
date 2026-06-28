@@ -66,6 +66,8 @@ export class AddOrderItemUseCase {
     const savedOrder = await this.orderRepository.save({
       ...updatedOrder,
       totalAmount,
+      // If order was already PAID but we're adding a new (unpaid) item, reset to PENDING
+      status: updatedOrder.status === 'PAID' ? 'PENDING' : updatedOrder.status,
     });
 
     // Update patient visit status to PENDING_PAYMENT
