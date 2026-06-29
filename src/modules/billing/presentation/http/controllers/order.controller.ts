@@ -161,7 +161,28 @@ export class OrderController {
   async refund(
     @Param('id') id: string,
     @Body() dto: RefundOrderDto,
+    @Req() req: any,
   ): Promise<OrderResponseDto> {
-    return await this.refundOrderUseCase.execute(id, dto);
+    const result = await this.refundOrderUseCase.execute(id, dto);
+
+    const refundedServices = result.items
+      ?.filter(i => dto.itemIds.includes(i.id))
+      .map(i => i.service?.name || i.serviceId)
+      .join(', ') || 'N/A';
+    const patientName = result.patient?.fullName || '';
+    const visitCode = result.visit?.visitCode || '';
+
+    const user = req.user;
+    await this.createAuditLogUseCase.execute({
+      userId: user?.sub,
+      userName: user?.staffName || user?.username || user?.email,
+      userRole: user?.roleName || 'N/A',
+      action: 'REFUND_SERVICE',
+      module: 'BILLING',
+      description: `Hoàn tiền/hủy dịch vụ [${refundedServices}] của bệnh nhân "${patientName}" (Mã LK: ${visitCode}), Mã đơn: ${result.orderCode}`,
+      ipAddress: req.ip,
+    });
+
+    return result;
   }
 }
