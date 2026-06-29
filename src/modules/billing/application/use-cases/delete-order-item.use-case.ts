@@ -58,7 +58,7 @@ export class DeleteOrderItemUseCase {
     // Update patient visit status
     if (savedOrder && savedOrder.items) {
       const allCompleted = savedOrder.items.length > 0 && savedOrder.items.every(
-        (i) => i.status === ORDER_ITEM_STATUS.COMPLETED || i.status === ORDER_ITEM_STATUS.CANCELLED,
+        (i) => (i.status === ORDER_ITEM_STATUS.COMPLETED && i.resultStatus !== 'PENDING') || i.status === ORDER_ITEM_STATUS.CANCELLED,
       );
       const visit = await this.visitRepository.findOne({ where: { id: savedOrder.visitId } });
       if (visit) {

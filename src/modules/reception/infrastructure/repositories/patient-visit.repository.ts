@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { IPatientVisitRepository } from '../../domain/repositories/patient-visit.repository.interface';
 import { PatientVisit } from '../../domain/entities/patient-visit.model';
 import { PatientVisitOrmEntity } from '../database/patient-visit.entity';
@@ -16,7 +16,7 @@ export class PatientVisitRepository implements IPatientVisitRepository {
   ) {}
 
   private mapToDomain(entity: PatientVisitOrmEntity): PatientVisit {
-    return new PatientVisit(
+    const domain = new PatientVisit(
       entity.id,
       entity.visitCode,
       entity.patientId,
@@ -43,6 +43,8 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       entity.currentDoctor,
       entity.currentNurse,
     );
+    (domain as any).order = (entity as any).order;
+    return domain;
   }
 
   async findAll(filters: {
@@ -93,7 +95,20 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     query.orderBy('visit.queueNumber', 'ASC');
 
     const entities = await query.getMany();
-    return entities.map(this.mapToDomain);
+    if (entities.length > 0) {
+      const visitIds = entities.map((e) => e.id);
+      const orders = await this.ormRepository.manager.find(OrderOrmEntity, {
+        where: { visitId: In(visitIds) },
+        relations: { items: { service: true } },
+      });
+      for (const entity of entities) {
+        const order = orders.find((o) => o.visitId === entity.id);
+        if (order) {
+          (entity as any).order = order;
+        }
+      }
+    }
+    return entities.map((e) => this.mapToDomain(e));
   }
 
   async findById(id: string): Promise<PatientVisit | null> {

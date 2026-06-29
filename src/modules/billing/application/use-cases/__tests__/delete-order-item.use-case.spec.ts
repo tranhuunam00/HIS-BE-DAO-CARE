@@ -130,4 +130,79 @@ describe('DeleteOrderItemUseCase', () => {
       deleteOrderItemUseCase.execute('order-1', 'item-1')
     ).rejects.toThrow(BadRequestException);
   });
+
+  it('should update visit status to ALL_SERVICES_DONE when deleting the last uncompleted item and remaining items are fully completed', async () => {
+    const itemToDelete = {
+      id: 'item-2',
+      orderId: 'order-1',
+      status: ORDER_ITEM_STATUS.PENDING,
+      isPaid: false,
+    };
+    const completedItem = {
+      id: 'item-1',
+      orderId: 'order-1',
+      status: ORDER_ITEM_STATUS.COMPLETED,
+      resultStatus: 'COMPLETED',
+      isPaid: true,
+    };
+    
+    mockOrderRepository.findItemById.mockResolvedValue(itemToDelete);
+    
+    mockOrderRepository.findById
+      .mockResolvedValueOnce({
+        ...mockOrder,
+        items: [completedItem, itemToDelete],
+      })
+      .mockResolvedValueOnce({
+        ...mockOrder,
+        items: [completedItem],
+      });
+
+    mockVisit.status = PATIENT_VISIT_STATUS.WAITING_SERVICE;
+
+    await deleteOrderItemUseCase.execute('order-1', 'item-2');
+
+    expect(mockVisitRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'visit-1',
+        status: PATIENT_VISIT_STATUS.ALL_SERVICES_DONE,
+      })
+    );
+  });
+
+  it('should NOT update visit status to ALL_SERVICES_DONE if there is still a completed item with PENDING resultStatus (Boundary Case)', async () => {
+    const itemToDelete = {
+      id: 'item-2',
+      orderId: 'order-1',
+      status: ORDER_ITEM_STATUS.PENDING,
+      isPaid: false,
+    };
+    const pendingResultItem = {
+      id: 'item-1',
+      orderId: 'order-1',
+      status: ORDER_ITEM_STATUS.COMPLETED,
+      resultStatus: 'PENDING',
+      isPaid: true,
+    };
+    
+    mockOrderRepository.findItemById.mockResolvedValue(itemToDelete);
+    
+    mockOrderRepository.findById
+      .mockResolvedValueOnce({
+        ...mockOrder,
+        items: [pendingResultItem, itemToDelete],
+      })
+      .mockResolvedValueOnce({
+        ...mockOrder,
+        items: [pendingResultItem],
+      });
+
+    mockVisit.status = PATIENT_VISIT_STATUS.WAITING_SERVICE;
+    mockVisitRepository.save.mockClear();
+
+    await deleteOrderItemUseCase.execute('order-1', 'item-2');
+
+    expect(mockVisitRepository.save).not.toHaveBeenCalled();
+    expect(mockVisit.status).not.toBe(PATIENT_VISIT_STATUS.ALL_SERVICES_DONE);
+  });
 });

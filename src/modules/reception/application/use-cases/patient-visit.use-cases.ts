@@ -83,6 +83,7 @@ export function mapVisitToDto(model: PatientVisit): PatientVisitResponseDto {
     diagnosis,
     advice,
     prescriptions,
+    order: (model as any).order,
     createdAt: model.createdAt!,
     updatedAt: model.updatedAt!,
   };
@@ -683,13 +684,14 @@ export class CompletePatientUseCase {
     let nextDoctorId = visit.currentDoctorId;
 
     if (visit.status === PATIENT_VISIT_STATUS.IN_CLINICAL_EXAM) {
-      // Check if they ordered any service items that are PENDING
+      // Check if there are any service items that are not COMPLETED/CANCELLED, or COMPLETED but have PENDING results
       const order = await this.orderRepository.findByVisitId(id);
-      const hasPendingItems = order && order.items && order.items.some(
-        (item) => item.status === ORDER_ITEM_STATUS.PENDING
+      const hasUncompletedItems = order && order.items && order.items.some(
+        (item) => (item.status !== ORDER_ITEM_STATUS.COMPLETED && item.status !== ORDER_ITEM_STATUS.CANCELLED) ||
+                  (item.status === ORDER_ITEM_STATUS.COMPLETED && item.resultStatus === 'PENDING')
       );
 
-      if (hasPendingItems) {
+      if (hasUncompletedItems) {
         newStatus = PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE;
         // Transfer to coordination/reception room
         const coordRoom = await this.roomRepository.findOne({

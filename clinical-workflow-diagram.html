@@ -199,5 +199,41 @@
     </div>
   </div>
 
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Quy trình Tự động hóa Hoàn thành & Điều phối của Bác sĩ (Doctor Completion & Auto-routing Workflow)</h1>
+    <p>Sơ đồ dưới đây thể hiện quy trình xử lý tự động khi bác sĩ hoàn thành lượt khám, hệ thống tự động tính toán điều phối mặc định kết hợp hiển thị giao diện cho phép bác sĩ điều phối thủ công.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          %% Bác sĩ hoàn thành
+          Start([1. Bác sĩ nhấn nút Hoàn thành tại phòng khám]) --> CompleteAPI["2. Gọi API hoàn thành lượt khám (completePatient)"]
+          CompleteAPI --> CheckServices{"Kiểm tra tiến độ dịch vụ CLS/chuyên khoa?"}
+          
+          %% Nhánh chưa xong
+          CheckServices -->|Chưa hoàn thành tất cả dịch vụ| DefaultCoord["Mặc định cập nhật lượt khám:<br>1. Trạng thái: Đã khám lâm sàng (CLINICAL_EXAM_DONE)<br>2. Phòng đích: Quầy Lễ Tân & Tiếp Đón (PK105)<br>3. Bác sĩ phụ trách: null"]
+          
+          %% Nhánh đã xong
+          CheckServices -->|Đã hoàn thành tất cả dịch vụ| DefaultConclusion["Mặc định cập nhật lượt khám:<br>1. Trạng thái: Hoàn thành cuộc khám (COMPLETED)<br>2. Phòng đích: Phòng khám hiện tại của Bác sĩ<br>3. Bác sĩ phụ trách: Bác sĩ hiện tại"]
+          
+          %% Mở modal
+          DefaultCoord --> OpenModal["3. Hệ thống tự động bật Modal chuyển phòng trên màn hình Bác sĩ"]
+          DefaultConclusion --> OpenModal
+          
+          %% Tác vụ của bác sĩ
+          OpenModal --> DoctorChoice{"4. Bác sĩ xử lý trên Modal?"}
+          
+          %% Chọn thủ công
+          DoctorChoice -->|Chọn phòng/bác sĩ khác & bấm Xác nhận| ManualTransfer["Cập nhật phòng & bác sĩ đích theo chỉ định thủ công"]
+          
+          %% Đóng / Cancel
+          DoctorChoice -->|Bấm Đóng / Cancel modal| CloseModal["Bệnh nhân giữ nguyên giá trị Mặc định trên DB<br>(Tự động về Lễ tân hoặc Kết luận tùy tiến độ)"]
+          
+          ManualTransfer --> EndVisit([Kết thúc tác vụ hoàn thành & điều phối])
+          CloseModal --> EndVisit
+    </div>
+  </div>
+
 </body>
 </html>

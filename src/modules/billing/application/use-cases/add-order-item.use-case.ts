@@ -106,7 +106,12 @@ export class AddOrderItemUseCase {
   }
 
   private shouldMoveVisitToPendingPayment(status: string): boolean {
-    return status === PATIENT_VISIT_STATUS.ADMITTED || status === PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE || status === PATIENT_VISIT_STATUS.WAITING_RESULTS;
+    return (
+      status === PATIENT_VISIT_STATUS.ADMITTED ||
+      status === PATIENT_VISIT_STATUS.CLINICAL_EXAM_DONE ||
+      status === PATIENT_VISIT_STATUS.WAITING_RESULTS ||
+      status === PATIENT_VISIT_STATUS.ALL_SERVICES_DONE
+    );
   }
 
   private getActivePriceAtDate(prices: any[], targetDate: Date): number {
