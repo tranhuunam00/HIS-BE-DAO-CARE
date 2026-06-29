@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, Min, IsArray, IsIn } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, Min, IsArray, IsIn, ValidateIf } from 'class-validator';
 import {
   ORDER_ITEM_RESULT_STATUS,
   ORDER_ITEM_STATUS,
@@ -45,10 +45,11 @@ export class UpdateOrderItemDto {
   @IsIn(Object.values(ORDER_ITEM_RESULT_STATUS))
   resultStatus?: OrderItemResultStatus;
 
-  @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien (tinh KPI)' })
+  @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien (tinh KPI)', nullable: true })
   @IsOptional()
+  @ValidateIf((object, value) => value !== null)
   @IsUUID()
-  performedById?: string;
+  performedById?: string | null;
 }
 
 export class OrderItemResponseDto {
@@ -70,7 +71,7 @@ export class OrderItemResponseDto {
   @ApiProperty()
   status: string;
 
-  @ApiProperty({ description: 'Trang thai thanh toan cua dong dich vu' })
+  @ApiProperty({ description: 'Trạng thái thanh toán của dòng dịch vụ' })
   isPaid: boolean;
 
   @ApiPropertyOptional()
@@ -79,8 +80,11 @@ export class OrderItemResponseDto {
   @ApiPropertyOptional()
   resultStatus?: string;
 
-  @ApiPropertyOptional({ description: 'ID cua nhan vien thuc hien' })
+  @ApiPropertyOptional({ description: 'ID của nhân viên thực hiện' })
   performedById?: string | null;
+
+  @ApiPropertyOptional()
+  performedBy?: any;
 
   @ApiProperty()
   createdAt: Date;
@@ -90,9 +94,24 @@ export class OrderItemResponseDto {
 
   @ApiPropertyOptional()
   service?: any;
+}
 
-  @ApiPropertyOptional({ description: 'Thong tin nhan vien thuc hien' })
-  performedBy?: any;
+export class CreatePaymentDto {
+  @ApiProperty({ description: 'ID của đơn hàng cần thanh toán' })
+  @IsNotEmpty()
+  @IsUUID()
+  orderId: string;
+
+  @ApiProperty({ description: 'Phương thức thanh toán', enum: PAYMENT_METHOD })
+  @IsNotEmpty()
+  @IsString()
+  @IsIn(Object.values(PAYMENT_METHOD))
+  paymentMethod: PaymentMethod;
+
+  @ApiPropertyOptional({ description: 'Mã giao dịch ngân hàng / hóa đơn' })
+  @IsOptional()
+  @IsString()
+  transactionCode?: string;
 }
 
 export class OrderResponseDto {
@@ -126,21 +145,16 @@ export class OrderResponseDto {
   @ApiPropertyOptional()
   patient?: any;
 
-  @ApiPropertyOptional({ type: [OrderItemResponseDto] })
+  @ApiProperty({ type: [OrderItemResponseDto], required: false })
   items?: OrderItemResponseDto[];
 }
 
 export class RefundOrderDto {
-  @ApiProperty({ description: 'Danh sách ID của các order item cần hoàn tiền' })
+  @ApiProperty({ description: 'Danh sách ID dịch vụ chỉ định cần hoàn tiền', type: [String] })
   @IsNotEmpty()
   @IsArray()
-  @IsUUID('all', { each: true })
+  @IsUUID(undefined, { each: true })
   itemIds: string[];
-
-  @ApiProperty({ description: 'Lý do hoàn trả' })
-  @IsNotEmpty()
-  @IsString()
-  reason: string;
 
   @ApiProperty({ description: 'Phương thức hoàn tiền', enum: PAYMENT_METHOD })
   @IsNotEmpty()

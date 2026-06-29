@@ -235,5 +235,51 @@
     </div>
   </div>
 
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Vòng đời & Trực quan hóa Phân quyền Tiếp nhận Chỉ định CLS (Order Item Assignment State Machine)</h1>
+    <p>Sơ đồ dưới đây thể hiện chi tiết sự thay đổi giao diện nút bấm và phân quyền giữa Bác sĩ tiếp nhận (BS A) và Bác sĩ khác (BS B) đối với từng dịch vụ chỉ định.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      stateDiagram-v2
+          [*] --> PENDING_Unassigned : Bệnh nhân thanh toán (isPaid = true)
+          
+          state PENDING_Unassigned {
+              [*] --> Button_NhanViec : Hiển thị nút "Nhận việc" cho tất cả bác sĩ trong phòng
+          }
+          
+          PENDING_Unassigned --> PENDING_Assigned_Me : Bác sĩ A bấm "Nhận việc" (Gán performedById = BS A)
+          PENDING_Unassigned --> PENDING_Assigned_Other : Bác sĩ B bấm "Nhận việc" (Gán performedById = BS B)
+          
+          state PENDING_Assigned_Me {
+              [*] --> Button_DangLam_HuyNhan : Hiển thị nút "Đang làm" và "Hủy nhận"
+              Button_HuyNhan --> [*] : Bác sĩ A bấm "Hủy nhận" (Đặt performedById = null)
+          }
+          
+          state PENDING_Assigned_Other {
+              [*] --> Button_Disabled : Khóa toàn bộ thao tác (Hiện nhãn Đã nhận)
+          }
+          
+          PENDING_Assigned_Me --> PENDING_Unassigned : Bác sĩ A bấm "Hủy nhận"
+          PENDING_Assigned_Me --> IN_PROGRESS_Me : Bác sĩ A bấm "Đang làm" (status = IN_PROGRESS)
+          
+          state IN_PROGRESS_Me {
+              [*] --> Button_Done_Later_Undo : Hiển thị nút "Đã xong", "Trả sau" và "Hủy làm"
+              Button_HuyLam --> [*] : Bác sĩ A bấm "Hủy làm" (status = PENDING, giữ performedById = BS A)
+          }
+          
+          IN_PROGRESS_Me --> PENDING_Assigned_Me : Bác sĩ A bấm "Hủy làm"
+          IN_PROGRESS_Me --> COMPLETED_PendingResult : Bác sĩ A bấm "Trả sau" (status = COMPLETED, resultStatus = PENDING)
+          IN_PROGRESS_Me --> COMPLETED_Final : Bác sĩ A bấm "Đã xong" (status = COMPLETED, resultStatus = COMPLETED)
+          
+          state COMPLETED_PendingResult {
+              [*] --> Button_VietKQ : Hiển thị nút "Viết KQ"
+          }
+          
+          COMPLETED_PendingResult --> COMPLETED_Final : Bác sĩ A bấm "Viết KQ" (Nhập kết quả và lưu)
+    </div>
+  </div>
+
 </body>
 </html>
