@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import { JwtAuthGuard } from '../../../../auth/presentation/http/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../../auth/presentation/http/guards/permissions.guard';
 import { RequirePermissions } from '../../../../auth/presentation/http/decorators/require-permissions.decorator';
@@ -10,6 +11,8 @@ import { UpdateOrderItemUseCase } from '../../../application/use-cases/update-or
 import { DeleteOrderItemUseCase } from '../../../application/use-cases/delete-order-item.use-case';
 import { RefundOrderUseCase } from '../../../application/use-cases/refund-order.use-case';
 import { AddOrderItemDto, UpdateOrderItemDto, RefundOrderDto, OrderResponseDto } from '../../../application/dtos/order.dto';
+import { CreateAuditLogUseCase } from '../../../../auth/application/use-cases/create-audit-log.use-case';
+import { OrderItemOrmEntity } from '../../../infrastructure/database/order-item.entity';
 
 @ApiTags('Billing - Orders')
 @Controller('orders')
@@ -23,6 +26,8 @@ export class OrderController {
     private readonly updateOrderItemUseCase: UpdateOrderItemUseCase,
     private readonly deleteOrderItemUseCase: DeleteOrderItemUseCase,
     private readonly refundOrderUseCase: RefundOrderUseCase,
+    private readonly createAuditLogUseCase: CreateAuditLogUseCase,
+    private readonly dataSource: DataSource,
   ) {}
 
   @Get()
@@ -53,8 +58,25 @@ export class OrderController {
   async addItem(
     @Param('id') id: string,
     @Body() dto: AddOrderItemDto,
+    @Req() req: any,
   ): Promise<OrderResponseDto> {
-    return await this.addOrderItemUseCase.execute(id, dto);
+    const result = await this.addOrderItemUseCase.execute(id, dto);
+    const addedItem = result.items?.find(i => i.serviceId === dto.serviceId);
+    const serviceName = addedItem?.service?.name || dto.serviceId;
+    const patientName = result.patient?.fullName || '';
+    const visitCode = result.visit?.visitCode || '';
+
+    const user = req.user;
+    await this.createAuditLogUseCase.execute({
+      userId: user?.sub,
+      userName: user?.staffName || user?.username || user?.email,
+      userRole: user?.roleName || 'N/A',
+      action: 'ADD_SERVICE',
+      module: 'BILLING',
+      description: `Đã thêm chỉ định dịch vụ "${serviceName}" cho bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
+      ipAddress: req.ip,
+    });
+    return result;
   }
 
   @Patch(':id/items/:itemId')
@@ -65,8 +87,34 @@ export class OrderController {
     @Param('id') id: string,
     @Param('itemId') itemId: string,
     @Body() dto: UpdateOrderItemDto,
+    @Req() req: any,
   ): Promise<OrderResponseDto> {
-    return await this.updateOrderItemUseCase.execute(id, itemId, dto);
+    let serviceName = itemId;
+    try {
+      const item = await this.dataSource.getRepository(OrderItemOrmEntity).findOne({
+        where: { id: itemId },
+        relations: { service: true },
+      });
+      if (item?.service) {
+        serviceName = item.service.name;
+      }
+    } catch {}
+
+    const result = await this.updateOrderItemUseCase.execute(id, itemId, dto);
+    const patientName = result.patient?.fullName || '';
+    const visitCode = result.visit?.visitCode || '';
+
+    const user = req.user;
+    await this.createAuditLogUseCase.execute({
+      userId: user?.sub,
+      userName: user?.staffName || user?.username || user?.email,
+      userRole: user?.roleName || 'N/A',
+      action: 'UPDATE_SERVICE',
+      module: 'BILLING',
+      description: `Cập nhật trạng thái chỉ định "${serviceName}" thành "${dto.status || 'N/A'}" cho bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
+      ipAddress: req.ip,
+    });
+    return result;
   }
 
   @Delete(':id/items/:itemId')
@@ -76,8 +124,34 @@ export class OrderController {
   async deleteItem(
     @Param('id') id: string,
     @Param('itemId') itemId: string,
+    @Req() req: any,
   ): Promise<OrderResponseDto> {
-    return await this.deleteOrderItemUseCase.execute(id, itemId);
+    let serviceName = itemId;
+    try {
+      const item = await this.dataSource.getRepository(OrderItemOrmEntity).findOne({
+        where: { id: itemId },
+        relations: { service: true },
+      });
+      if (item?.service) {
+        serviceName = item.service.name;
+      }
+    } catch {}
+
+    const result = await this.deleteOrderItemUseCase.execute(id, itemId);
+    const patientName = result.patient?.fullName || '';
+    const visitCode = result.visit?.visitCode || '';
+
+    const user = req.user;
+    await this.createAuditLogUseCase.execute({
+      userId: user?.sub,
+      userName: user?.staffName || user?.username || user?.email,
+      userRole: user?.roleName || 'N/A',
+      action: 'DELETE_SERVICE',
+      module: 'BILLING',
+      description: `Xóa chỉ định dịch vụ "${serviceName}" của bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
+      ipAddress: req.ip,
+    });
+    return result;
   }
 
   @Post(':id/refund')

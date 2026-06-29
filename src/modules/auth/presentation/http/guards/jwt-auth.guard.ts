@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import type { Request } from 'express';
 import { UserOrmEntity } from '../../../infrastructure/database/user.entity';
+import { StaffOrmEntity } from '../../../../org/infrastructure/database/staff.entity';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -19,15 +20,22 @@ export class JwtAuthGuard implements CanActivate {
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      const user = await this.dataSource.getRepository(UserOrmEntity).findOneBy({ id: payload.sub });
+      const user = await this.dataSource.getRepository(UserOrmEntity).findOne({
+        where: { id: payload.sub },
+        relations: { role: true },
+      });
       if (!user || !user.isActive || user.lockedAt) {
         throw new UnauthorizedException('Tài khoản đã bị khóa hoặc không còn hiệu lực');
       }
+
+      const staff = await this.dataSource.getRepository(StaffOrmEntity).findOneBy({ userId: user.id });
 
       (request as any).user = {
         ...payload,
         defaultBranchId: user.defaultBranchId,
         branchScopeMode: user.branchScopeMode,
+        roleName: user.role?.name ?? null,
+        staffName: staff?.fullName ?? null,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {

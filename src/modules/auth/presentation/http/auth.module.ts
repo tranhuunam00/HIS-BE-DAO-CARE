@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { UserOrmEntity } from '../../infrastructure/database/user.entity';
@@ -12,6 +12,8 @@ import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.ent
 import { PatientOrmEntity } from '../../../reception/infrastructure/database/patient.entity';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
 import { UserRepository } from '../../infrastructure/repositories/user.repository';
+import { AuditLogOrmEntity } from '../../infrastructure/database/audit-log.entity';
+import { AuditLogRepository } from '../../infrastructure/repositories/audit-log.repository';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 import { GoogleLoginUseCase } from '../../application/use-cases/google-login.use-case';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
@@ -42,7 +44,10 @@ import { RoleController } from './controllers/role.controller';
 import { LoginTimeWindowController } from './controllers/login-time-window.controller';
 import { BranchAllowedIpController } from './controllers/branch-allowed-ip.controller';
 import { ScopedPermissionController } from './controllers/scoped-permission.controller';
+import { AuditLogController } from './controllers/audit-log.controller';
 import { ScopedPermissionOrmEntity } from '../../infrastructure/database/scoped-permission.entity';
+import { CreateAuditLogUseCase, IAuditLogRepositoryToken } from '../../application/use-cases/create-audit-log.use-case';
+import { ListAuditLogsUseCase } from '../../application/use-cases/list-audit-logs.use-case';
 import {
   ListUserScopedPermissionsUseCase,
   ListRoleScopedPermissionsUseCase,
@@ -56,6 +61,7 @@ import * as path from 'path';
 // Load environment variables for JWT secret
 dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -69,6 +75,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
       BranchOrmEntity,
       PatientOrmEntity,
       ScopedPermissionOrmEntity,
+      AuditLogOrmEntity,
     ]),
     JwtModule.register({
       global: true,
@@ -83,6 +90,7 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
     LoginTimeWindowController,
     BranchAllowedIpController,
     ScopedPermissionController,
+    AuditLogController,
   ],
   providers: [
     LoginUseCase,
@@ -110,11 +118,17 @@ dotenv.config({ path: path.join(__dirname, '../../../../../../.env') });
     SaveRoleScopedPermissionsUseCase,
     SaveUserCustomPermissionsUseCase,
     DeleteScopedPermissionUseCase,
+    CreateAuditLogUseCase,
+    ListAuditLogsUseCase,
     {
       provide: IUserRepositoryToken,
       useClass: UserRepository,
     },
+    {
+      provide: IAuditLogRepositoryToken,
+      useClass: AuditLogRepository,
+    },
   ],
-  exports: [IUserRepositoryToken],
+  exports: [IUserRepositoryToken, CreateAuditLogUseCase, IAuditLogRepositoryToken],
 })
 export class AuthModule {}

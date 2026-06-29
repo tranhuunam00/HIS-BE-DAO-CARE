@@ -35,6 +35,10 @@ export class DeleteOrderItemUseCase {
       throw new BadRequestException(`Only pending items can be deleted. Current status: ${item.status}`);
     }
 
+    if (item.isPaid) {
+      throw new BadRequestException('Không thể xóa dịch vụ đã được thu tiền (thanh toán).');
+    }
+
     // Delete item
     await this.orderRepository.deleteItem(itemId);
 
