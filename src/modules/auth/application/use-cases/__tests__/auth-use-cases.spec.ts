@@ -8,6 +8,7 @@ import { User } from '../../../domain/entities/user.entity';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { StaffOrmEntity } from '../../../../org/infrastructure/database/staff.entity';
 
 describe('Auth Use Cases', () => {
   let loginUseCase: LoginUseCase;
@@ -58,16 +59,26 @@ describe('Auth Use Cases', () => {
     }),
   };
 
+  let mockStaff: any = null;
+
   const mockDataSource = {
-    getRepository: jest.fn(() => ({
-      findOneBy: jest.fn(),
-      find: jest.fn(async () => []),
-    })),
+    getRepository: jest.fn((entity: any) => {
+      if (entity === StaffOrmEntity) {
+        return {
+          findOneBy: jest.fn(async () => mockStaff),
+        };
+      }
+      return {
+        findOneBy: jest.fn(),
+        find: jest.fn(async () => []),
+      };
+    }),
   };
 
   beforeEach(async () => {
     usersDb = new Map();
     usersDb.set(mockUser.id, mockUser);
+    mockStaff = null;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -127,6 +138,22 @@ describe('Auth Use Cases', () => {
       ).rejects.toThrow(UnauthorizedException);
       expect(usersDb.get(mockUser.id)?.failedLoginCount).toBe(1);
     });
+
+    it('should throw UnauthorizedException if staff profile is inactive', async () => {
+      mockStaff = {
+        id: 'staff-id',
+        userId: mockUser.id,
+        isActive: false,
+        fullName: 'Inactive Staff',
+      };
+
+      await expect(
+        loginUseCase.execute({
+          email: 'admin@hisdaocare.com',
+          password: 'Admin@HIS2026!',
+        })
+      ).rejects.toThrow(UnauthorizedException);
+    });
   });
 
   describe('RefreshTokenUseCase', () => {
@@ -152,6 +179,28 @@ describe('Auth Use Cases', () => {
         refreshTokenUseCase.execute(
           '10000000-0000-4000-8000-000000000001',
           'invalid-refresh-token'
+        )
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException if staff profile is inactive during refresh', async () => {
+      // First login to seed token
+      const loginTokens = await loginUseCase.execute({
+        email: 'admin@hisdaocare.com',
+        password: 'Admin@HIS2026!',
+      });
+
+      mockStaff = {
+        id: 'staff-id',
+        userId: mockUser.id,
+        isActive: false,
+        fullName: 'Inactive Staff',
+      };
+
+      await expect(
+        refreshTokenUseCase.execute(
+          '10000000-0000-4000-8000-000000000001',
+          loginTokens.refreshToken
         )
       ).rejects.toThrow(UnauthorizedException);
     });

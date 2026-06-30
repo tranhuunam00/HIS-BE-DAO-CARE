@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import {
   BranchScopeMode,
   DEFAULT_GOOGLE_PATIENT_DOB,
@@ -65,7 +66,7 @@ export class GoogleLoginUseCase {
     let isNewUser = false;
 
     if (user) {
-      this.ensureUserCanLogin(user);
+      await this.ensureUserCanLogin(user);
     } else {
       const role = await this.ensurePatientRole();
       const passwordHash = await bcrypt.hash(randomUUID(), PASSWORD_HASH_ROUNDS);
@@ -178,9 +179,13 @@ export class GoogleLoginUseCase {
     return Number.isFinite(expiresAtSeconds) && expiresAtSeconds * 1000 <= Date.now();
   }
 
-  private ensureUserCanLogin(user: User): void {
+  private async ensureUserCanLogin(user: User): Promise<void> {
     if (!user.isActive || user.lockedAt) {
       throw new UnauthorizedException('Account is disabled or locked');
+    }
+    const staff = await this.dataSource.getRepository(StaffOrmEntity).findOneBy({ userId: user.id });
+    if (staff && !staff.isActive) {
+      throw new UnauthorizedException('Tài khoản/Nhân sự đã bị khóa hoặc không còn hoạt động');
     }
   }
 

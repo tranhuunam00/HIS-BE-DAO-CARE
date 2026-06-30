@@ -29,6 +29,9 @@ export class JwtAuthGuard implements CanActivate {
       }
 
       const staff = await this.dataSource.getRepository(StaffOrmEntity).findOneBy({ userId: user.id });
+      if (staff && !staff.isActive) {
+        throw new UnauthorizedException('Tài khoản/Nhân sự đã bị khóa hoặc không còn hoạt động');
+      }
 
       (request as any).user = {
         ...payload,

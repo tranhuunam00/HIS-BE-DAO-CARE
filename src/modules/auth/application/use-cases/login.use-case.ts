@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
+import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { LoginDto } from '../dtos/login.dto';
 import { TokenResponseDto } from '../dtos/token-response.dto';
@@ -28,6 +29,11 @@ export class LoginUseCase {
 
     if (!user.isActive || user.lockedAt) {
       throw new UnauthorizedException('Tài khoản của bạn đã bị vô hiệu hóa');
+    }
+
+    const staff = await this.dataSource.getRepository(StaffOrmEntity).findOneBy({ userId: user.id });
+    if (staff && !staff.isActive) {
+      throw new UnauthorizedException('Tài khoản/Nhân sự đã bị khóa hoặc không còn hoạt động');
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);

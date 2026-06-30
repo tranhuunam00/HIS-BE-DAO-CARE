@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepositoryToken } from '../../domain/repositories/user.repository.interface';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
+import { DataSource } from 'typeorm';
+import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { TokenResponseDto } from '../dtos/token-response.dto';
 import * as bcrypt from 'bcrypt';
 import { PASSWORD_HASH_ROUNDS } from '../../domain/constants/auth.constants';
@@ -11,12 +13,18 @@ export class RefreshTokenUseCase {
   constructor(
     @Inject(IUserRepositoryToken)
     private readonly userRepository: IUserRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource
   ) {}
 
   async execute(userId: string, refreshToken: string): Promise<TokenResponseDto> {
     const user = await this.userRepository.findById(userId);
     if (!user || !user.isActive || user.lockedAt || !user.refreshTokenHash) {
+      throw new UnauthorizedException('Phiên đăng nhập không hợp lệ hoặc đã hết hạn');
+    }
+
+    const staff = await this.dataSource.getRepository(StaffOrmEntity).findOneBy({ userId: user.id });
+    if (staff && !staff.isActive) {
       throw new UnauthorizedException('Phiên đăng nhập không hợp lệ hoặc đã hết hạn');
     }
 

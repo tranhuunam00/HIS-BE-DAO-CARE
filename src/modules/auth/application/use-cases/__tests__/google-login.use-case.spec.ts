@@ -7,6 +7,7 @@ import { IUserRepository } from '../../../domain/repositories/user.repository.in
 import { RoleOrmEntity } from '../../../infrastructure/database/role.entity';
 import { PermissionOrmEntity } from '../../../infrastructure/database/permission.entity';
 import { PatientOrmEntity } from '../../../../reception/infrastructure/database/patient.entity';
+import { StaffOrmEntity } from '../../../../org/infrastructure/database/staff.entity';
 
 describe('GoogleLoginUseCase', () => {
   const googleClientId = 'google-client-id.apps.googleusercontent.com';
@@ -104,6 +105,11 @@ describe('GoogleLoginUseCase', () => {
         }
         if (entity === PermissionOrmEntity) {
           return permissionRepository;
+        }
+        if (entity === StaffOrmEntity) {
+          return {
+            findOneBy: jest.fn(async () => null),
+          };
         }
         throw new Error('Unexpected repository');
       }),
