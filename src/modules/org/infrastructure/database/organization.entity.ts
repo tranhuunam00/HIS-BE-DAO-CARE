@@ -1,9 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { BranchOrmEntity } from './branch.entity';
-import {
-  DEFAULT_COUNTRY_CODE,
-  DEFAULT_CURRENCY_CODE,
-} from '../../../../common/constants/global.constants';
 
 @Entity({ name: 'organizations' })
 export class OrganizationOrmEntity {
@@ -42,45 +38,6 @@ export class OrganizationOrmEntity {
 
   @Column({ type: 'varchar', nullable: true })
   address: string | null;
-
-  // Localization settings
-  @Column({ default: 'vi' })
-  language: string;
-
-  @Column({ default: 'Asia/Ho_Chi_Minh' })
-  timezone: string;
-
-  @Column({ default: DEFAULT_COUNTRY_CODE })
-  country: string;
-
-  @Column({ name: 'default_currency', default: DEFAULT_CURRENCY_CODE })
-  defaultCurrency: string;
-
-  // Formats settings
-  @Column({ name: 'date_format', default: 'YYYY-MM-DD' })
-  dateFormat: string;
-
-  @Column({ name: 'time_format', default: 'HH:mm:ss' })
-  timeFormat: string;
-
-  @Column({ name: 'currency_format', default: 'standard' })
-  currencyFormat: string;
-
-  @Column({ name: 'otp_expiration_time', type: 'integer', default: 300 })
-  otpExpirationTime: number;
-
-  @Column({ name: 'appointment_cancellation_limit', type: 'integer', default: 24 })
-  appointmentCancellationLimit: number;
-
-  // Identifier formats
-  @Column({ name: 'mrn_format', default: 'MRN-{YY}{MM}{DD}-{SEQ}' })
-  mrnFormat: string;
-
-  @Column({ name: 'patient_code_format', default: 'PT-{YY}{MM}-{SEQ}' })
-  patientCodeFormat: string;
-
-  @Column({ name: 'visit_code_format', default: 'VS-{YY}{MM}{DD}-{SEQ}' })
-  visitCodeFormat: string;
 
   @OneToMany(() => BranchOrmEntity, (branch) => branch.organization)
   branches: BranchOrmEntity[];

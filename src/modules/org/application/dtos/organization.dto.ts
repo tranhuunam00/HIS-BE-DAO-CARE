@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateOrganizationDto {
@@ -50,68 +50,6 @@ export class UpdateOrganizationDto {
   @IsOptional()
   @IsString()
   address?: string;
-
-  @ApiProperty({ example: 'vi', required: false })
-  @IsOptional()
-  @IsString()
-  language?: string;
-
-  @ApiProperty({ example: 'Asia/Ho_Chi_Minh', required: false })
-  @IsOptional()
-  @IsString()
-  timezone?: string;
-
-  @ApiProperty({ example: 'VN', required: false })
-  @IsOptional()
-  @IsString()
-  country?: string;
-
-  @ApiProperty({ example: 'VND', required: false })
-  @IsOptional()
-  @IsString()
-  defaultCurrency?: string;
-
-  @ApiProperty({ example: 'YYYY-MM-DD', required: false })
-  @IsOptional()
-  @IsString()
-  dateFormat?: string;
-
-  @ApiProperty({ example: 'HH:mm:ss', required: false })
-  @IsOptional()
-  @IsString()
-  timeFormat?: string;
-
-  @ApiProperty({ example: 'standard', required: false })
-  @IsOptional()
-  @IsString()
-  currencyFormat?: string;
-
-  @ApiProperty({ example: 300, required: false })
-  @IsOptional()
-  @IsInt()
-  @Min(60)
-  otpExpirationTime?: number;
-
-  @ApiProperty({ example: 24, required: false })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  appointmentCancellationLimit?: number;
-
-  @ApiProperty({ example: 'MRN-{YY}{MM}{DD}-{SEQ}', required: false })
-  @IsOptional()
-  @IsString()
-  mrnFormat?: string;
-
-  @ApiProperty({ example: 'PT-{YY}{MM}-{SEQ}', required: false })
-  @IsOptional()
-  @IsString()
-  patientCodeFormat?: string;
-
-  @ApiProperty({ example: 'VS-{YY}{MM}{DD}-{SEQ}', required: false })
-  @IsOptional()
-  @IsString()
-  visitCodeFormat?: string;
 }
 
 export class OrganizationResponseDto {
@@ -150,42 +88,6 @@ export class OrganizationResponseDto {
 
   @ApiProperty()
   address: string | null;
-
-  @ApiProperty()
-  language: string;
-
-  @ApiProperty()
-  timezone: string;
-
-  @ApiProperty()
-  country: string;
-
-  @ApiProperty()
-  defaultCurrency: string;
-
-  @ApiProperty()
-  dateFormat: string;
-
-  @ApiProperty()
-  timeFormat: string;
-
-  @ApiProperty()
-  currencyFormat: string;
-
-  @ApiProperty()
-  otpExpirationTime: number;
-
-  @ApiProperty()
-  appointmentCancellationLimit: number;
-
-  @ApiProperty()
-  mrnFormat: string;
-
-  @ApiProperty()
-  patientCodeFormat: string;
-
-  @ApiProperty()
-  visitCodeFormat: string;
 
   @ApiProperty()
   createdAt: Date;

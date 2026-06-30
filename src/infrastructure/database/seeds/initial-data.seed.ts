@@ -208,10 +208,6 @@ async function seed() {
       hotline: '19001234',
       email: 'contact@daocare.vn',
       address: 'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội',
-      language: 'vi',
-      timezone: 'Asia/Ho_Chi_Minh',
-      country: 'VN',
-      defaultCurrency: 'VND',
     });
     org = await orgRepository.save(org);
     console.log(`+ Created default Organization: ${org.name}`);

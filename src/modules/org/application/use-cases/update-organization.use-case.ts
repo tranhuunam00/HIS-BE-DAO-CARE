@@ -30,18 +30,6 @@ export class UpdateOrganizationUseCase {
       dto.email !== undefined ? dto.email : existing.email,
       dto.website !== undefined ? dto.website : existing.website,
       dto.address !== undefined ? dto.address : existing.address,
-      dto.language !== undefined ? dto.language : existing.language,
-      dto.timezone !== undefined ? dto.timezone : existing.timezone,
-      dto.country !== undefined ? dto.country : existing.country,
-      dto.defaultCurrency !== undefined ? dto.defaultCurrency : existing.defaultCurrency,
-      dto.dateFormat !== undefined ? dto.dateFormat : existing.dateFormat,
-      dto.timeFormat !== undefined ? dto.timeFormat : existing.timeFormat,
-      dto.currencyFormat !== undefined ? dto.currencyFormat : existing.currencyFormat,
-      dto.otpExpirationTime !== undefined ? dto.otpExpirationTime : existing.otpExpirationTime,
-      dto.appointmentCancellationLimit !== undefined ? dto.appointmentCancellationLimit : existing.appointmentCancellationLimit,
-      dto.mrnFormat !== undefined ? dto.mrnFormat : existing.mrnFormat,
-      dto.patientCodeFormat !== undefined ? dto.patientCodeFormat : existing.patientCodeFormat,
-      dto.visitCodeFormat !== undefined ? dto.visitCodeFormat : existing.visitCodeFormat,
       existing.createdAt,
       new Date()
     );

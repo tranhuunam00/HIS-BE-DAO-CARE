@@ -54,18 +54,6 @@ export class OrganizationRepository implements IOrganizationRepository {
       orm.email,
       orm.website,
       orm.address,
-      orm.language,
-      orm.timezone,
-      orm.country,
-      orm.defaultCurrency,
-      orm.dateFormat,
-      orm.timeFormat,
-      orm.currencyFormat,
-      orm.otpExpirationTime,
-      orm.appointmentCancellationLimit,
-      orm.mrnFormat,
-      orm.patientCodeFormat,
-      orm.visitCodeFormat,
       orm.createdAt,
       orm.updatedAt
     );
@@ -85,18 +73,6 @@ export class OrganizationRepository implements IOrganizationRepository {
     orm.email = domain.email;
     orm.website = domain.website;
     orm.address = domain.address;
-    orm.language = domain.language;
-    orm.timezone = domain.timezone;
-    orm.country = domain.country;
-    orm.defaultCurrency = domain.defaultCurrency;
-    orm.dateFormat = domain.dateFormat;
-    orm.timeFormat = domain.timeFormat;
-    orm.currencyFormat = domain.currencyFormat;
-    orm.otpExpirationTime = domain.otpExpirationTime;
-    orm.appointmentCancellationLimit = domain.appointmentCancellationLimit;
-    orm.mrnFormat = domain.mrnFormat;
-    orm.patientCodeFormat = domain.patientCodeFormat;
-    orm.visitCodeFormat = domain.visitCodeFormat;
     if (domain.createdAt) orm.createdAt = domain.createdAt;
     if (domain.updatedAt) orm.updatedAt = domain.updatedAt;
     return orm;
