@@ -49,6 +49,9 @@ export class ListStaffUseCase {
         updatedAt: a.updatedAt
       })) : [],
       nickname: staff.nickname,
+      avatarUrl: staff.avatarUrl,
+      academicTitle: staff.academicTitle,
+      degree: staff.degree,
       createdAt: staff.createdAt,
       updatedAt: staff.updatedAt,
     }));

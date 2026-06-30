@@ -69,6 +69,21 @@ export class CreateStaffDto {
   @IsOptional()
   @IsString()
   nickname?: string;
+
+  @ApiProperty({ example: 'http://minio/avatars/avatar.png', required: false })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
+
+  @ApiProperty({ example: 'PGS', required: false })
+  @IsOptional()
+  @IsString()
+  academicTitle?: string;
+
+  @ApiProperty({ example: 'BSCKI', required: false })
+  @IsOptional()
+  @IsString()
+  degree?: string;
 }
 
 export class UpdateStaffDto {
@@ -123,6 +138,21 @@ export class UpdateStaffDto {
   @IsOptional()
   @IsString()
   nickname?: string;
+
+  @ApiProperty({ example: 'http://minio/avatars/avatar.png', required: false })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
+
+  @ApiProperty({ example: 'PGS', required: false })
+  @IsOptional()
+  @IsString()
+  academicTitle?: string;
+
+  @ApiProperty({ example: 'BSCKI', required: false })
+  @IsOptional()
+  @IsString()
+  degree?: string;
 }
 
 export class UpdatePracticingCertificateDto {
@@ -285,6 +315,15 @@ export class StaffResponseDto {
 
   @ApiProperty()
   nickname: string | null;
+
+  @ApiProperty()
+  avatarUrl: string | null;
+
+  @ApiProperty()
+  academicTitle: string | null;
+
+  @ApiProperty()
+  degree: string | null;
 
   @ApiProperty()
   createdAt: Date;

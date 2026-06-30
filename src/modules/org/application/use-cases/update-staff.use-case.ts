@@ -46,6 +46,9 @@ export class UpdateStaffUseCase {
       staff.isActive,
       dto.userId !== undefined ? dto.userId : staff.userId,
       dto.nickname !== undefined ? dto.nickname : staff.nickname,
+      dto.avatarUrl !== undefined ? dto.avatarUrl : staff.avatarUrl,
+      dto.academicTitle !== undefined ? dto.academicTitle : staff.academicTitle,
+      dto.degree !== undefined ? dto.degree : staff.degree,
       staff.createdAt,
       new Date(),
       staff.certificate,
@@ -90,6 +93,9 @@ export class UpdateStaffUseCase {
         updatedAt: a.updatedAt
       })) : [],
       nickname: saved.nickname,
+      avatarUrl: saved.avatarUrl,
+      academicTitle: saved.academicTitle,
+      degree: saved.degree,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

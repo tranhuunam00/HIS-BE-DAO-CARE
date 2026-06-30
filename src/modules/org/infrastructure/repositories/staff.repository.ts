@@ -158,6 +158,9 @@ export class StaffRepository implements IStaffRepository {
       orm.isActive,
       orm.userId,
       orm.nickname,
+      orm.avatarUrl,
+      orm.academicTitle,
+      orm.degree,
       orm.createdAt,
       orm.updatedAt,
       certificate,
@@ -181,6 +184,9 @@ export class StaffRepository implements IStaffRepository {
     orm.isActive = domain.isActive;
     orm.userId = domain.userId;
     orm.nickname = domain.nickname;
+    orm.avatarUrl = domain.avatarUrl;
+    orm.academicTitle = domain.academicTitle;
+    orm.degree = domain.degree;
     if (domain.createdAt) orm.createdAt = domain.createdAt;
     if (domain.updatedAt) orm.updatedAt = domain.updatedAt;
     return orm;

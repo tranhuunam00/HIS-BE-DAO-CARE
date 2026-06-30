@@ -44,6 +44,15 @@ export class StaffOrmEntity {
   @Column({ type: 'varchar', nullable: true })
   nickname: string | null;
 
+  @Column({ name: 'avatar_url', type: 'varchar', nullable: true })
+  avatarUrl: string | null;
+
+  @Column({ name: 'academic_title', type: 'varchar', nullable: true })
+  academicTitle: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  degree: string | null;
+
   @Column({ name: 'user_id', type: 'uuid', nullable: true, unique: true })
   userId: string | null;
 
