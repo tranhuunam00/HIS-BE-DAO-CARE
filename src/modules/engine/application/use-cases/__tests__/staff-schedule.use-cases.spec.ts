@@ -8,6 +8,8 @@ import { StaffScheduleOverride } from '../../../domain/entities/staff-schedule-o
 import { Shift } from '../../../domain/entities/shift.model';
 import { BranchOrmEntity } from '../../../../org/infrastructure/database/branch.entity';
 import { StaffOrmEntity } from '../../../../org/infrastructure/database/staff.entity';
+import { RoomOrmEntity } from '../../../../org/infrastructure/database/room.entity';
+import { StaffAssignmentOrmEntity } from '../../../../org/infrastructure/database/staff-assignment.entity';
 import {
   UpdateStaffScheduleTemplateUseCase,
   CreateStaffScheduleOverrideUseCase,
@@ -54,6 +56,7 @@ describe('StaffScheduleUseCases', () => {
           t.dayOfWeek,
           t.shiftId,
           t.effectiveDate,
+          t.roomId || null,
           new Date(),
           new Date(),
         );
@@ -85,6 +88,7 @@ describe('StaffScheduleUseCases', () => {
         override.branchId,
         override.shiftId,
         override.reason,
+        override.roomId || null,
         new Date(),
         new Date(),
       );
@@ -120,6 +124,31 @@ describe('StaffScheduleUseCases', () => {
     }),
   };
 
+  const mockRooms = [
+    { id: 'room-1', name: 'Phòng khám 1', branchId: 'branch-1' },
+    { id: 'room-2', name: 'Phòng khám 2', branchId: 'branch-1' },
+  ];
+
+  const mockRoomOrmRepository = {
+    find: jest.fn().mockResolvedValue(mockRooms),
+    findOne: jest.fn().mockImplementation((opts: any) => {
+      const r = mockRooms.find((item) => item.id === opts.where.id);
+      return Promise.resolve(r || null);
+    }),
+  };
+
+  const mockStaffAssignments = [
+    { id: 'assign-1', staffId: 'staff-1', branchId: 'branch-1', roomId: 'room-1', isPrimary: true },
+    { id: 'assign-2', staffId: 'staff-2', branchId: 'branch-1', roomId: 'room-2', isPrimary: true },
+  ];
+
+  const mockStaffAssignmentRepository = {
+    find: jest.fn().mockImplementation((opts: any) => {
+      const filtered = mockStaffAssignments.filter(a => a.staffId === opts.where.staffId);
+      return Promise.resolve(filtered);
+    }),
+  };
+
   beforeEach(async () => {
     templatesDb = [];
     overridesDb = [];
@@ -145,6 +174,14 @@ describe('StaffScheduleUseCases', () => {
         {
           provide: getRepositoryToken(StaffOrmEntity),
           useValue: mockStaffOrmRepository,
+        },
+        {
+          provide: getRepositoryToken(RoomOrmEntity),
+          useValue: mockRoomOrmRepository,
+        },
+        {
+          provide: getRepositoryToken(StaffAssignmentOrmEntity),
+          useValue: mockStaffAssignmentRepository,
         },
       ],
     }).compile();

@@ -9,6 +9,8 @@ import { StaffAttendanceOrmEntity } from '../../infrastructure/database/staff-at
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { PatientVisitOrmEntity } from '../../../reception/infrastructure/database/patient-visit.entity';
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
+import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
 
 // Controllers
 import { ShiftController } from './controllers/shift.controller';
@@ -57,6 +59,8 @@ import {
       BranchOrmEntity,
       StaffOrmEntity,
       PatientVisitOrmEntity,
+      RoomOrmEntity,
+      StaffAssignmentOrmEntity,
     ]),
   ],
   controllers: [

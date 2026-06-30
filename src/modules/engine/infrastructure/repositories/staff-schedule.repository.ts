@@ -91,6 +91,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
       orm.dayOfWeek,
       orm.shiftId,
       this.formatDate(orm.effectiveDate),
+      orm.roomId,
       orm.createdAt,
       orm.updatedAt,
     );
@@ -104,6 +105,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
     orm.dayOfWeek = domain.dayOfWeek;
     orm.shiftId = domain.shiftId;
     orm.effectiveDate = domain.effectiveDate;
+    orm.roomId = domain.roomId;
     return orm;
   }
 
@@ -116,6 +118,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
       orm.branchId,
       orm.shiftId,
       orm.reason,
+      orm.roomId,
       orm.createdAt,
       orm.updatedAt,
     );
@@ -130,6 +133,7 @@ export class StaffScheduleRepository implements IStaffScheduleRepository {
     orm.branchId = domain.branchId;
     orm.shiftId = domain.shiftId;
     orm.reason = domain.reason;
+    orm.roomId = domain.roomId;
     return orm;
   }
 }

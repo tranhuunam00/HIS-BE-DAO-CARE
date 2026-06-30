@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { ShiftOrmEntity } from './shift.entity';
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
 
 @Entity({ name: 'staff_schedule_templates' })
 export class StaffScheduleTemplateOrmEntity {
@@ -31,6 +32,13 @@ export class StaffScheduleTemplateOrmEntity {
   @ManyToOne(() => ShiftOrmEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shift_id' })
   shift: ShiftOrmEntity;
+
+  @Column({ name: 'room_id', type: 'uuid', nullable: true })
+  roomId: string | null;
+
+  @ManyToOne(() => RoomOrmEntity, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'room_id' })
+  room: RoomOrmEntity | null;
 
   @Column({ name: 'effective_date', type: 'date' })
   effectiveDate: string; // YYYY-MM-DD string representation for date column

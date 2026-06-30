@@ -9,6 +9,8 @@ import { StaffScheduleTemplate } from '../../domain/entities/staff-schedule-temp
 import { StaffScheduleOverride } from '../../domain/entities/staff-schedule-override.model';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
+import { StaffAssignmentOrmEntity } from '../../../org/infrastructure/database/staff-assignment.entity';
 import {
   UpdateStaffScheduleTemplateDto,
   CreateOverrideDto,
@@ -29,6 +31,10 @@ export class UpdateStaffScheduleTemplateUseCase {
     private readonly branchOrmRepository: Repository<BranchOrmEntity>,
     @InjectRepository(StaffOrmEntity)
     private readonly staffOrmRepository: Repository<StaffOrmEntity>,
+    @InjectRepository(RoomOrmEntity)
+    private readonly roomOrmRepository: Repository<RoomOrmEntity>,
+    @InjectRepository(StaffAssignmentOrmEntity)
+    private readonly staffAssignmentRepository: Repository<StaffAssignmentOrmEntity>,
   ) {}
 
   async execute(dto: UpdateStaffScheduleTemplateDto): Promise<void> {
@@ -38,11 +44,29 @@ export class UpdateStaffScheduleTemplateUseCase {
       if (!exists) {
         throw new NotFoundException(`Không tìm thấy nhân viên với ID ${staffId}`);
       }
+
+      // Verify staff assignments (branch & room)
+      const assignments = await this.staffAssignmentRepository.find({ where: { staffId } });
+
+      for (const item of dto.items) {
+        const branchAssigned = assignments.some(a => a.branchId === item.branchId);
+        if (!branchAssigned) {
+          throw new BadRequestException(`Nhân viên không được phân công làm việc tại chi nhánh này`);
+        }
+
+        if (item.roomId) {
+          const roomAssigned = assignments.some(a => a.branchId === item.branchId && (a.roomId === item.roomId || !a.roomId));
+          if (!roomAssigned) {
+            throw new BadRequestException(`Nhân viên không được phân công làm việc tại phòng này`);
+          }
+        }
+      }
     }
 
-    // 2. Verify shifts and branches in items
+    // 2. Verify shifts, branches and rooms in items
     const shiftIds = Array.from(new Set(dto.items.map((i) => i.shiftId)));
     const branchIds = Array.from(new Set(dto.items.map((i) => i.branchId)));
+    const roomIds = Array.from(new Set(dto.items.map((i) => i.roomId).filter(Boolean)));
 
     for (const sId of shiftIds) {
       const exists = await this.shiftRepository.findById(sId);
@@ -55,6 +79,13 @@ export class UpdateStaffScheduleTemplateUseCase {
       const exists = await this.branchOrmRepository.findOne({ where: { id: bId } });
       if (!exists) {
         throw new NotFoundException(`Không tìm thấy chi nhánh với ID ${bId}`);
+      }
+    }
+
+    for (const rId of roomIds) {
+      const exists = await this.roomOrmRepository.findOne({ where: { id: rId } });
+      if (!exists) {
+        throw new NotFoundException(`Không tìm thấy phòng với ID ${rId}`);
       }
     }
 
@@ -72,6 +103,7 @@ export class UpdateStaffScheduleTemplateUseCase {
             item.dayOfWeek,
             item.shiftId,
             dto.effectiveDate,
+            item.roomId ?? null,
           ),
         );
       }
@@ -94,6 +126,10 @@ export class CreateStaffScheduleOverrideUseCase {
     private readonly branchOrmRepository: Repository<BranchOrmEntity>,
     @InjectRepository(StaffOrmEntity)
     private readonly staffOrmRepository: Repository<StaffOrmEntity>,
+    @InjectRepository(RoomOrmEntity)
+    private readonly roomOrmRepository: Repository<RoomOrmEntity>,
+    @InjectRepository(StaffAssignmentOrmEntity)
+    private readonly staffAssignmentRepository: Repository<StaffAssignmentOrmEntity>,
   ) {}
 
   async execute(dto: CreateOverrideDto): Promise<StaffScheduleOverrideResponseDto> {
@@ -118,6 +154,25 @@ export class CreateStaffScheduleOverrideUseCase {
       if (!branchExists) {
         throw new NotFoundException('Không tìm thấy chi nhánh');
       }
+
+      // Verify staff assignments (branch & room)
+      const assignments = await this.staffAssignmentRepository.find({ where: { staffId: dto.staffId } });
+      const branchAssigned = assignments.some(a => a.branchId === dto.branchId);
+      if (!branchAssigned) {
+        throw new BadRequestException('Nhân viên không được phân công làm việc tại chi nhánh này');
+      }
+
+      if (dto.roomId) {
+        const roomExists = await this.roomOrmRepository.findOne({ where: { id: dto.roomId } });
+        if (!roomExists) {
+          throw new NotFoundException('Không tìm thấy phòng');
+        }
+
+        const roomAssigned = assignments.some(a => a.branchId === dto.branchId && (a.roomId === dto.roomId || !a.roomId));
+        if (!roomAssigned) {
+          throw new BadRequestException('Nhân viên không được phân công làm việc tại phòng này');
+        }
+      }
     }
 
     // 3. Delete existing override on this date for this staff
@@ -135,6 +190,7 @@ export class CreateStaffScheduleOverrideUseCase {
       dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK ? dto.branchId! : null,
       dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK ? dto.shiftId! : null,
       dto.reason ?? null,
+      dto.overrideType === SCHEDULE_OVERRIDE_TYPE.WORK ? dto.roomId ?? null : null,
     );
 
     const saved = await this.scheduleRepository.saveOverride(override);
@@ -149,6 +205,7 @@ export class CreateStaffScheduleOverrideUseCase {
       overrideType: domain.overrideType,
       branchId: domain.branchId,
       shiftId: domain.shiftId,
+      roomId: domain.roomId,
       reason: domain.reason,
       createdAt: domain.createdAt!,
       updatedAt: domain.updatedAt!,
@@ -181,21 +238,25 @@ export class GetStaffSchedulesUseCase {
     private readonly shiftRepository: IShiftRepository,
     @InjectRepository(BranchOrmEntity)
     private readonly branchOrmRepository: Repository<BranchOrmEntity>,
+    @InjectRepository(RoomOrmEntity)
+    private readonly roomOrmRepository: Repository<RoomOrmEntity>,
   ) {}
 
   async execute(staffIds: string[], startDate: string, endDate: string): Promise<ResolvedScheduleResponseDto[]> {
     if (staffIds.length === 0) return [];
 
     // 1. Fetch metadata helper lists
-    const [shifts, branches, templates, overrides] = await Promise.all([
+    const [shifts, branches, rooms, templates, overrides] = await Promise.all([
       this.shiftRepository.findAll(),
       this.branchOrmRepository.find(),
+      this.roomOrmRepository.find(),
       this.scheduleRepository.findTemplatesByStaffs(staffIds),
       this.scheduleRepository.findOverrides(staffIds, startDate, endDate),
     ]);
 
     const shiftMap = new Map(shifts.map((s) => [s.id, s]));
     const branchMap = new Map(branches.map((b) => [b.id, b]));
+    const roomMap = new Map(rooms.map((r) => [r.id, r]));
 
     // 2. Generate list of dates in the range
     const dateList = this.getDatesInRange(startDate, endDate);
@@ -228,6 +289,7 @@ export class GetStaffSchedulesUseCase {
             const shiftsList: ResolvedScheduleShiftDto[] = [];
 
             if (shiftInfo && branchInfo) {
+              const roomInfo = dayOverride.roomId ? roomMap.get(dayOverride.roomId) : null;
               shiftsList.push({
                 shiftId: shiftInfo.id,
                 shiftName: shiftInfo.name,
@@ -235,6 +297,8 @@ export class GetStaffSchedulesUseCase {
                 endTime: shiftInfo.endTime,
                 branchId: branchInfo.id,
                 branchName: branchInfo.name,
+                roomId: roomInfo ? roomInfo.id : null,
+                roomName: roomInfo ? roomInfo.name : null,
               });
             }
 
@@ -283,6 +347,7 @@ export class GetStaffSchedulesUseCase {
           const shiftInfo = shiftMap.get(t.shiftId);
           const branchInfo = branchMap.get(t.branchId);
           if (shiftInfo && branchInfo) {
+            const roomInfo = t.roomId ? roomMap.get(t.roomId) : null;
             shiftList.push({
               shiftId: shiftInfo.id,
               shiftName: shiftInfo.name,
@@ -290,6 +355,8 @@ export class GetStaffSchedulesUseCase {
               endTime: shiftInfo.endTime,
               branchId: branchInfo.id,
               branchName: branchInfo.name,
+              roomId: roomInfo ? roomInfo.id : null,
+              roomName: roomInfo ? roomInfo.name : null,
             });
           }
         }

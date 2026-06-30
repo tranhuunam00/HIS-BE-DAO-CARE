@@ -69,6 +69,11 @@ export class CreateStaffScheduleTemplateItemDto {
   @IsUUID()
   @IsNotEmpty()
   shiftId: string;
+
+  @ApiProperty({ example: 'room-uuid', required: false })
+  @IsOptional()
+  @IsUUID()
+  roomId?: string;
 }
 
 export class UpdateStaffScheduleTemplateDto {
@@ -116,6 +121,11 @@ export class CreateOverrideDto {
   @IsUUID()
   shiftId?: string;
 
+  @ApiProperty({ example: 'room-uuid', required: false })
+  @IsOptional()
+  @IsUUID()
+  roomId?: string;
+
   @ApiProperty({ example: 'Nghỉ phép năm', required: false })
   @IsOptional()
   @IsString()
@@ -129,6 +139,7 @@ export class StaffScheduleOverrideResponseDto {
   @ApiProperty() overrideType: string;
   @ApiProperty() branchId: string | null;
   @ApiProperty() shiftId: string | null;
+  @ApiProperty() roomId: string | null;
   @ApiProperty() reason: string | null;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
@@ -141,6 +152,8 @@ export class ResolvedScheduleShiftDto {
   @ApiProperty() endTime: string;
   @ApiProperty() branchId: string;
   @ApiProperty() branchName: string;
+  @ApiProperty({ required: false }) roomId: string | null;
+  @ApiProperty({ required: false }) roomName: string | null;
 }
 
 export class ResolvedScheduleResponseDto {

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { StaffOrmEntity } from '../../../org/infrastructure/database/staff.entity';
 import { BranchOrmEntity } from '../../../org/infrastructure/database/branch.entity';
 import { ShiftOrmEntity } from './shift.entity';
+import { RoomOrmEntity } from '../../../org/infrastructure/database/room.entity';
 
 @Entity({ name: 'staff_schedule_overrides' })
 export class StaffScheduleOverrideOrmEntity {
@@ -34,6 +35,13 @@ export class StaffScheduleOverrideOrmEntity {
   @ManyToOne(() => ShiftOrmEntity, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'shift_id' })
   shift: ShiftOrmEntity | null;
+
+  @Column({ name: 'room_id', type: 'uuid', nullable: true })
+  roomId: string | null;
+
+  @ManyToOne(() => RoomOrmEntity, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'room_id' })
+  room: RoomOrmEntity | null;
 
   @Column({ type: 'varchar', nullable: true })
   reason: string | null;

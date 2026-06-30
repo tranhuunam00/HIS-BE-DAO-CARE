@@ -7,6 +7,7 @@ export class StaffScheduleOverride {
     public readonly branchId: string | null,
     public readonly shiftId: string | null,
     public readonly reason: string | null,
+    public readonly roomId: string | null = null,
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
   ) {}

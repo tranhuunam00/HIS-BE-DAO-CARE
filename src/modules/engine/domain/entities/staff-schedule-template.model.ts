@@ -6,6 +6,7 @@ export class StaffScheduleTemplate {
     public readonly dayOfWeek: string,
     public readonly shiftId: string,
     public readonly effectiveDate: string,
+    public readonly roomId: string | null = null,
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
   ) {}
