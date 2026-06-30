@@ -19,6 +19,7 @@ import { CheckInDto, UpdateVitalSignsDto, TransferRoomDto, PatientVisitResponseD
 import { CreateAuditLogUseCase } from '../../../../auth/application/use-cases/create-audit-log.use-case';
 import { RoomOrmEntity } from '../../../../org/infrastructure/database/room.entity';
 import { StaffOrmEntity } from '../../../../org/infrastructure/database/staff.entity';
+import { AUDIT_LOG_ACTION, AUDIT_LOG_MODULE } from '../../../../auth/domain/constants/auth.constants';
 
 @ApiTags('Patient Visit & Queue Management (Đón tiếp & Điều phối)')
 @Controller('visits')
@@ -45,6 +46,8 @@ export class PatientVisitController {
   @ApiQuery({ name: 'roomId', required: false, description: 'Lọc theo phòng khám hiện tại' })
   @ApiQuery({ name: 'status', required: false, enum: PATIENT_VISIT_STATUS, description: 'Lọc trạng thái hàng đợi' })
   @ApiQuery({ name: 'date', required: false, description: 'Lọc ngày tạo lượt khám (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Lọc từ ngày (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Lọc đến ngày (YYYY-MM-DD)' })
   @ApiQuery({ name: 'doctorId', required: false, description: 'Lọc worklist theo bác sĩ đang/đã nhận ca' })
   @ApiQuery({ name: 'serviceId', required: false, description: 'Lọc worklist theo dịch vụ được chỉ định' })
   @ApiQuery({ name: 'patientId', required: false, description: 'Lọc theo ID bệnh nhân' })
@@ -54,11 +57,13 @@ export class PatientVisitController {
     @Query('roomId') roomId?: string,
     @Query('status') status?: string,
     @Query('date') date?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('doctorId') doctorId?: string,
     @Query('serviceId') serviceId?: string,
     @Query('patientId') patientId?: string,
   ): Promise<PatientVisitResponseDto[]> {
-    return await this.listPatientVisitsUseCase.execute({ branchId, roomId, status, date, doctorId, serviceId, patientId });
+    return await this.listPatientVisitsUseCase.execute({ branchId, roomId, status, date, startDate, endDate, doctorId, serviceId, patientId });
   }
 
   @Get(':id')
@@ -80,8 +85,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'CHECK_IN',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.CHECK_IN,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Tiếp nhận bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode}), STT: ${result.queueNumber}`,
       ipAddress: req.ip,
     });
@@ -99,8 +104,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'UPDATE_VITALS',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.UPDATE_VITALS,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Cập nhật sinh hiệu bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode}): Mạch ${dto.pulse || '-'}, Huyết áp ${dto.bloodPressure || '-'}, Nhiệt độ ${dto.temperature || '-'}`,
       ipAddress: req.ip,
     });
@@ -131,8 +136,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'TRANSFER_ROOM',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.TRANSFER_ROOM,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Điều phối bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode}) đến phòng "${roomName}"${dto.doctorId ? `, BS nhận: "${doctorName}"` : ''}`,
       ipAddress: req.ip,
     });
@@ -150,8 +155,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'CONFIRM_RESULTS_WAIT',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.CONFIRM_RESULTS_WAIT,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Xác nhận bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode}) chờ trả kết quả cận lâm sàng`,
       ipAddress: req.ip,
     });
@@ -173,8 +178,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'ACCEPT_PATIENT',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.ACCEPT_PATIENT,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Bác sĩ nhận bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode}) vào khám thực tế`,
       ipAddress: req.ip,
     });
@@ -192,8 +197,8 @@ export class PatientVisitController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'COMPLETE_PATIENT',
-      module: 'RECEPTION',
+      action: AUDIT_LOG_ACTION.COMPLETE_PATIENT,
+      module: AUDIT_LOG_MODULE.RECEPTION,
       description: `Bác sĩ kết luận hoàn thành lượt khám cho bệnh nhân "${result.patient?.fullName || 'N/A'}" (Mã LK: ${result.visitCode})`,
       ipAddress: req.ip,
     });

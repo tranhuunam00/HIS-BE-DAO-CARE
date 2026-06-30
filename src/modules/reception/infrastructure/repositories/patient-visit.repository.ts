@@ -52,6 +52,8 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     roomId?: string;
     status?: string;
     date?: string;
+    startDate?: string;
+    endDate?: string;
     doctorId?: string;
     serviceId?: string;
     patientId?: string;
@@ -81,6 +83,12 @@ export class PatientVisitRepository implements IPatientVisitRepository {
     if (filters.date) {
       // Compare only date part of createdAt
       query.andWhere('DATE(visit.createdAt) = :date', { date: filters.date });
+    }
+    if (filters.startDate) {
+      query.andWhere('DATE(visit.createdAt) >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters.endDate) {
+      query.andWhere('DATE(visit.createdAt) <= :endDate', { endDate: filters.endDate });
     }
     if (filters.doctorId) {
       query.andWhere(

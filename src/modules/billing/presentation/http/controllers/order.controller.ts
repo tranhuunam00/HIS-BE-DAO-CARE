@@ -13,6 +13,7 @@ import { RefundOrderUseCase } from '../../../application/use-cases/refund-order.
 import { AddOrderItemDto, UpdateOrderItemDto, RefundOrderDto, OrderResponseDto } from '../../../application/dtos/order.dto';
 import { CreateAuditLogUseCase } from '../../../../auth/application/use-cases/create-audit-log.use-case';
 import { OrderItemOrmEntity } from '../../../infrastructure/database/order-item.entity';
+import { AUDIT_LOG_ACTION, AUDIT_LOG_MODULE } from '../../../../auth/domain/constants/auth.constants';
 
 @ApiTags('Billing - Orders')
 @Controller('orders')
@@ -71,8 +72,8 @@ export class OrderController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'ADD_SERVICE',
-      module: 'BILLING',
+      action: AUDIT_LOG_ACTION.ADD_SERVICE,
+      module: AUDIT_LOG_MODULE.BILLING,
       description: `Đã thêm chỉ định dịch vụ "${serviceName}" cho bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
       ipAddress: req.ip,
     });
@@ -109,8 +110,8 @@ export class OrderController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'UPDATE_SERVICE',
-      module: 'BILLING',
+      action: AUDIT_LOG_ACTION.UPDATE_SERVICE,
+      module: AUDIT_LOG_MODULE.BILLING,
       description: `Cập nhật trạng thái chỉ định "${serviceName}" thành "${dto.status || 'N/A'}" cho bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
       ipAddress: req.ip,
     });
@@ -146,8 +147,8 @@ export class OrderController {
       userId: user?.sub,
       userName: user?.staffName || user?.username || user?.email,
       userRole: user?.roleName || 'N/A',
-      action: 'DELETE_SERVICE',
-      module: 'BILLING',
+      action: AUDIT_LOG_ACTION.DELETE_SERVICE,
+      module: AUDIT_LOG_MODULE.BILLING,
       description: `Xóa chỉ định dịch vụ "${serviceName}" của bệnh nhân "${patientName}" (Mã LK: ${visitCode})`,
       ipAddress: req.ip,
     });

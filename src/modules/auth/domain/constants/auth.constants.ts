@@ -44,3 +44,24 @@ export const MANAGED_USER_STATUS = {
 export type ManagedUserStatus =
   (typeof MANAGED_USER_STATUS)[keyof typeof MANAGED_USER_STATUS];
 export type AuthRoleName = (typeof AUTH_ROLE_NAME)[keyof typeof AUTH_ROLE_NAME];
+
+export const AUDIT_LOG_ACTION = {
+  ADD_SERVICE: 'ADD_SERVICE',
+  UPDATE_SERVICE: 'UPDATE_SERVICE',
+  DELETE_SERVICE: 'DELETE_SERVICE',
+  CHECK_IN: 'CHECK_IN',
+  UPDATE_VITALS: 'UPDATE_VITALS',
+  TRANSFER_ROOM: 'TRANSFER_ROOM',
+  CONFIRM_RESULTS_WAIT: 'CONFIRM_RESULTS_WAIT',
+  ACCEPT_PATIENT: 'ACCEPT_PATIENT',
+  COMPLETE_PATIENT: 'COMPLETE_PATIENT',
+} as const;
+
+export const AUDIT_LOG_MODULE = {
+  RECEPTION: 'RECEPTION',
+  BILLING: 'BILLING',
+  AUTH: 'AUTH',
+} as const;
+
+export type AuditLogAction = (typeof AUDIT_LOG_ACTION)[keyof typeof AUDIT_LOG_ACTION];
+export type AuditLogModule = (typeof AUDIT_LOG_MODULE)[keyof typeof AUDIT_LOG_MODULE];

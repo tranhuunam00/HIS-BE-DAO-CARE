@@ -101,6 +101,8 @@ export class ListPatientVisitsUseCase {
     roomId?: string;
     status?: string;
     date?: string;
+    startDate?: string;
+    endDate?: string;
     doctorId?: string;
     serviceId?: string;
     patientId?: string;
