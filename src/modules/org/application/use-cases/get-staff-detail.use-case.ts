@@ -28,7 +28,6 @@ export class GetStaffDetailUseCase {
       staffCode: staff.staffCode,
       joinDate: staff.joinDate,
       title: staff.title,
-      isClinical: staff.isClinical,
       isActive: staff.isActive,
       userId: staff.userId,
       certificate: staff.certificate ? {
@@ -54,7 +53,6 @@ export class GetStaffDetailUseCase {
         updatedAt: a.updatedAt
       })) : [],
       nickname: staff.nickname,
-      departmentId: staff.departmentId,
       createdAt: staff.createdAt,
       updatedAt: staff.updatedAt,
     };

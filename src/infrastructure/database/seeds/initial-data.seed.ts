@@ -399,7 +399,6 @@ async function seed() {
       address: 'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-01-01',
       title: STAFF_TITLE.DOCTOR,
-      isClinical: true,
       nickname: 'BS Nam TH',
       deptCode: 'DEPT_NOI',
       roomCode: 'PK101',
@@ -423,7 +422,6 @@ async function seed() {
       address: 'Giải Phóng, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-03-01',
       title: STAFF_TITLE.DOCTOR,
-      isClinical: true,
       nickname: 'BS Mai NT',
       deptCode: 'DEPT_SAN',
       roomCode: 'PK103',
@@ -447,7 +445,6 @@ async function seed() {
       address: 'Lò Đúc, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-02-15',
       title: STAFF_TITLE.DOCTOR,
-      isClinical: true,
       nickname: 'BS Long LH',
       deptCode: 'DEPT_NHI',
       roomCode: 'PK104',
@@ -471,7 +468,6 @@ async function seed() {
       address: 'Trần Đại Nghĩa, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-05-01',
       title: STAFF_TITLE.DOCTOR,
-      isClinical: true,
       nickname: 'BS Đức PM',
       deptCode: 'DEPT_NGOAI',
       roomCode: 'PK101',
@@ -495,7 +491,6 @@ async function seed() {
       address: 'Bạch Mai, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-06-01',
       title: STAFF_TITLE.DOCTOR,
-      isClinical: true,
       nickname: 'BS Hồng VT',
       deptCode: 'DEPT_KB',
       roomCode: 'PK101',
@@ -519,7 +514,6 @@ async function seed() {
       address: 'Minh Khai, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-01-10',
       title: STAFF_TITLE.NURSE,
-      isClinical: true,
       deptCode: 'DEPT_NOI',
       roomCode: 'PK101',
       userEmail: 'hainv@hisdaocare.com',
@@ -538,7 +532,6 @@ async function seed() {
       address: 'Kim Ngưu, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-03-15',
       title: STAFF_TITLE.NURSE,
-      isClinical: true,
       deptCode: 'DEPT_SAN',
       roomCode: 'PK103',
       userEmail: 'thutt@hisdaocare.com',
@@ -557,7 +550,6 @@ async function seed() {
       address: 'Trương Định, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-02-01',
       title: STAFF_TITLE.TECHNICIAN,
-      isClinical: true,
       deptCode: 'DEPT_CDHA',
       roomCode: 'PK102',
       userEmail: 'quanlm@hisdaocare.com',
@@ -576,7 +568,6 @@ async function seed() {
       address: 'Đại La, Hai Bà Trưng, Hà Nội',
       joinDate: '2025-04-10',
       title: STAFF_TITLE.TECHNICIAN,
-      isClinical: true,
       deptCode: 'DEPT_XN',
       roomCode: 'PK106',
       userEmail: 'lanht@hisdaocare.com',
@@ -595,7 +586,6 @@ async function seed() {
       address: 'Tương Mai, Hoàng Mai, Hà Nội',
       joinDate: '2025-01-05',
       title: STAFF_TITLE.RECEPTIONIST,
-      isClinical: false,
       deptCode: 'DEPT_LT',
       roomCode: 'PK105',
       userEmail: 'anhpn@hisdaocare.com',
@@ -614,7 +604,6 @@ async function seed() {
       address: 'Mai Động, Hoàng Mai, Hà Nội',
       joinDate: '2025-02-20',
       title: STAFF_TITLE.RECEPTIONIST,
-      isClinical: false,
       deptCode: 'DEPT_LT',
       roomCode: 'PK105',
       userEmail: 'linhnt@hisdaocare.com',
@@ -641,10 +630,8 @@ async function seed() {
       staffCode: item.staffCode,
       joinDate: new Date(item.joinDate),
       title: item.title,
-      isClinical: item.isClinical,
       isActive: true,
       nickname: item.nickname || null,
-      departmentId: dept ? dept.id : null,
     };
 
     if (!staff) {
@@ -687,7 +674,7 @@ async function seed() {
     }
 
     // Seed Practicing Certificate if clinical doctor
-    if (item.cert && item.isClinical && item.title === STAFF_TITLE.DOCTOR) {
+    if (item.cert && item.title === STAFF_TITLE.DOCTOR) {
       let cert = await certRepository.findOneBy({ staffId: staff.id });
       if (!cert) {
         cert = certRepository.create({

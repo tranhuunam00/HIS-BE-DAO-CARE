@@ -155,11 +155,9 @@ export class StaffRepository implements IStaffRepository {
       orm.staffCode,
       new Date(orm.joinDate),
       orm.title,
-      orm.isClinical,
       orm.isActive,
       orm.userId,
       orm.nickname,
-      orm.departmentId,
       orm.createdAt,
       orm.updatedAt,
       certificate,
@@ -180,11 +178,9 @@ export class StaffRepository implements IStaffRepository {
     orm.staffCode = domain.staffCode;
     orm.joinDate = domain.joinDate;
     orm.title = domain.title;
-    orm.isClinical = domain.isClinical;
     orm.isActive = domain.isActive;
     orm.userId = domain.userId;
     orm.nickname = domain.nickname;
-    orm.departmentId = domain.departmentId;
     if (domain.createdAt) orm.createdAt = domain.createdAt;
     if (domain.updatedAt) orm.updatedAt = domain.updatedAt;
     return orm;

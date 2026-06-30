@@ -108,7 +108,7 @@ describe('Rooms, Resources & Staff Use Cases', () => {
     new Date('2026-01-01'),
     'DOCTOR',
     true,
-    true,
+    null,
     null,
     new Date(),
     new Date(),
@@ -182,7 +182,7 @@ describe('Rooms, Resources & Staff Use Cases', () => {
       return list.map((s) => {
         const cert = certsDb.get(s.id) || null;
         const assigns = Array.from(assignmentsDb.values()).filter((a) => a.staffId === s.id);
-        return new Staff(s.id, s.fullName, s.dateOfBirth, s.gender, s.identityNumber, s.phone, s.email, s.address, s.staffCode, s.joinDate, s.title, s.isClinical, s.isActive, s.userId, s.createdAt, s.updatedAt, cert, assigns);
+        return new Staff(s.id, s.fullName, s.dateOfBirth, s.gender, s.identityNumber, s.phone, s.email, s.address, s.staffCode, s.joinDate, s.title, s.isActive, s.userId, s.nickname, s.createdAt, s.updatedAt, cert, assigns);
       });
     }),
     findById: jest.fn(async (id: string) => {
@@ -190,7 +190,7 @@ describe('Rooms, Resources & Staff Use Cases', () => {
       if (!s) return null;
       const cert = Array.from(certsDb.values()).find((c) => c.staffId === s.id) || null;
       const assigns = Array.from(assignmentsDb.values()).filter((a) => a.staffId === s.id);
-      return new Staff(s.id, s.fullName, s.dateOfBirth, s.gender, s.identityNumber, s.phone, s.email, s.address, s.staffCode, s.joinDate, s.title, s.isClinical, s.isActive, s.userId, s.createdAt, s.updatedAt, cert, assigns);
+      return new Staff(s.id, s.fullName, s.dateOfBirth, s.gender, s.identityNumber, s.phone, s.email, s.address, s.staffCode, s.joinDate, s.title, s.isActive, s.userId, s.nickname, s.createdAt, s.updatedAt, cert, assigns);
     }),
     findByCode: jest.fn(async (code: string) => {
       for (const s of staffDb.values()) {
@@ -364,7 +364,6 @@ describe('Rooms, Resources & Staff Use Cases', () => {
         staffCode: 'NV0002',
         joinDate: '2026-03-01',
         title: 'DOCTOR',
-        isClinical: true,
       });
       expect(res.staffCode).toBe('NV0002');
       expect(res.fullName).toBe('BS. Lê Thị B');

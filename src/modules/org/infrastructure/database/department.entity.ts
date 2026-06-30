@@ -26,8 +26,7 @@ export class DepartmentOrmEntity {
   @JoinColumn({ name: 'branch_id' })
   branch: BranchOrmEntity | null;
 
-  @OneToMany(() => StaffOrmEntity, (staff) => staff.department)
-  staff: StaffOrmEntity[];
+
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

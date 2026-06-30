@@ -1,9 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, IsDateString, IsUUID, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsDateString, IsUUID, IsIn, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   PATIENT_GENDER,
-  STAFF_TITLE,
   type PatientGender,
+  STAFF_TITLE,
   type StaffTitle,
 } from '../../../../common/constants/workflow.constants';
 
@@ -60,11 +60,6 @@ export class CreateStaffDto {
   @IsIn(Object.values(STAFF_TITLE))
   title: StaffTitle;
 
-  @ApiProperty({ example: true, required: false })
-  @IsOptional()
-  @IsBoolean()
-  isClinical?: boolean;
-
   @ApiProperty({ example: '8521a944-cf1c-431a-a121-c62438179d2b', required: false })
   @IsOptional()
   @IsUUID()
@@ -74,11 +69,6 @@ export class CreateStaffDto {
   @IsOptional()
   @IsString()
   nickname?: string;
-
-  @ApiProperty({ example: 'a0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
-  @IsOptional()
-  @IsUUID()
-  departmentId?: string;
 }
 
 export class UpdateStaffDto {
@@ -124,11 +114,6 @@ export class UpdateStaffDto {
   @IsIn(Object.values(STAFF_TITLE))
   title?: StaffTitle;
 
-  @ApiProperty({ example: true, required: false })
-  @IsOptional()
-  @IsBoolean()
-  isClinical?: boolean;
-
   @ApiProperty({ example: '8521a944-cf1c-431a-a121-c62438179d2b', required: false })
   @IsOptional()
   @IsUUID()
@@ -138,11 +123,6 @@ export class UpdateStaffDto {
   @IsOptional()
   @IsString()
   nickname?: string;
-
-  @ApiProperty({ example: 'a0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
-  @IsOptional()
-  @IsUUID()
-  departmentId?: string;
 }
 
 export class UpdatePracticingCertificateDto {
@@ -292,9 +272,6 @@ export class StaffResponseDto {
   title: string;
 
   @ApiProperty()
-  isClinical: boolean;
-
-  @ApiProperty()
   isActive: boolean;
 
   @ApiProperty()
@@ -308,9 +285,6 @@ export class StaffResponseDto {
 
   @ApiProperty()
   nickname: string | null;
-
-  @ApiProperty()
-  departmentId: string | null;
 
   @ApiProperty()
   createdAt: Date;
