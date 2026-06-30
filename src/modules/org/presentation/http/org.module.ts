@@ -46,6 +46,7 @@ import { GetRoomUseCase } from '../../application/use-cases/get-room.use-case';
 import { CreateRoomUseCase } from '../../application/use-cases/create-room.use-case';
 import { UpdateRoomUseCase } from '../../application/use-cases/update-room.use-case';
 import { ToggleRoomStatusUseCase } from '../../application/use-cases/toggle-room-status.use-case';
+import { AssignStaffsToRoomUseCase } from '../../application/use-cases/assign-staffs-to-room.use-case';
 
 import { ListResourcesUseCase } from '../../application/use-cases/list-resources.use-case';
 import { CreateResourceUseCase } from '../../application/use-cases/create-resource.use-case';
@@ -132,6 +133,7 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     CreateRoomUseCase,
     UpdateRoomUseCase,
     ToggleRoomStatusUseCase,
+    AssignStaffsToRoomUseCase,
 
     ListResourcesUseCase,
     CreateResourceUseCase,

@@ -8,6 +8,7 @@ import { GetRoomUseCase } from '../../../application/use-cases/get-room.use-case
 import { CreateRoomUseCase } from '../../../application/use-cases/create-room.use-case';
 import { UpdateRoomUseCase } from '../../../application/use-cases/update-room.use-case';
 import { ToggleRoomStatusUseCase } from '../../../application/use-cases/toggle-room-status.use-case';
+import { AssignStaffsToRoomUseCase } from '../../../application/use-cases/assign-staffs-to-room.use-case';
 import { CreateRoomDto, UpdateRoomDto, RoomResponseDto } from '../../../application/dtos/room.dto';
 
 @ApiTags('Room Management')
@@ -20,7 +21,8 @@ export class RoomController {
     private readonly getRoomUseCase: GetRoomUseCase,
     private readonly createRoomUseCase: CreateRoomUseCase,
     private readonly updateRoomUseCase: UpdateRoomUseCase,
-    private readonly toggleRoomStatusUseCase: ToggleRoomStatusUseCase
+    private readonly toggleRoomStatusUseCase: ToggleRoomStatusUseCase,
+    private readonly assignStaffsToRoomUseCase: AssignStaffsToRoomUseCase
   ) {}
 
   @Get()
@@ -70,5 +72,17 @@ export class RoomController {
     @Body('isActive') isActive: boolean
   ): Promise<RoomResponseDto> {
     return await this.toggleRoomStatusUseCase.execute(id, isActive);
+  }
+
+  @Post(':id/staffs')
+  @RequirePermissions('room:write')
+  @ApiOperation({ summary: 'Phân công hàng loạt nhân sự vào phòng khám' })
+  @ApiResponse({ status: 200, description: 'Phân công thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy phòng hoặc nhân sự' })
+  async assignStaffs(
+    @Param('id') id: string,
+    @Body('staffIds') staffIds: string[]
+  ): Promise<void> {
+    await this.assignStaffsToRoomUseCase.execute(id, staffIds);
   }
 }
