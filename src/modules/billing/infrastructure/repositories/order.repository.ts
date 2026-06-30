@@ -115,11 +115,21 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async saveItem(item: Omit<OrderItem, 'id'> & { id?: string }): Promise<OrderItem> {
-    const entity = this.itemRepository.create(item);
+    const cleanItem = { ...item } as any;
+    // Delete relation objects to prevent TypeORM from overriding foreign keys
+    delete cleanItem.performedBy;
+    delete cleanItem.service;
+
+    const entity = this.itemRepository.create(cleanItem) as unknown as OrderItemOrmEntity;
+
+    if (cleanItem.performedById === null) {
+      entity.performedBy = null;
+    }
+
     const saved = await this.itemRepository.save(entity);
     const reFetched = await this.itemRepository.findOne({
       where: { id: saved.id },
-      relations: { service: true },
+      relations: { service: true, performedBy: true },
     });
     return this.mapItemToDomain(reFetched!);
   }

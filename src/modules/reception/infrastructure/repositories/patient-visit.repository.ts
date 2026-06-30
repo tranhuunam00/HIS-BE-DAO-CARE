@@ -107,7 +107,7 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       const visitIds = entities.map((e) => e.id);
       const orders = await this.ormRepository.manager.find(OrderOrmEntity, {
         where: { visitId: In(visitIds) },
-        relations: { items: { service: true } },
+        relations: { items: { service: true, performedBy: true } },
       });
       for (const entity of entities) {
         const order = orders.find((o) => o.visitId === entity.id);

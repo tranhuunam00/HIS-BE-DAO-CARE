@@ -71,17 +71,20 @@
           Vitals --> ChooseRoute{Bệnh nhân đã biết cần khám gì?}
           
           %% Nhánh A: Đã biết dịch vụ (Khám chuyên khoa thẳng hoặc dịch vụ CLS lẻ)
-          ChooseRoute -->|Đã biết dịch vụ| OrderServiceDirect[4A. Lập đơn dịch vụ trực tiếp]
-          OrderServiceDirect --> PayDirect[5A. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          ChooseRoute -->|Đã biết dịch vụ| OrderServiceDirect[4A. Lập đơn dịch vụ trực tiếp <br> & Chọn phòng/Bác sĩ thực hiện]
+          OrderServiceDirect --> CheckStaffDirect{Kiểm tra ca trực / check-in của BS & Phòng?}
+          
+          CheckStaffDirect -->|Không trực ca / Chưa check-in| ShowWarnDirect[Popup cảnh báo rủi ro: <br> - Phòng chưa có ca trực <br> - BS không trực hoặc chưa check-in]
+          ShowWarnDirect --> ConfirmWarnDirect{Người tạo vẫn muốn gán?}
+          ConfirmWarnDirect -->|Có / Đồng ý tiếp tục| PayDirect[5A. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          ConfirmWarnDirect -->|Không / Hủy bỏ| OrderServiceDirect
+          
+          CheckStaffDirect -->|Hợp lệ: Có ca & Đã check-in| PayDirect
           PayDirect --> CashierOK{Thu ngân xác nhận đóng tiền?}
           
-          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH A)
-          CashierOK -->|Đã đóng tiền| DispatchDirect[6A. Điều phối phân phòng & bác sĩ <br> Tự động mở popup điều phối tại Cashier]
-          DispatchDirect --> CheckStaffDirect{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
-          CheckStaffDirect -->|Đạt điều kiện| GoServiceDirect[7A. Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
-          CheckStaffDirect -->|Không đạt| ReAssignDirect[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
-          ReAssignDirect -->|Chọn phòng khác| DispatchDirect
-          ReAssignDirect -->|Hủy dịch vụ / Hoàn tiền| OrderServiceDirect
+          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH A - TỰ ĐỘNG CẤP STT VÀ HÀNG CHỜ)
+          CashierOK -->|Đã đóng tiền| SetQueueDirect[6A. Hệ thống tự động cấp queue_number <br> & Đẩy vào hàng chờ phòng]
+          SetQueueDirect --> GoServiceDirect[7A. Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           
           %% Nhánh B: Chưa biết (Cần khám lâm sàng tổng quát / định hướng)
           ChooseRoute -->|Chưa định hướng rõ| DispatchClinic[4B. Điều phối phân vào Phòng khám Lâm sàng]
@@ -96,58 +99,50 @@
           CheckCLS -->|Không chỉ định CLS| COMPLETED[19. Hoàn thành khám: Trạng thái COMPLETED]
           
           %% Đăng ký & Thanh toán CLS cho nhánh B (hoặc dịch vụ phát sinh)
-          CLINICAL_EXAM_DONE --> OrderServiceCLS[8. Đăng ký các dịch vụ CLS chỉ định]
-          OrderServiceCLS --> PayCLS[9. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          CLINICAL_EXAM_DONE --> OrderServiceCLS[8. Bác sĩ chỉ định các dịch vụ CLS <br> & Chọn phòng/Bác sĩ thực hiện]
+          OrderServiceCLS --> CheckStaffCLS{Kiểm tra ca trực / check-in của BS & Phòng?}
+          
+          CheckStaffCLS -->|Không trực ca / Chưa check-in| ShowWarnCLS[Popup cảnh báo rủi ro: <br> - Phòng chưa có ca trực <br> - BS không trực hoặc chưa check-in]
+          ShowWarnCLS --> ConfirmWarnCLS{Người tạo vẫn muốn gán?}
+          ConfirmWarnCLS -->|Có / Đồng ý tiếp tục| PayCLS[9. Chờ thanh toán: Trạng thái PENDING_PAYMENT]
+          ConfirmWarnCLS -->|Không / Hủy bỏ| OrderServiceCLS
+          
+          CheckStaffCLS -->|Hợp lệ: Có ca & Đã check-in| PayCLS
           PayCLS --> CashierOK_CLS{Thu ngân xác nhận đóng tiền?}
           
-          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH B)
-          CashierOK_CLS -->|Đã đóng tiền| DispatchCLS[10. Điều phối phân phòng & bác sĩ <br> Tự động mở popup điều phối tại Cashier]
-          DispatchCLS --> CheckStaffCLS{Kiểm tra phòng có BS trực, check-in & SẴN SÀNG NHẬN BỆNH? <br> isAcceptingPatients == true}
-          CheckStaffCLS -->|Đạt điều kiện| GoServiceCLS[11. Chờ làm dịch vụ: Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
-          CheckStaffCLS -->|Không đạt| ReAssignCLS[Điều phối chọn phòng khác hoặc Hủy dịch vụ]
-          ReAssignCLS -->|Chọn phòng khác| DispatchCLS
-          ReAssignCLS -->|Hủy dịch vụ / Hoàn tiền| OrderServiceCLS
+          %% BƯỚC ĐIỀU PHỐI QUAN TRỌNG SAU THANH TOÁN (NHÁNH B - TỰ ĐỘNG CẤP STT VÀ HÀNG CHỜ)
+          CashierOK_CLS -->|Đã đóng tiền| SetQueueCLS[10. Hệ thống tự động cấp queue_number <br> & Đẩy vào hàng chờ phòng]
+          SetQueueCLS --> GoServiceCLS[11. Chờ làm dịch vụ: Trạng thái WAITING_SERVICE: Nằm trong hàng đợi phòng CLS]
           
-          %% Hoàn tiền & Hủy dịch vụ sau thanh toán (Refund & Cancellation)
-          GoServiceDirect -.->|Yêu cầu hủy dịch vụ| RequestRefund[Bệnh nhân yêu cầu hủy/hoàn tiền]
-          GoServiceCLS -.->|Yêu cầu hủy dịch vụ| RequestRefund
-          RequestRefund --> CashierRefund{Thu ngân duyệt hoàn tiền?}
-          CashierRefund -->|Đồng ý| RefundSuccess[Trạng thái CANCELLED & Hoàn tiền]
-          RefundSuccess --> CANCELLED
-          CashierRefund -->|Từ chối| ReturnToQueue[Quay lại hàng chờ phòng CLS]
-          ReturnToQueue --> IN_SERVICE
+          %% Hủy dịch vụ CHỈ được phép thực hiện KHI CHƯA THANH TOÁN (ở bước 4A hoặc 8)
+          OrderServiceDirect -.->|Bệnh nhân đổi ý khi chưa đóng tiền| DeleteUnpaid[Xóa dịch vụ chỉ định chưa thanh toán]
+          OrderServiceCLS -.->|Bệnh nhân đổi ý khi chưa đóng tiền| DeleteUnpaid
+          DeleteUnpaid --> CANCELLED[Đã hủy: Trạng thái CANCELLED]
           
           %% Thực hiện dịch vụ CLS
-          GoServiceDirect --> IN_SERVICE[12. Đang thực hiện dịch vụ: Trạng thái IN_SERVICE]
+          GoServiceDirect --> IN_SERVICE[12. Đang thực hiện dịch vụ: Trạng thái IN_SERVICE <br> Bác sĩ CLS nhận việc / Bắt đầu kỹ thuật]
           GoServiceCLS --> IN_SERVICE
           IN_SERVICE --> SERVICE_DONE[13. Bác sĩ/KTV phòng CLS hoàn thành & tải kết quả]
           
           %% Kiểm tra còn dịch vụ nào chưa thực hiện?
-          SERVICE_DONE --> CheckMoreServices{Còn dịch vụ?}
-          CheckMoreServices -->|Còn| GoServiceCLS
+          SERVICE_DONE --> CheckMoreServices{Còn dịch vụ nào chưa thực hiện?}
+          CheckMoreServices -->|Còn dịch vụ khác| GoServiceCLS
           
-          %% KHÂU HOÀN THÀNH DỊCH VỤ CUỐI CÙNG
-          CheckMoreServices -->|Hết dịch vụ| FinalServiceDone[14. Trạng thái HOÀN THÀNH DỊCH VỤ]
-          FinalServiceDone --> CoordinatorTalk[15. Điều phối viên hỏi han bệnh nhân]
-          CoordinatorTalk --> PatientDecision{Quyết định?}
+          %% KHÂU HOÀN THÀNH DỊCH VỤ CUỐI CÙNG (Hệ thống tự động tính trạng thái)
+          CheckMoreServices -->|Đã hoàn thành tất cả dịch vụ| CheckResultStatus{Có dịch vụ nào kết quả PENDING? <br> status = COMPLETED & resultStatus = PENDING}
           
-          %% Đồng ý chờ kết quả (Để bên trái hướng xuống dưới)
-          PatientDecision -->|Đồng ý chờ KQ| CoordConfirm[Điều phối bấm Xác nhận chờ kết quả]
-          CoordConfirm --> WAITING_RESULTS[16. Chờ kết quả: Trạng thái WAITING_RESULTS]
+          CheckResultStatus -->|Có - Đang chờ duyệt kết quả| WAITING_RESULTS[14. Chờ kết quả: Trạng thái WAITING_RESULTS]
+          CheckResultStatus -->|Không - Đã có đủ kết quả| ALL_SERVICES_DONE[15. Xong toàn bộ CLS: Trạng thái ALL_SERVICES_DONE]
           
-          %% Bệnh nhân đổi ý / Muốn thêm dịch vụ (Để bên phải hướng đi lên)
-          PatientDecision -->|Yêu cầu thêm CLS| RegisterMore[Yêu cầu đăng ký dịch vụ mới]
-          RegisterMore --> OrderServiceCLS
+          WAITING_RESULTS --> WAITING_CONCLUSION[16. Quay lại phòng khám lâm sàng ban đầu: Trạng thái WAITING_CONCLUSION]
+          ALL_SERVICES_DONE --> WAITING_CONCLUSION
           
-          WAITING_RESULTS --> WAITING_CONCLUSION[17. Quay lại phòng khám lâm sàng ban đầu: Trạng thái WAITING_CONCLUSION]
+          WAITING_CONCLUSION --> IN_CONCLUSION[17. Bác sĩ đọc kết quả & kết luận đơn thuốc: Trạng thái IN_CONCLUSION]
+          IN_CONCLUSION --> COMPLETED[18. Hoàn thành khám: Trạng thái COMPLETED]
           
-          WAITING_CONCLUSION --> IN_CONCLUSION[18. Bác sĩ đọc kết quả & kết luận đơn thuốc: Trạng thái IN_CONCLUSION]
-          IN_CONCLUSION --> COMPLETED[19. Hoàn thành khám: Trạng thái COMPLETED]
-          
-          %% Đường rẽ nhánh hủy
-          Admitted -.-> CANCELLED[Đã hủy: Trạng thái CANCELLED]
+          %% Đường rẽ nhánh hủy khác
+          Admitted -.-> CANCELLED
           WAITING_CLINICAL_EXAM -.-> CANCELLED
-          PENDING_PAYMENT -.-> CANCELLED
     </div>
   </div>
 
@@ -278,6 +273,488 @@
           }
           
           COMPLETED_PendingResult --> COMPLETED_Final : Bác sĩ A bấm "Viết KQ" (Nhập kết quả và lưu)
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Quy trình Hàng đợi Cận lâm sàng theo Dịch vụ chỉ định (Order Item Worklist Flow)</h1>
+    <p>Sơ đồ dưới đây thể hiện cơ chế hiển thị danh sách hàng đợi làm việc (Worklist) của bác sĩ CLS theo từng Dịch vụ chỉ định (Order Item) thay vì theo Lượt khám (Visit).</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          Start([Bệnh nhân thanh toán & gán vào phòng]) --> GetItems[Hệ thống lọc toàn bộ Order Items được gán cho Phòng hiện tại]
+          GetItems --> RenderList[Hiển thị danh sách thẻ chỉ định dịch vụ y khoa ở thanh bên trái]
+          
+          %% Trực quan hóa 4 bộ lọc
+          RenderList --> FilterScope{Bác sĩ chọn bộ lọc trạng thái?}
+          
+          FilterScope -->|1. Chờ thực hiện - WAITING| ShowWaiting[Chỉ hiển thị các dịch vụ:<br>status == PENDING và chưa có bác sĩ nhận việc]
+          FilterScope -->|2. Đang thực hiện - IN_PROGRESS| ShowInProgress[Chỉ hiển thị các dịch vụ:<br>status == IN_PROGRESS hoặc PENDING đã được bác sĩ nhận việc]
+          FilterScope -->|3. Chờ kết quả - WAITING_RESULTS| ShowWaitingResults[Chỉ hiển thị các dịch vụ:<br>status == COMPLETED nhưng kết quả resultStatus == PENDING]
+          FilterScope -->|4. Hoàn thành - DONE| ShowDone[Chỉ hiển thị các dịch vụ:<br>status == COMPLETED và kết quả resultStatus == COMPLETED]
+          
+          %% Nhận việc & Bác sĩ phụ trách
+          ShowWaiting --> ClickAccept[Bác sĩ click Nhận việc]
+          ClickAccept --> AssignDoctor[Gán performedById = ID Bác sĩ hiện tại]
+          AssignDoctor --> StateToInProgress[Chuyển trạng thái dịch vụ sang IN_PROGRESS]
+          
+          ShowInProgress --> ClickDone[Bác sĩ nhập kết quả & Lưu hoàn thành]
+          ClickDone --> StateToCompleted[Chuyển trạng thái dịch vụ sang COMPLETED và resultStatus sang COMPLETED]
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Quy trình Chọn Phòng thực hiện khi Chỉ định Dịch vụ CLS (Target Room Selection Flow)</h1>
+    <p>Sơ đồ dưới đây thể hiện quy trình gán phòng khi Bác sĩ hoặc Điều phối viên thêm dịch vụ chỉ định y tế, bắt buộc chọn phòng nếu dịch vụ có từ 2 phòng khả dụng trở lên.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px; display: flex; flex-direction: column; gap: 40px;">
+    <!-- Sơ đồ 1: Quy trình chọn phòng ban đầu -->
+    <div style="background: #272828; padding: 20px; border-radius: 8px;">
+      <h3 style="color: #fff; margin-top: 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px;">A. Quy trình Chọn Phòng & Gán Bác sĩ ban đầu khi Tạo chỉ định</h3>
+      <div class="mermaid">
+        flowchart TD
+            Start([Bác sĩ hoặc Điều phối viên thêm chỉ định dịch vụ]) --> CheckRooms{Dịch vụ này có bao nhiêu phòng hoạt động và có năng lực thực hiện?}
+            
+            %% Nhánh 1 phòng
+            CheckRooms -->|Chỉ có 1 phòng duy nhất| CheckRoomShift{Kiểm tra ca trực hôm nay của phòng đó?}
+            
+            CheckRoomShift -->|Không có ca trực nào đăng ký| BlockAuto["Chặn cứng (BE trả lỗi): <br> Không thể tự động gán chỉ định vì <br> phòng thực hiện chưa có ca trực hôm nay"]
+            BlockAuto --> BlockCreate[Chặn không cho tạo chỉ định]
+            BlockCreate --> EndBlock([Hủy tác vụ])
+            
+            CheckRoomShift -->|Có ca trực đăng ký| CheckDocCheckIn{Kiểm tra bác sĩ đã check-in ca trực hiện tại ở phòng đó?}
+            
+            CheckDocCheckIn -->|Có đúng 1 bác sĩ duy nhất đã check-in| AutoAssignAll["Tự động gán hoàn toàn (Giảm click): <br> - assignedRoomId = ID phòng duy nhất <br> - performedById = ID Bác sĩ duy nhất"]
+            AutoAssignAll --> Success([Thêm chỉ định thành công])
+            
+            CheckDocCheckIn -->|Không có bác sĩ OR Có nhiều bác sĩ check-in| ShowManualSelect["Hiện popup bắt buộc chọn bác sĩ: <br> (Danh sách hiển thị bác sĩ thuộc phòng này)"]
+            
+            ShowManualSelect --> UserSelectDoc{Bác sĩ được chọn có lịch trực hôm nay?}
+            
+            UserSelectDoc -->|Có ca trực - Chưa check-in| ShowAlertDoc["Popup cảnh báo nhắc nhở: <br> Bác sĩ chưa check-in ca trực"]
+            ShowAlertDoc --> ConfirmAlertDoc{Người tạo vẫn muốn gán?}
+            ConfirmAlertDoc -->|Có / Xác nhận| SaveManualDoc["Lưu: assignedRoomId = ID phòng <br> - performedById = ID Bác sĩ <br> - status = PENDING"]
+            ConfirmAlertDoc -->|Không / Quay lại| ShowManualSelect
+            
+            UserSelectDoc -->|Không có ca trực ở phòng này| BlockManualDoc["Chặn cứng (Không cho gán): <br> Bác sĩ không có lịch trực hôm nay tại phòng này"]
+            BlockManualDoc --> ShowManualSelect
+            
+            SaveManualDoc --> Success
+            
+            %% Nhánh nhiều phòng
+            CheckRooms -->|Từ 2 phòng trở lên| OpenSelectionModal[Mở Modal chọn phòng thực hiện]
+            OpenSelectionModal --> RenderRoomsTable[Hiển thị danh sách phòng khả dụng kèm số hàng chờ & BS trực]
+            RenderRoomsTable --> UserSelectRoom{Người tạo chọn phòng & bác sĩ?}
+            UserSelectRoom -->|Hủy / Không chọn| BlockCreate
+            
+            UserSelectRoom -->|Chọn phòng & Bác sĩ và ấn Confirm| CheckSelectedShift{Kiểm tra lịch trực ca hôm nay?}
+            
+            CheckSelectedShift -->|Phòng hoặc Bác sĩ không có ca trực| BlockManualSelection["Chặn cứng (Không cho gán): <br> Phòng hoặc Bác sĩ được chọn không có ca trực hôm nay"]
+            BlockManualSelection --> RenderRoomsTable
+            
+            CheckSelectedShift -->|Bác sĩ có ca - Chưa check-in| ShowAlertDocMany["Popup cảnh báo nhắc nhở: <br> Bác sĩ chưa check-in ca trực"]
+            ShowAlertDocMany --> ConfirmAlertMany{Người tạo vẫn muốn gán?}
+            ConfirmAlertMany -->|Có / Xác nhận| SetAssignedRoom["Lưu: assignedRoomId = ID phòng được chọn <br> - performedById = ID Bác sĩ được chọn <br> - status = PENDING"]
+            ConfirmAlertMany -->|Không / Quay lại| RenderRoomsTable
+            
+            CheckSelectedShift -->|Hợp lệ: Đã check-in & có ca trực| SetAssignedRoom
+            SetAssignedRoom --> Success
+      </div>
+    </div>
+
+    <!-- Sơ đồ 2: Quy trình thay đổi bác sĩ gán đích danh -->
+    <div style="background: #272828; padding: 20px; border-radius: 8px;">
+      <h3 style="color: #fff; margin-top: 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px;">B. Quy trình Thay đổi Bác sĩ thực hiện theo yêu cầu đích danh của Bệnh nhân</h3>
+      <div class="mermaid">
+        flowchart TD
+            StartChange([Bệnh nhân yêu cầu khám đích danh bác sĩ khác]) --> OpenItemDetail[Bác sĩ/Điều phối viên mở chi tiết Dịch vụ chỉ định - Order Item]
+            OpenItemDetail --> ClickEditDoc[Bấm nút Chỉnh sửa bác sĩ thực hiện]
+            ClickEditDoc --> LoadRoomDoctors[Tải danh sách bác sĩ của phòng gán kèm trạng thái ca trực/check-in]
+            LoadRoomDoctors --> UserChooseDoc{Chọn bác sĩ mong muốn?}
+            
+            UserChooseDoc -->|Bác sĩ có ca & đã check-in| SaveDoc[Cập nhật performedById = ID Bác sĩ mới]
+            
+            UserChooseDoc -->|Bác sĩ có ca - Chưa check-in| ShowWarn["Popup cảnh báo nhắc nhở: <br> Bác sĩ chưa check-in ca trực"]
+            ShowWarn --> ConfirmWarn{Vẫn muốn gán bác sĩ này?}
+            ConfirmWarn -->|Không| LoadRoomDoctors
+            ConfirmWarn -->|Có / Xác nhận| SaveDoc
+            
+            UserChooseDoc -->|Bác sĩ không có ca trực phòng này| BlockEditDoc["Chặn cứng (Không cho gán): <br> Bác sĩ không trực phòng này hôm nay"]
+            BlockEditDoc --> LoadRoomDoctors
+            
+            SaveDoc --> SuccessChange([Cập nhật bác sĩ thực hiện thành công])
+      </div>
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Luồng Gán Dịch vụ vào Phòng thực hiện (Room Capability & Service Routing Lifecycle Flow)</h1>
+    <p>Sơ đồ dưới đây thể hiện toàn bộ vòng đời kết nối dữ liệu từ khi Quản trị viên thiết lập cấu hình phòng, Bác sĩ chỉ định chọn phòng thực hiện, Thu ngân thu phí cấp số xếp hàng cho đến khi dịch vụ xuất hiện trong hàng đợi của bác sĩ cận lâm sàng.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          %% Phase 1: Cấu hình hệ thống (Admin)
+          subgraph Phase1 [Phase 1: Thiết lập năng lực phòng]
+              CreateRoom["1. Tạo Phòng khám/Kỹ thuật <br> (Ví dụ: Phòng Siêu âm 1, Phòng Siêu âm 2)"]
+              CreateService["2. Tạo Danh mục dịch vụ <br> (Ví dụ: Siêu âm ổ bụng, Siêu âm tim)"]
+              LinkCapability["3. Gán dịch vụ cho phòng <br> (Room Service Capabilities)"]
+              CreateRoom --> LinkCapability
+              CreateService --> LinkCapability
+          end
+
+          %% Phase 2: Chỉ định & Định luồng (Bác sĩ phòng khám/Điều phối viên)
+          subgraph Phase2 [Phase 2: Chỉ định & Chọn phòng thực hiện]
+              Prescribe["4. Bác sĩ hoặc Lễ tân thêm chỉ định dịch vụ"] --> CheckCapability{5. Kiểm tra phòng đáp ứng dịch vụ này?}
+              
+              CheckCapability -->|Chỉ có 1 phòng duy nhất| AutoAssign["6a. Hệ thống tự động gán <br> assignedRoomId = ID phòng duy nhất"]
+              CheckCapability -->|Có từ 2 phòng trở lên| ShowModal["6b. Hiển thị danh sách phòng có năng lực <br> kèm số lượng bệnh nhân đang chờ"]
+              
+              ShowModal --> UserSelect["7. Nhân viên y tế chọn phòng thủ công"]
+              UserSelect --> ManualAssign["8. Gán assignedRoomId = ID phòng đã chọn"]
+              
+              AutoAssign --> CreateUnpaidItem["9. Tạo OrderItem ở trạng thái <br> isPaid = false, status = PENDING"]
+              ManualAssign --> CreateUnpaidItem
+          end
+
+          %% Phase 3: Kích hoạt hàng đợi (Thu ngân)
+          subgraph Phase3 [Phase 3: Thanh toán & Sinh số thứ tự]
+              CreateUnpaidItem --> PaymentSuccess["10. Bệnh nhân thanh toán tại quầy thu ngân"]
+              PaymentSuccess --> UpdatePaid["11. Cập nhật isPaid = true"]
+              UpdatePaid --> GetMaxQueue["12. Tìm số thứ tự lớn nhất hôm nay của assignedRoomId đó"]
+              GetMaxQueue --> IncQueue["13. Gán queueNumber = số lớn nhất + 1"]
+          end
+
+          %% Phase 4: Hiển thị tại phòng khám (Bác sĩ cận lâm sàng)
+          subgraph Phase4 [Phase 4: Hàng đợi phòng cận lâm sàng]
+              IncQueue --> FetchWorklist["14. Bác sĩ CLS đăng nhập và chọn phòng làm việc"]
+              FetchWorklist --> FlattenItems["15. Frontend lấy danh sách chỉ định, làm phẳng thành các Order Items"]
+              FlattenItems --> FilterByRoom["16. Lọc chỉ hiển thị các Order Items có assignedRoomId == phòng hiện tại"]
+              FilterByRoom --> DisplayQueue["17. Thẻ dịch vụ xuất hiện trong hàng chờ phòng CLS <br> Sẵn sàng để bác sĩ thực hiện"]
+          end
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Sinh số thứ tự dịch vụ khi Thanh toán (Queue Number Generation on Payment Flow)</h1>
+    <p>Sơ đồ dưới đây thể hiện cơ chế tự động sinh số thứ tự (STT) phòng/dịch vụ cho từng Order Item ngay khi người bệnh hoàn tất thanh toán hóa đơn.</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          Start([Bệnh nhân thanh toán hóa đơn thành công]) --> GetUnpaid[Hệ thống lấy danh sách các dịch vụ chưa thanh toán của hóa đơn]
+          GetUnpaid --> LoopItems[Duyệt qua từng dịch vụ chỉ định: order_item]
+          
+          LoopItems --> GetRoomID[Lấy assignedRoomId của dịch vụ]
+          GetRoomID --> CheckHasRoom{Có gán phòng thực hiện?}
+          
+          CheckHasRoom -->|Không gán phòng| NoQueue[Không sinh số thứ tự hàng đợi]
+          
+          CheckHasRoom -->|Có gán phòng| QueryMaxQueue[Tìm số thứ tự lớn nhất hôm nay tại phòng đó trong DB]
+          QueryMaxQueue --> CalculateNext[Tính số thứ tự mới = Số lớn nhất hôm nay + 1]
+          CalculateNext --> SaveQueue[Lưu queueNumber = số thứ tự mới vào order_item]
+          SaveQueue --> SetPaid[Cập nhật isPaid = true]
+          
+          NoQueue --> SetPaid
+          ConfirmSave -->|Có / Đồng ý| SaveInProgress
+          
+          SaveInProgress --> Success
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Sơ đồ Tác động Trạng thái từ Order Item lên Đơn & Lượt khám (Order Item Status Propagation Flow)</h1>
+    <p>Sơ đồ dưới đây thể hiện quy tắc lan truyền và tính toán lại trạng thái (Recalculation & Propagation Rules) khi Bác sĩ/Điều phối viên Thêm mới, Xóa (chỉ áp dụng khi chưa thanh toán), thanh toán hóa đơn, hoặc Cập nhật tiến độ của từng Dịch vụ chỉ định (Order Item).</p>
+  </div>
+
+  <div class="container" style="margin-bottom: 50px;">
+    <div class="mermaid">
+      flowchart TD
+          %% Bắt đầu các hành động tác động
+          ActionStart([Thao tác tác động lên Order Item]) --> ActionType{Loại thao tác?}
+          
+          %% 1. Thêm mới dịch vụ
+          ActionType -->|1. Thêm mới chỉ định| AddItem[Thêm Order Item mới vào đơn]
+          AddItem --> RecalcTotalAdd[Tính toán lại tổng tiền của đơn hàng]
+          RecalcTotalAdd --> CheckOrderPaid{Order có status = PAID?}
+          CheckOrderPaid -->|Có| ResetOrderPending[Reset Order status = PENDING]
+          CheckOrderPaid -->|Không| CheckVisitStatus{Trạng thái Visit?}
+          ResetOrderPending --> CheckVisitStatus
+          CheckVisitStatus -->|Là ADMITTED, CLINICAL_EXAM_DONE, WAITING_RESULTS, ALL_SERVICES_DONE| SetVisitPendingPayment[Visit chuyển sang PENDING_PAYMENT]
+          CheckVisitStatus -->|Khác| KeepVisitStatusNew[Giữ nguyên trạng thái Visit]
+          
+          %% 2. Xóa dịch vụ
+          ActionType -->|2. Yêu cầu xóa chỉ định| DeleteItem{Dịch vụ đã thanh toán chưa? isPaid == true}
+          DeleteItem -->|Đã thanh toán| BlockDelete[Từ chối xóa / Ẩn nút Xóa trên giao diện]
+          DeleteItem -->|Chưa thanh toán| PerformDelete[Tiến hành xóa Order Item khỏi DB]
+          PerformDelete --> RecalculateTotal[Tính toán lại tổng tiền của đơn hàng]
+          RecalculateTotal --> CheckRemaining{Tất cả các dịch vụ còn lại đã hoàn tất/hủy?}
+          CheckRemaining -->|Không - còn dịch vụ đang chạy/chờ| KeepVisitStatus[Giữ nguyên trạng thái Visit]
+          CheckRemaining -->|Đúng - tất cả đã xong| CheckRemainingResults{Có dịch vụ nào chưa trả kết quả? <br> resultStatus = PENDING}
+          CheckRemainingResults -->|Có| SetVisitWaitingResults[Visit chuyển sang WAITING_RESULTS]
+          CheckRemainingResults -->|Không| SetVisitAllServicesDone[Visit chuyển sang ALL_SERVICES_DONE]
+          
+          %% 3. Thanh toán hóa đơn
+          ActionType -->|3. Thanh toán dịch vụ| PayServices[Thu ngân tạo thanh toán thành công]
+          PayServices --> SetItemsPaid[Cập nhật isPaid = true cho các item & Order.status = PAID]
+          SetItemsPaid --> GenerateQueue[Tự động sinh queue_number cho từng item phòng]
+          GenerateQueue --> RecalculateVisitStatus[Tính toán lại trạng thái Visit]
+          RecalculateVisitStatus --> CheckAnyInProgress{Có dịch vụ nào đã nhận việc trước đó?}
+          CheckAnyInProgress -->|Có| SetVisitInService[Visit chuyển sang IN_SERVICE]
+          CheckAnyInProgress -->|Không| SetVisitWaitingService2[Visit chuyển sang WAITING_SERVICE]
+          
+          %% 4. Cập nhật trạng thái dịch vụ (Nhận việc, Đang làm, Trả kết quả)
+          ActionType -->|4. Thay đổi trạng thái dịch vụ| UpdateItem[Cập nhật status / resultStatus của Order Item]
+          UpdateItem --> CheckNewStatus{Trạng thái mới của Item?}
+          
+          CheckNewStatus -->|Nhận việc / Đang làm| CheckVisitWaiting{Visit đang ở WAITING_SERVICE?}
+          CheckVisitWaiting -->|Đúng| SetVisitInService
+          CheckVisitWaiting -->|Sai| KeepVisitStatusUpdate[Giữ nguyên trạng thái Visit]
+          
+          CheckNewStatus -->|Hoàn thành / Trả kết quả| CheckAllItemsDone{Tất cả các dịch vụ trong đơn đã hoàn thành/hủy?}
+          CheckAllItemsDone -->|Chưa - Còn dịch vụ khác| KeepVisitStatus
+          CheckAllItemsDone -->|Rồi - Hết dịch vụ| CheckAnyPendingResults{Có dịch vụ nào kết quả PENDING? <br> status = COMPLETED & resultStatus = PENDING}
+          CheckAnyPendingResults -->|Có| SetVisitWaitingResults
+          CheckAnyPendingResults -->|Không| SetVisitDone[Visit chuyển sang ALL_SERVICES_DONE]
+    </div>
+  </div>
+
+  <div class="header" style="margin-top: 40px;">
+    <h1>Danh mục Trạng thái (Status Reference Dictionary)</h1>
+    <p>Bảng liệt kê tất cả các trạng thái thực tế trong code, màu sắc hiển thị tương ứng trên giao diện (UI Badges) và ý nghĩa nghiệp vụ. Lưu ý: <strong>Order</strong> = hóa đơn tổng của 1 lần đến khám (visit), có thể chứa nhiều dịch vụ chỉ định (Order Items).</p>
+
+  </div>
+
+  <div class="container" style="margin-bottom: 40px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+
+      <!-- Bảng trạng thái Order -->
+      <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef2f6;">
+        <h3 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">1. Hóa đơn (Order.status) — 3 trạng thái</h3>
+        <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;"><em>Order = tổng toàn bộ dịch vụ của 1 bệnh nhân trong 1 lần đến khám. Tự động tính lại khi có item thêm/xóa chưa thanh toán.</em></p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b;">
+              <th style="padding: 8px 5px;">Mã trạng thái</th>
+              <th style="padding: 8px 5px;">Hiển thị</th>
+              <th style="padding: 8px 5px;">Ý nghĩa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+              <td style="padding: 10px 5px; font-family: monospace; font-weight: bold; color: #475569;">PENDING</td>
+              <td style="padding: 10px 5px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">Chờ thanh toán</span></td>
+              <td style="padding: 10px 5px; color: #334155;">Có ít nhất 1 dịch vụ chưa đóng tiền (<code>isPaid = false</code>). Tự động reset từ PAID về PENDING khi thêm item mới.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+              <td style="padding: 10px 5px; font-family: monospace; font-weight: bold; color: #475569;">PAID</td>
+              <td style="padding: 10px 5px;"><span style="background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #a7f3d0;">Đã thanh toán</span></td>
+              <td style="padding: 10px 5px; color: #334155;">Tất cả dịch vụ đã đóng tiền. Hệ thống gán queue_number và chuyển visit sang WAITING_SERVICE.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+              <td style="padding: 10px 5px; font-family: monospace; font-weight: bold; color: #475569;">CANCELLED</td>
+              <td style="padding: 10px 5px;"><span style="background-color: #f3f4f6; color: #374151; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #e5e7eb;">Đã hủy</span></td>
+              <td style="padding: 10px 5px; color: #334155;">Hóa đơn đã bị hủy hoàn toàn.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bảng trạng thái Order Item — redesigned to show isPaid as explicit dimension -->
+      <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef2f6;">
+        <h3 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #10b981; padding-bottom: 8px;">2. Dịch vụ chỉ định (OrderItem) — 2 chiều trạng thái</h3>
+        <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">Mỗi Order Item có <strong>2 chiều trạng thái độc lập</strong> hiển thị song song trên UI (dưới dạng 2 badge riêng biệt):</p>
+
+        <!-- 2-dimension explanation -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0;">
+
+          <!-- Dim 1: Payment -->
+          <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px;">
+            <p style="margin: 0 0 8px; font-weight: 700; font-size: 0.85rem; color: #92400e;">📦 Chiều 1: Thanh toán (<code>isPaid: boolean</code>)</p>
+            <p style="margin: 0 0 8px; font-size: 0.8rem; color: #78350f;">Một chiều, <strong>không thể đảo ngược</strong>. Khóa xóa item khi <code>isPaid=true</code>.</p>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="background-color: #fef3c7; color: #d97706; padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">⏳ Chờ thu tiền</span>
+              <span style="color: #6b7280; font-size: 1rem;">→</span>
+              <span style="background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #a7f3d0;">✓ Đã thanh toán</span>
+            </div>
+            <p style="margin: 8px 0 0; font-size: 0.78rem; color: #9ca3af;">Trigger: Thu ngân xác nhận → gán <code>isPaid=true</code> + sinh <code>queue_number</code>.</p>
+          </div>
+
+          <!-- Dim 2: Execution -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px;">
+            <p style="margin: 0 0 8px; font-weight: 700; font-size: 0.85rem; color: #065f46;">⚕️ Chiều 2: Thực hiện (<code>status</code> + <code>resultStatus</code>)</p>
+            <p style="margin: 0 0 8px; font-size: 0.8rem; color: #166534;">Chỉ hoạt động sau khi <code>isPaid=true</code>. Luồng tuyến tính từ trái sang phải.</p>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="background-color: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; border: 1px solid #bae6fd;">Chờ thực hiện</span>
+              <span style="color: #6b7280;">→</span>
+              <span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; border: 1px solid #fde68a;">Đang thực hiện</span>
+              <span style="color: #6b7280;">→</span>
+              <span style="background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; border: 1px solid #fecaca;">Chờ kết quả</span>
+              <span style="color: #6b7280;">→</span>
+              <span style="background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; border: 1px solid #a7f3d0;">Hoàn thành</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full state table -->
+        <p style="font-weight: 600; color: #374151; font-size: 0.85rem; margin: 16px 0 8px;">Bảng tất cả trạng thái hiển thị kết hợp (trên Worklist UI):</p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.82rem; color: #64748b; background: #f8fafc;">
+              <th style="padding: 8px 6px;">Nhãn hiển thị</th>
+              <th style="padding: 8px 6px;">isPaid</th>
+              <th style="padding: 8px 6px;">status</th>
+              <th style="padding: 8px 6px;">resultStatus</th>
+              <th style="padding: 8px 6px;">Có thể xóa?</th>
+              <th style="padding: 8px 6px;">Ý nghĩa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; background: #fffbeb;">
+              <td style="padding: 9px 6px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #fde68a;">⏳ Chờ thu tiền</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #ef4444; font-weight: bold;">false</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">PENDING</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #9ca3af;">NONE</td>
+              <td style="padding: 9px 6px; color: #16a34a; font-weight: 600;">✓ Có</td>
+              <td style="padding: 9px 6px; color: #334155;">Mới tạo, chưa qua quầy thu ngân. Có thể hủy/xóa tự do.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem;">
+              <td style="padding: 9px 6px;"><span style="background-color: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #bae6fd;">Chờ thực hiện</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #16a34a; font-weight: bold;">true</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">PENDING</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #9ca3af;">NONE</td>
+              <td style="padding: 9px 6px; color: #ef4444; font-weight: 600;">✗ Không</td>
+              <td style="padding: 9px 6px; color: #334155;">Đã đóng tiền, đã có <code>queue_number</code>, đang chờ bác sĩ nhận.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem;">
+              <td style="padding: 9px 6px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #fde68a;">Đang thực hiện</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #16a34a; font-weight: bold;">true</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">IN_PROGRESS</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #9ca3af;">NONE</td>
+              <td style="padding: 9px 6px; color: #ef4444; font-weight: 600;">✗ Không</td>
+              <td style="padding: 9px 6px; color: #334155;">Bác sĩ đã nhận việc (<code>performedById</code> được gán).</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem;">
+              <td style="padding: 9px 6px;"><span style="background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #fecaca;">Chờ kết quả</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #16a34a; font-weight: bold;">true</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">COMPLETED</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #d97706;">PENDING</td>
+              <td style="padding: 9px 6px; color: #ef4444; font-weight: 600;">✗ Không</td>
+              <td style="padding: 9px 6px; color: #334155;">Xong kỹ thuật, chưa viết/ký trả kết quả cho bệnh nhân.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem;">
+              <td style="padding: 9px 6px;"><span style="background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #a7f3d0;">✓ Hoàn thành</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #16a34a; font-weight: bold;">true</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">COMPLETED</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #16a34a;">COMPLETED</td>
+              <td style="padding: 9px 6px; color: #ef4444; font-weight: 600;">✗ Không</td>
+              <td style="padding: 9px 6px; color: #334155;">Đã trả kết quả đầy đủ. Đây là trạng thái kết thúc chính thức.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; background: #f9fafb;">
+              <td style="padding: 9px 6px;"><span style="background-color: #f3f4f6; color: #374151; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.78rem; border: 1px solid #e5e7eb;">Đã hủy</span></td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #ef4444; font-weight: bold;">false</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #475569;">CANCELLED</td>
+              <td style="padding: 9px 6px; font-family: monospace; color: #9ca3af;">NONE</td>
+              <td style="padding: 9px 6px; color: #9ca3af;">N/A</td>
+              <td style="padding: 9px 6px; color: #334155;">Đã bị hủy trước khi thanh toán. Không thể hoàn tác.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- Bảng trạng thái Lượt khám (Visit) - toàn chiều rộng -->
+    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef2f6; margin-top: 0;">
+      <h3 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #8b5cf6; padding-bottom: 8px;">3. Lượt khám bệnh nhân (PatientVisit.status) — 14 trạng thái</h3>
+      <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;"><em>Visit status là luồng chính điều phối vị trí bệnh nhân trong hệ thống. Bị tác động bởi Order Items và thao tác của bác sĩ/điều phối viên.</em></p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b; background: #f8fafc;">
+            <th style="padding: 8px 10px; width: 20%;">Mã trạng thái</th>
+            <th style="padding: 8px 10px; width: 18%;">Hiển thị</th>
+            <th style="padding: 8px 5px;">Ý nghĩa & Cách chuyển trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">ADMITTED</td>
+            <td style="padding: 10px;"><span style="background-color: #f0fdf4; color: #15803d; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #bbf7d0;">Đã tiếp nhận</span></td>
+            <td style="padding: 10px; color: #334155;">Bệnh nhân vừa check-in tại quầy lễ tân. Điểm bắt đầu của lượt khám.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">WAITING</td>
+            <td style="padding: 10px;"><span style="background-color: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #bae6fd;">Đang chờ</span></td>
+            <td style="padding: 10px; color: #334155;">Đang chờ vào phòng khám. Sau tiếp nhận nhưng chưa được gọi vào khám.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">WAITING_CLINICAL_EXAM</td>
+            <td style="padding: 10px;"><span style="background-color: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #bfdbfe;">Chờ vào khám</span></td>
+            <td style="padding: 10px; color: #334155;">Đã được điều phối vào phòng khám, đang chờ bác sĩ gọi vào.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">IN_CLINICAL_EXAM</td>
+            <td style="padding: 10px;"><span style="background-color: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">Đang khám</span></td>
+            <td style="padding: 10px; color: #334155;">Bác sĩ đang khám trực tiếp cho bệnh nhân.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">CLINICAL_EXAM_DONE</td>
+            <td style="padding: 10px;"><span style="background-color: #f0fdf4; color: #15803d; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #bbf7d0;">Khám xong</span></td>
+            <td style="padding: 10px; color: #334155;">Bác sĩ đã khám xong. Có thể chỉ định thêm CLS hoặc kết luận.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; background: #fff7ed;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #c2410c;">PENDING_PAYMENT</td>
+            <td style="padding: 10px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">Chờ thanh toán</span></td>
+            <td style="padding: 10px; color: #334155;"><strong>Được thêm vào khi:</strong> Bác sĩ thêm Order Item mới vào đơn, và visit đang ở các trạng thái ADMITTED / CLINICAL_EXAM_DONE / WAITING_RESULTS / ALL_SERVICES_DONE. Bệnh nhân cần ra quầy thu ngân đóng tiền.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">WAITING_SERVICE</td>
+            <td style="padding: 10px;"><span style="background-color: #ede9fe; color: #6d28d9; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #c4b5fd;">Chờ làm dịch vụ</span></td>
+            <td style="padding: 10px; color: #334155;">Đã thanh toán xong, đã cấp số thứ tự, đang chờ phòng CLS gọi vào làm.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">IN_SERVICE</td>
+            <td style="padding: 10px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">Đang làm dịch vụ</span></td>
+            <td style="padding: 10px; color: #334155;">Bác sĩ CLS đã nhận việc và đang thực hiện ít nhất 1 dịch vụ.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">ALL_SERVICES_DONE</td>
+            <td style="padding: 10px;"><span style="background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #a7f3d0;">Xong toàn bộ CLS</span></td>
+            <td style="padding: 10px; color: #334155;">Tất cả Order Items đã COMPLETED và resultStatus = COMPLETED. Sẵn sàng bác sĩ kết luận.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">WAITING_RESULTS</td>
+            <td style="padding: 10px;"><span style="background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fecaca;">Chờ kết quả CLS</span></td>
+            <td style="padding: 10px; color: #334155;">Có item đã COMPLETED nhưng resultStatus vẫn còn PENDING. Chờ trả kết quả đầy đủ.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">WAITING_CONCLUSION</td>
+            <td style="padding: 10px;"><span style="background-color: #ede9fe; color: #6d28d9; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #c4b5fd;">Chờ kết luận</span></td>
+            <td style="padding: 10px; color: #334155;">Toàn bộ CLS xong, chờ bác sĩ viết kết luận/chẩn đoán cuối cùng.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">IN_CONCLUSION</td>
+            <td style="padding: 10px;"><span style="background-color: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #fde68a;">Đang kết luận</span></td>
+            <td style="padding: 10px; color: #334155;">Bác sĩ đang viết kết luận/chẩn đoán cuối cùng cho lượt khám.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">COMPLETED</td>
+            <td style="padding: 10px;"><span style="background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #a7f3d0;">Hoàn thành</span></td>
+            <td style="padding: 10px; color: #334155;">Lượt khám đã hoàn thành toàn diện: khám, CLS, kết luận. Bệnh nhân ra về.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #475569;">CANCELLED</td>
+            <td style="padding: 10px;"><span style="background-color: #f3f4f6; color: #374151; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #e5e7eb;">Đã hủy</span></td>
+            <td style="padding: 10px; color: #334155;">Lượt khám bị hủy.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

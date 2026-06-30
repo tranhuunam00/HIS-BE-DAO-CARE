@@ -62,6 +62,8 @@ export class GetOrderByVisitUseCase {
         isPaid: item.isPaid ?? false,
         resultNotes: item.resultNotes,
         resultStatus: item.resultStatus,
+        performedById: item.performedById,
+        performedBy: item.performedBy,
         createdAt: item.createdAt!,
         updatedAt: item.updatedAt!,
         service: item.service,
