@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsDateString, IsUUID, IsIn, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsDateString, IsUUID, IsIn, IsBoolean, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   PATIENT_GENDER,
@@ -188,6 +188,11 @@ export class UpdatePracticingCertificateDto {
 }
 
 export class AssignStaffDto {
+  @ApiProperty({ example: 'a0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
   @ApiProperty({ example: 'b0efcb3f-9b58-4834-9544-7d27f77a3108' })
   @IsUUID()
   @IsNotEmpty()
@@ -195,11 +200,13 @@ export class AssignStaffDto {
 
   @ApiProperty({ example: 'c0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
   @IsOptional()
+  @ValidateIf((o, v) => v !== null)
   @IsUUID()
   specialtyId?: string;
 
   @ApiProperty({ example: 'd0efcb3f-9b58-4834-9544-7d27f77a3108', required: false })
   @IsOptional()
+  @ValidateIf((o, v) => v !== null)
   @IsUUID()
   roomId?: string;
 

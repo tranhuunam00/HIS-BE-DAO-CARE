@@ -96,6 +96,9 @@ describe('AssignStaffsToRoomUseCase', () => {
       assignmentsDb.set(assignment.id, assignment);
       return assignment;
     }),
+    delete: jest.fn(async (id: string) => {
+      assignmentsDb.delete(id);
+    }),
   };
 
   beforeEach(async () => {
@@ -168,6 +171,76 @@ describe('AssignStaffsToRoomUseCase', () => {
 
     const staff2Assign = currentAssignments.find((a) => a.staffId === 'staff-2222');
     expect(staff2Assign?.roomId).toBe('room-1111'); // should keep assignment
+  });
+
+  it('should support multiple room assignments for the same staff member without any limits (kiêm nhiệm nhiều phòng)', async () => {
+    // 1. Setup: staff1 is currently assigned to room-1111 (Primary)
+    const primaryAssign = new StaffAssignment(
+      'assign-primary',
+      'staff-1111',
+      'branch-1111',
+      null,
+      'room-1111',
+      true,
+      new Date(),
+      new Date()
+    );
+    assignmentsDb.set(primaryAssign.id, primaryAssign);
+
+    // Create a second room in the same branch
+    const secondRoom = new Room(
+      'room-2222',
+      'branch-1111',
+      'Phòng Khám 102',
+      'PK102',
+      'CLINIC',
+      null,
+      'Tầng 1',
+      1,
+      true,
+      new Date(),
+      new Date(),
+      []
+    );
+    roomsDb.set(secondRoom.id, secondRoom);
+
+    // Create a third room in the same branch
+    const thirdRoom = new Room(
+      'room-3333',
+      'branch-1111',
+      'Phòng Khám 103',
+      'PK103',
+      'CLINIC',
+      null,
+      'Tầng 1',
+      1,
+      true,
+      new Date(),
+      new Date(),
+      []
+    );
+    roomsDb.set(thirdRoom.id, thirdRoom);
+
+    // 2. Execute: assign staff1 to room-2222 AND room-3333
+    await useCase.execute('room-2222', ['staff-1111']);
+    await useCase.execute('room-3333', ['staff-1111']);
+
+    // 3. Assertions:
+    // staff1 should now be assigned to THREE rooms: room-1111, room-2222, and room-3333!
+    const staff1Assignments = Array.from(assignmentsDb.values()).filter((a) => a.staffId === 'staff-1111');
+    expect(staff1Assignments.length).toBe(3);
+
+    const assignToRoom1 = staff1Assignments.find((a) => a.roomId === 'room-1111');
+    expect(assignToRoom1).toBeDefined();
+    expect(assignToRoom1?.isPrimary).toBe(true);
+
+    const assignToRoom2 = staff1Assignments.find((a) => a.roomId === 'room-2222');
+    expect(assignToRoom2).toBeDefined();
+    expect(assignToRoom2?.isPrimary).toBe(false);
+
+    const assignToRoom3 = staff1Assignments.find((a) => a.roomId === 'room-3333');
+    expect(assignToRoom3).toBeDefined();
+    expect(assignToRoom3?.isPrimary).toBe(false);
   });
 
   it('should throw NotFoundException if room does not exist', async () => {

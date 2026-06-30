@@ -48,9 +48,32 @@ export class AssignStaffUseCase {
       await this.staffAssignmentRepository.clearPrimary(staffId);
     }
 
-    // Check if assignment for this branch already exists for this staff to update, otherwise create new
+    // Check if assignment already exists for this staff to update, otherwise create new
     const existingAssignments = await this.staffAssignmentRepository.findByStaffId(staffId);
-    const existing = existingAssignments.find((a) => a.branchId === dto.branchId);
+    
+    let existing: StaffAssignment | undefined;
+    if (dto.id) {
+      existing = existingAssignments.find((a) => a.id === dto.id);
+    } else if (dto.roomId) {
+      existing = existingAssignments.find((a) => a.branchId === dto.branchId && a.roomId === dto.roomId);
+    } else {
+      existing = existingAssignments.find((a) => a.branchId === dto.branchId && !a.roomId);
+    }
+
+    // If we are setting room to null for a secondary assignment, we can delete the assignment row entirely
+    if (dto.roomId === null && existing && !existing.isPrimary) {
+      await this.staffAssignmentRepository.delete(existing.id);
+      return {
+        id: existing.id,
+        staffId: existing.staffId,
+        branchId: existing.branchId,
+        specialtyId: null,
+        roomId: null,
+        isPrimary: false,
+        createdAt: existing.createdAt,
+        updatedAt: new Date()
+      };
+    }
 
     const id = existing ? existing.id : crypto.randomUUID();
     const now = new Date();

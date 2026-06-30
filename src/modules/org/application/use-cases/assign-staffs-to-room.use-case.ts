@@ -35,20 +35,25 @@ export class AssignStaffsToRoomUseCase {
     const staffToUnassign = currentStaffIds.filter((id) => !staffIds.includes(id));
     for (const staffId of staffToUnassign) {
       const existingAssignments = await this.staffAssignmentRepository.findByStaffId(staffId);
-      const branchAssignment = existingAssignments.find((a) => a.branchId === branchId);
-      if (branchAssignment) {
-        // Set roomId to null for this assignment
-        const updatedAssignment = new StaffAssignment(
-          branchAssignment.id,
-          branchAssignment.staffId,
-          branchAssignment.branchId,
-          branchAssignment.specialtyId,
-          null, // Clear roomId
-          branchAssignment.isPrimary,
-          branchAssignment.createdAt,
-          new Date()
-        );
-        await this.staffAssignmentRepository.save(updatedAssignment);
+      const roomAssignments = existingAssignments.filter((a) => a.branchId === branchId && a.roomId === roomId);
+      for (const a of roomAssignments) {
+        if (a.isPrimary) {
+          // If it is primary, keep the assignment row but clear the roomId (so they remain assigned to the branch)
+          const updatedAssignment = new StaffAssignment(
+            a.id,
+            a.staffId,
+            a.branchId,
+            a.specialtyId,
+            null, // Clear roomId
+            a.isPrimary,
+            a.createdAt,
+            new Date()
+          );
+          await this.staffAssignmentRepository.save(updatedAssignment);
+        } else {
+          // If it is a secondary assignment, delete the assignment row
+          await this.staffAssignmentRepository.delete(a.id);
+        }
       }
     }
 
@@ -60,23 +65,40 @@ export class AssignStaffsToRoomUseCase {
       }
 
       const existingAssignments = await this.staffAssignmentRepository.findByStaffId(staffId);
-      const branchAssignment = existingAssignments.find((a) => a.branchId === branchId);
+      
+      // Check if they are already assigned to this room in this branch
+      const alreadyAssigned = existingAssignments.some(
+        (a) => a.branchId === branchId && a.roomId === roomId
+      );
 
-      if (branchAssignment) {
-        // Update existing assignment's roomId
+      if (alreadyAssigned) {
+        continue;
+      }
+
+      // Check if they have an existing assignment in this branch with no room
+      const emptyRoomAssignment = existingAssignments.find(
+        (a) => a.branchId === branchId && !a.roomId
+      );
+
+      if (emptyRoomAssignment) {
+        // Fill the empty room assignment with this room
         const updatedAssignment = new StaffAssignment(
-          branchAssignment.id,
-          branchAssignment.staffId,
-          branchAssignment.branchId,
-          branchAssignment.specialtyId,
+          emptyRoomAssignment.id,
+          emptyRoomAssignment.staffId,
+          emptyRoomAssignment.branchId,
+          emptyRoomAssignment.specialtyId,
           roomId, // Assign to room
-          branchAssignment.isPrimary,
-          branchAssignment.createdAt,
+          emptyRoomAssignment.isPrimary,
+          emptyRoomAssignment.createdAt,
           new Date()
         );
         await this.staffAssignmentRepository.save(updatedAssignment);
       } else {
-        // Create new assignment
+        // Create new assignment row for this room.
+        // Make it primary only if they have no primary assignment in this branch yet.
+        const hasPrimaryInBranch = existingAssignments.some(
+          (a) => a.branchId === branchId && a.isPrimary
+        );
         const now = new Date();
         const newAssignment = new StaffAssignment(
           crypto.randomUUID(),
@@ -84,7 +106,7 @@ export class AssignStaffsToRoomUseCase {
           branchId,
           null,
           roomId, // Assign to room
-          false, // defaults to false for new secondary assignments
+          !hasPrimaryInBranch,
           now,
           now
         );
