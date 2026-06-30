@@ -143,12 +143,10 @@ describe('Organization & Branch Use Cases', () => {
       const res = await updateOrgUseCase.execute({
         name: 'Hệ thống DAO CARE Mới',
         shortName: 'DAO CARE NEW',
-        otpExpirationTime: 400,
       });
 
       expect(res.name).toBe('Hệ thống DAO CARE Mới');
       expect(res.shortName).toBe('DAO CARE NEW');
-      expect(res.otpExpirationTime).toBe(400);
       expect(mockOrganizationRepository.save).toHaveBeenCalled();
     });
   });

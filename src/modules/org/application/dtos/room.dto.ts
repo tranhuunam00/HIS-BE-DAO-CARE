@@ -1,6 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, IsInt, Min, IsIn, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsIn, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ResourceResponseDto } from './resource.dto';
 import {
   ROOM_TYPE,
   type RoomType,
@@ -38,12 +37,6 @@ export class CreateRoomDto {
   @IsString()
   floor?: string;
 
-  @ApiProperty({ example: 5, required: false })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  capacity?: number;
-
   @ApiProperty({ type: [String], required: false })
   @IsOptional()
   @IsArray()
@@ -72,12 +65,6 @@ export class UpdateRoomDto {
   @IsOptional()
   @IsString()
   floor?: string;
-
-  @ApiProperty({ example: 6, required: false })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  capacity?: number;
 
   @ApiProperty({ type: [String], required: false })
   @IsOptional()
@@ -109,13 +96,7 @@ export class RoomResponseDto {
   floor: string | null;
 
   @ApiProperty()
-  capacity: number;
-
-  @ApiProperty()
   isActive: boolean;
-
-  @ApiProperty({ type: [ResourceResponseDto], required: false })
-  resources?: ResourceResponseDto[];
 
   @ApiProperty({ type: [String], required: false })
   serviceIds?: string[];

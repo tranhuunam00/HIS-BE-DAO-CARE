@@ -25,11 +25,9 @@ export class UpdateRoomUseCase {
       dto.type !== undefined ? dto.type : room.type,
       dto.specialtyId !== undefined ? dto.specialtyId : room.specialtyId,
       dto.floor !== undefined ? dto.floor : room.floor,
-      dto.capacity !== undefined ? dto.capacity : room.capacity,
       room.isActive,
       room.createdAt,
       new Date(),
-      room.resources || [],
       dto.serviceIds !== undefined ? dto.serviceIds : room.serviceIds,
     );
 
@@ -42,19 +40,7 @@ export class UpdateRoomUseCase {
       type: saved.type,
       specialtyId: saved.specialtyId,
       floor: saved.floor,
-      capacity: saved.capacity,
       isActive: saved.isActive,
-      resources: saved.resources ? saved.resources.map(r => ({
-        id: r.id,
-        roomId: r.roomId,
-        name: r.name,
-        code: r.code,
-        type: r.type,
-        isActive: r.isActive,
-        isOccupied: r.isOccupied,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt
-      })) : [],
       serviceIds: saved.serviceIds || [],
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,

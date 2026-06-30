@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IRoomRepository } from '../../domain/repositories/room.repository.interface';
 import { Room } from '../../domain/entities/room.model';
-import { Resource } from '../../domain/entities/resource.model';
 import { RoomOrmEntity } from '../database/room.entity';
 import { RoomServiceCapabilityOrmEntity } from '../database/room-service-capability.entity';
 
@@ -23,7 +22,7 @@ export class RoomRepository implements IRoomRepository {
     }
     const orms = await this.ormRepository.find({
       where,
-      relations: { resources: true, serviceCapabilities: true },
+      relations: { serviceCapabilities: true },
       order: { createdAt: 'ASC' },
     });
     return orms.map((orm) => this.toDomain(orm));
@@ -32,7 +31,7 @@ export class RoomRepository implements IRoomRepository {
   async findById(id: string): Promise<Room | null> {
     const orm = await this.ormRepository.findOne({
       where: { id },
-      relations: { resources: true, serviceCapabilities: true },
+      relations: { serviceCapabilities: true },
     });
     return orm ? this.toDomain(orm) : null;
   }
@@ -40,7 +39,7 @@ export class RoomRepository implements IRoomRepository {
   async findByCode(code: string): Promise<Room | null> {
     const orm = await this.ormRepository.findOne({
       where: { code },
-      relations: { resources: true, serviceCapabilities: true },
+      relations: { serviceCapabilities: true },
     });
     return orm ? this.toDomain(orm) : null;
   }
@@ -64,23 +63,6 @@ export class RoomRepository implements IRoomRepository {
   }
 
   private toDomain(orm: RoomOrmEntity): Room {
-    const resources = orm.resources
-      ? orm.resources.map(
-          (r) =>
-            new Resource(
-              r.id,
-              r.roomId,
-              r.name,
-              r.code,
-              r.type,
-              r.isActive,
-              r.isOccupied,
-              r.createdAt,
-              r.updatedAt
-            )
-        )
-      : [];
-
     return new Room(
       orm.id,
       orm.branchId,
@@ -89,11 +71,9 @@ export class RoomRepository implements IRoomRepository {
       orm.type,
       orm.specialtyId,
       orm.floor,
-      orm.capacity,
       orm.isActive,
       orm.createdAt,
       orm.updatedAt,
-      resources,
       orm.serviceCapabilities?.map((capability) => capability.serviceId) || [],
     );
   }
@@ -107,7 +87,6 @@ export class RoomRepository implements IRoomRepository {
     orm.type = domain.type;
     orm.specialtyId = domain.specialtyId;
     orm.floor = domain.floor;
-    orm.capacity = domain.capacity;
     orm.isActive = domain.isActive;
     if (domain.createdAt) orm.createdAt = domain.createdAt;
     if (domain.updatedAt) orm.updatedAt = domain.updatedAt;

@@ -25,7 +25,6 @@ export class ToggleRoomStatusUseCase {
       room.type,
       room.specialtyId,
       room.floor,
-      room.capacity,
       isActive,
       room.createdAt,
       new Date()
@@ -40,7 +39,6 @@ export class ToggleRoomStatusUseCase {
       type: saved.type,
       specialtyId: saved.specialtyId,
       floor: saved.floor,
-      capacity: saved.capacity,
       isActive: saved.isActive,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,

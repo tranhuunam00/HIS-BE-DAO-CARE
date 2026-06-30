@@ -37,11 +37,9 @@ export class CreateRoomUseCase {
       dto.type,
       dto.specialtyId || null,
       dto.floor || null,
-      dto.capacity || 1,
       true,
       now,
       now,
-      [],
       dto.serviceIds || [],
     );
 
@@ -54,9 +52,7 @@ export class CreateRoomUseCase {
       type: saved.type,
       specialtyId: saved.specialtyId,
       floor: saved.floor,
-      capacity: saved.capacity,
       isActive: saved.isActive,
-      resources: [],
       serviceIds: saved.serviceIds || [],
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,

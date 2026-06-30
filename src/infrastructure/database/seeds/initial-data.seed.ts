@@ -331,12 +331,12 @@ async function seed() {
 
   // ─── 8. Seed Rooms ───────────────────────────────────────────────────────────
   const roomsList = [
-    { code: 'PK101', name: 'Phòng khám Nội 101', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK102', name: 'Phòng Cận Lâm Sàng Siêu Âm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1', capacity: 1 },
-    { code: 'PK103', name: 'Phòng khám Sản Phụ khoa 103', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK104', name: 'Phòng khám Nhi 104', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 2 },
-    { code: 'PK105', name: 'Quầy Lễ Tân & Tiếp Đón', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1', capacity: 5 },
-    { code: 'PK106', name: 'Phòng Xét Nghiệm Trung Tâm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1', capacity: 3 }
+    { code: 'PK101', name: 'Phòng khám Nội 101', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1' },
+    { code: 'PK102', name: 'Phòng Cận Lâm Sàng Siêu Âm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1' },
+    { code: 'PK103', name: 'Phòng khám Sản Phụ khoa 103', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1' },
+    { code: 'PK104', name: 'Phòng khám Nhi 104', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1' },
+    { code: 'PK105', name: 'Quầy Lễ Tân & Tiếp Đón', type: ROOM_TYPE.CLINIC, floor: 'Tầng 1' },
+    { code: 'PK106', name: 'Phòng Xét Nghiệm Trung Tâm', type: ROOM_TYPE.IMAGING, floor: 'Tầng 1' }
   ];
 
   const dbRooms: Record<string, RoomOrmEntity> = {};

@@ -126,15 +126,13 @@ describe('Rooms, Resources & Staff Use Cases', () => {
       const all = Array.from(roomsDb.values());
       const filtered = branchId ? all.filter((r) => r.branchId === branchId) : all;
       return filtered.map((r) => {
-        const res = Array.from(resourcesDb.values()).filter((resObj) => resObj.roomId === r.id);
-        return new Room(r.id, r.branchId, r.name, r.code, r.type, r.specialtyId, r.floor, r.capacity, r.isActive, r.createdAt, r.updatedAt, res);
+        return new Room(r.id, r.branchId, r.name, r.code, r.type, r.specialtyId, r.floor, r.isActive, r.createdAt, r.updatedAt);
       });
     }),
     findById: jest.fn(async (id: string) => {
       const r = roomsDb.get(id);
       if (!r) return null;
-      const res = Array.from(resourcesDb.values()).filter((resObj) => resObj.roomId === r.id);
-      return new Room(r.id, r.branchId, r.name, r.code, r.type, r.specialtyId, r.floor, r.capacity, r.isActive, r.createdAt, r.updatedAt, res);
+      return new Room(r.id, r.branchId, r.name, r.code, r.type, r.specialtyId, r.floor, r.isActive, r.createdAt, r.updatedAt);
     }),
     findByCode: jest.fn(async (code: string) => {
       for (const r of roomsDb.values()) {

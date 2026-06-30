@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrganizationOrmEntity } from '../../infrastructure/database/organization.entity';
 import { BranchOrmEntity } from '../../infrastructure/database/branch.entity';
 import { RoomOrmEntity } from '../../infrastructure/database/room.entity';
-import { ResourceOrmEntity } from '../../infrastructure/database/resource.entity';
 import { StaffOrmEntity } from '../../infrastructure/database/staff.entity';
 import { PracticingCertificateOrmEntity } from '../../infrastructure/database/practicing-certificate.entity';
 import { StaffAssignmentOrmEntity } from '../../infrastructure/database/staff-assignment.entity';
@@ -13,7 +12,6 @@ import { RoomServiceCapabilityOrmEntity } from '../../infrastructure/database/ro
 import { OrganizationController } from './controllers/organization.controller';
 import { BranchController } from './controllers/branch.controller';
 import { RoomController } from './controllers/room.controller';
-import { ResourceController } from './controllers/resource.controller';
 import { StaffController } from './controllers/staff.controller';
 import { DepartmentController } from './controllers/department.controller';
 
@@ -26,8 +24,6 @@ import { IBranchRepositoryToken } from '../../domain/repositories/branch.reposit
 import { BranchRepository } from '../../infrastructure/repositories/branch.repository';
 import { IRoomRepositoryToken } from '../../domain/repositories/room.repository.interface';
 import { RoomRepository } from '../../infrastructure/repositories/room.repository';
-import { IResourceRepositoryToken } from '../../domain/repositories/resource.repository.interface';
-import { ResourceRepository } from '../../infrastructure/repositories/resource.repository';
 import { IStaffRepositoryToken } from '../../domain/repositories/staff.repository.interface';
 import { StaffRepository } from '../../infrastructure/repositories/staff.repository';
 import { IStaffAssignmentRepositoryToken } from '../../domain/repositories/staff-assignment.repository.interface';
@@ -48,11 +44,6 @@ import { UpdateRoomUseCase } from '../../application/use-cases/update-room.use-c
 import { ToggleRoomStatusUseCase } from '../../application/use-cases/toggle-room-status.use-case';
 import { AssignStaffsToRoomUseCase } from '../../application/use-cases/assign-staffs-to-room.use-case';
 
-import { ListResourcesUseCase } from '../../application/use-cases/list-resources.use-case';
-import { CreateResourceUseCase } from '../../application/use-cases/create-resource.use-case';
-import { UpdateResourceUseCase } from '../../application/use-cases/update-resource.use-case';
-import { ToggleResourceStatusUseCase } from '../../application/use-cases/toggle-resource-status.use-case';
-
 import { ListStaffUseCase } from '../../application/use-cases/list-staff.use-case';
 import { GetStaffDetailUseCase } from '../../application/use-cases/get-staff-detail.use-case';
 import { CreateStaffUseCase } from '../../application/use-cases/create-staff.use-case';
@@ -61,7 +52,6 @@ import { ToggleStaffStatusUseCase } from '../../application/use-cases/toggle-sta
 import { UpdateCertificateUseCase } from '../../application/use-cases/update-certificate.use-case';
 import { AssignStaffUseCase } from '../../application/use-cases/assign-staff.use-case';
 
-import { ToggleResourceOccupancyUseCase } from '../../application/use-cases/toggle-resource-occupancy.use-case';
 import { CreateDepartmentUseCase } from '../../application/use-cases/create-department.use-case';
 import { UpdateDepartmentUseCase } from '../../application/use-cases/update-department.use-case';
 import { ListDepartmentsUseCase } from '../../application/use-cases/list-departments.use-case';
@@ -73,7 +63,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
       OrganizationOrmEntity,
       BranchOrmEntity,
       RoomOrmEntity,
-      ResourceOrmEntity,
       StaffOrmEntity,
       PracticingCertificateOrmEntity,
       StaffAssignmentOrmEntity,
@@ -85,7 +74,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     OrganizationController,
     BranchController,
     RoomController,
-    ResourceController,
     StaffController,
     DepartmentController,
   ],
@@ -102,10 +90,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     {
       provide: IRoomRepositoryToken,
       useClass: RoomRepository,
-    },
-    {
-      provide: IResourceRepositoryToken,
-      useClass: ResourceRepository,
     },
     {
       provide: IStaffRepositoryToken,
@@ -135,12 +119,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     ToggleRoomStatusUseCase,
     AssignStaffsToRoomUseCase,
 
-    ListResourcesUseCase,
-    CreateResourceUseCase,
-    UpdateResourceUseCase,
-    ToggleResourceStatusUseCase,
-    ToggleResourceOccupancyUseCase,
-
     ListStaffUseCase,
     GetStaffDetailUseCase,
     CreateStaffUseCase,
@@ -158,7 +136,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     IOrganizationRepositoryToken,
     IBranchRepositoryToken,
     IRoomRepositoryToken,
-    IResourceRepositoryToken,
     IStaffRepositoryToken,
     IStaffAssignmentRepositoryToken,
     IDepartmentRepositoryToken,
