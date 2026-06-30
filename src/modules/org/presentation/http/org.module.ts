@@ -6,17 +6,12 @@ import { RoomOrmEntity } from '../../infrastructure/database/room.entity';
 import { StaffOrmEntity } from '../../infrastructure/database/staff.entity';
 import { PracticingCertificateOrmEntity } from '../../infrastructure/database/practicing-certificate.entity';
 import { StaffAssignmentOrmEntity } from '../../infrastructure/database/staff-assignment.entity';
-import { DepartmentOrmEntity } from '../../infrastructure/database/department.entity';
 import { RoomServiceCapabilityOrmEntity } from '../../infrastructure/database/room-service-capability.entity';
 
 import { OrganizationController } from './controllers/organization.controller';
 import { BranchController } from './controllers/branch.controller';
 import { RoomController } from './controllers/room.controller';
 import { StaffController } from './controllers/staff.controller';
-import { DepartmentController } from './controllers/department.controller';
-
-import { IDepartmentRepositoryToken } from '../../domain/repositories/department.repository.interface';
-import { DepartmentRepository } from '../../infrastructure/repositories/department.repository';
 
 import { IOrganizationRepositoryToken } from '../../domain/repositories/organization.repository.interface';
 import { OrganizationRepository } from '../../infrastructure/repositories/organization.repository';
@@ -52,11 +47,6 @@ import { ToggleStaffStatusUseCase } from '../../application/use-cases/toggle-sta
 import { UpdateCertificateUseCase } from '../../application/use-cases/update-certificate.use-case';
 import { AssignStaffUseCase } from '../../application/use-cases/assign-staff.use-case';
 
-import { CreateDepartmentUseCase } from '../../application/use-cases/create-department.use-case';
-import { UpdateDepartmentUseCase } from '../../application/use-cases/update-department.use-case';
-import { ListDepartmentsUseCase } from '../../application/use-cases/list-departments.use-case';
-import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggle-department-status.use-case';
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -66,7 +56,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
       StaffOrmEntity,
       PracticingCertificateOrmEntity,
       StaffAssignmentOrmEntity,
-      DepartmentOrmEntity,
       RoomServiceCapabilityOrmEntity,
     ]),
   ],
@@ -75,7 +64,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     BranchController,
     RoomController,
     StaffController,
-    DepartmentController,
   ],
   providers: [
     // Repositories
@@ -98,10 +86,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     {
       provide: IStaffAssignmentRepositoryToken,
       useClass: StaffAssignmentRepository,
-    },
-    {
-      provide: IDepartmentRepositoryToken,
-      useClass: DepartmentRepository,
     },
     // Use cases
     GetOrganizationUseCase,
@@ -126,11 +110,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     ToggleStaffStatusUseCase,
     UpdateCertificateUseCase,
     AssignStaffUseCase,
-
-    CreateDepartmentUseCase,
-    UpdateDepartmentUseCase,
-    ListDepartmentsUseCase,
-    ToggleDepartmentStatusUseCase,
   ],
   exports: [
     IOrganizationRepositoryToken,
@@ -138,7 +117,6 @@ import { ToggleDepartmentStatusUseCase } from '../../application/use-cases/toggl
     IRoomRepositoryToken,
     IStaffRepositoryToken,
     IStaffAssignmentRepositoryToken,
-    IDepartmentRepositoryToken,
   ],
 })
 export class OrgModule {}
