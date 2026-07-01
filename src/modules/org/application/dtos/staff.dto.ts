@@ -84,6 +84,21 @@ export class CreateStaffDto {
   @IsOptional()
   @IsString()
   degree?: string;
+
+  @ApiProperty({ example: 'namth', required: false })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiProperty({ example: '123456', required: false })
+  @IsOptional()
+  @IsString()
+  password?: string;
+
+  @ApiProperty({ example: '8521a944-cf1c-431a-a121-c62438179d2b', required: false })
+  @IsOptional()
+  @IsUUID()
+  roleId?: string;
 }
 
 export class UpdateStaffDto {
@@ -153,6 +168,21 @@ export class UpdateStaffDto {
   @IsOptional()
   @IsString()
   degree?: string;
+
+  @ApiProperty({ example: 'namth', required: false })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiProperty({ example: '123456', required: false })
+  @IsOptional()
+  @IsString()
+  password?: string;
+
+  @ApiProperty({ example: '8521a944-cf1c-431a-a121-c62438179d2b', required: false })
+  @IsOptional()
+  @IsUUID()
+  roleId?: string;
 }
 
 export class UpdatePracticingCertificateDto {

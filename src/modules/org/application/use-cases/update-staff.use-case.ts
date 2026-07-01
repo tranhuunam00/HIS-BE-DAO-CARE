@@ -1,14 +1,17 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { IStaffRepositoryToken } from '../../domain/repositories/staff.repository.interface';
 import type { IStaffRepository } from '../../domain/repositories/staff.repository.interface';
 import { UpdateStaffDto, StaffResponseDto } from '../dtos/staff.dto';
 import { Staff } from '../../domain/entities/staff.model';
+import { ensureStaffUser } from './staff-user.helper';
 
 @Injectable()
 export class UpdateStaffUseCase {
   constructor(
     @Inject(IStaffRepositoryToken)
-    private readonly staffRepository: IStaffRepository
+    private readonly staffRepository: IStaffRepository,
+    private readonly dataSource: DataSource
   ) {}
 
   async execute(id: string, dto: UpdateStaffDto): Promise<StaffResponseDto> {
@@ -31,6 +34,19 @@ export class UpdateStaffUseCase {
       }
     }
 
+    const finalEmail = dto.email !== undefined ? dto.email : staff.email;
+    const finalPhone = dto.phone !== undefined ? dto.phone : staff.phone;
+
+    const userId = await ensureStaffUser(
+      this.dataSource,
+      finalEmail,
+      finalPhone,
+      dto.username,
+      dto.password,
+      dto.roleId,
+      staff.userId
+    );
+
     const updatedStaff = new Staff(
       staff.id,
       dto.fullName !== undefined ? dto.fullName : staff.fullName,
@@ -44,7 +60,7 @@ export class UpdateStaffUseCase {
       staff.joinDate, // join date stays same or from model
       dto.title !== undefined ? dto.title : staff.title,
       staff.isActive,
-      dto.userId !== undefined ? dto.userId : staff.userId,
+      userId !== null ? userId : (dto.userId !== undefined ? dto.userId : staff.userId),
       dto.nickname !== undefined ? dto.nickname : staff.nickname,
       dto.avatarUrl !== undefined ? dto.avatarUrl : staff.avatarUrl,
       dto.academicTitle !== undefined ? dto.academicTitle : staff.academicTitle,

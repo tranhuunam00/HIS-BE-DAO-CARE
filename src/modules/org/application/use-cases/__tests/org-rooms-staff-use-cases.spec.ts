@@ -18,6 +18,7 @@ import { ToggleStaffStatusUseCase } from '../toggle-staff-status.use-case';
 import { UpdateCertificateUseCase } from '../update-certificate.use-case';
 import { AssignStaffUseCase } from '../assign-staff.use-case';
 
+import { DataSource } from 'typeorm';
 import { IRoomRepositoryToken } from '../../../domain/repositories/room.repository.interface';
 import { IResourceRepositoryToken } from '../../../domain/repositories/resource.repository.interface';
 import { IStaffRepositoryToken } from '../../../domain/repositories/staff.repository.interface';
@@ -279,6 +280,7 @@ describe('Rooms, Resources & Staff Use Cases', () => {
         { provide: IResourceRepositoryToken, useValue: mockResourceRepository },
         { provide: IStaffRepositoryToken, useValue: mockStaffRepository },
         { provide: IStaffAssignmentRepositoryToken, useValue: mockStaffAssignmentRepository },
+        { provide: DataSource, useValue: { getRepository: jest.fn() } },
       ],
     }).compile();
 

@@ -1,15 +1,18 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { IStaffRepositoryToken } from '../../domain/repositories/staff.repository.interface';
 import type { IStaffRepository } from '../../domain/repositories/staff.repository.interface';
 import { CreateStaffDto, StaffResponseDto } from '../dtos/staff.dto';
 import { Staff } from '../../domain/entities/staff.model';
+import { ensureStaffUser } from './staff-user.helper';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class CreateStaffUseCase {
   constructor(
     @Inject(IStaffRepositoryToken)
-    private readonly staffRepository: IStaffRepository
+    private readonly staffRepository: IStaffRepository,
+    private readonly dataSource: DataSource
   ) {}
 
   async execute(dto: CreateStaffDto): Promise<StaffResponseDto> {
@@ -30,6 +33,17 @@ export class CreateStaffUseCase {
 
     const id = crypto.randomUUID();
     const now = new Date();
+
+    const userId = await ensureStaffUser(
+      this.dataSource,
+      dto.email,
+      dto.phone,
+      dto.username,
+      dto.password,
+      dto.roleId,
+      null
+    );
+
     const staff = new Staff(
       id,
       dto.fullName,
@@ -43,7 +57,7 @@ export class CreateStaffUseCase {
       new Date(dto.joinDate),
       dto.title,
       true,
-      dto.userId || null,
+      userId || dto.userId || null,
       dto.nickname || null,
       dto.avatarUrl || null,
       dto.academicTitle || null,
