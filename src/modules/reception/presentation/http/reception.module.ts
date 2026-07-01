@@ -14,6 +14,7 @@ import { AppointmentController } from './controllers/appointment.controller';
 import { PatientVisitController } from './controllers/patient-visit.controller';
 
 import { IPatientRepositoryToken, ListPatientsUseCase, GetPatientUseCase, CreatePatientUseCase, UpdatePatientUseCase } from '../../application/use-cases/patient.use-cases';
+import { ResetPatientPasswordUseCase } from '../../application/use-cases/reset-patient-password.use-case';
 import { IAppointmentRepositoryToken, ListAppointmentsUseCase, GetAppointmentUseCase, CreateAppointmentUseCase, UpdateAppointmentUseCase } from '../../application/use-cases/appointment.use-cases';
 import { IPatientVisitRepositoryToken, ListPatientVisitsUseCase, GetPatientVisitUseCase, CheckInUseCase, UpdateVitalSignsUseCase, TransferRoomUseCase, ConfirmResultsWaitUseCase, AcceptPatientUseCase, CompletePatientUseCase } from '../../application/use-cases/patient-visit.use-cases';
 
@@ -55,6 +56,7 @@ import { BillingModule } from '../../../billing/presentation/http/billing.module
     GetPatientUseCase,
     CreatePatientUseCase,
     UpdatePatientUseCase,
+    ResetPatientPasswordUseCase,
     // Appointment Use Cases
     ListAppointmentsUseCase,
     GetAppointmentUseCase,

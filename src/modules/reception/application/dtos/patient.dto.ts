@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsEmail, IsDateString, IsIn } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsEmail, IsDateString, IsIn, MinLength } from 'class-validator';
 import {
   PATIENT_GENDER,
   type PatientGender,
@@ -61,6 +61,17 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   avatarUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Tên đăng nhập của tài khoản' })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiPropertyOptional({ description: 'Mật khẩu đăng nhập' })
+  @IsOptional()
+  @IsString()
+  @MinLength(6, { message: 'Mật khẩu phải từ 6 ký tự trở lên' })
+  password?: string;
 }
 
 export class UpdatePatientDto {
@@ -119,6 +130,17 @@ export class UpdatePatientDto {
   @IsOptional()
   @IsString()
   avatarUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Tên đăng nhập của tài khoản' })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiPropertyOptional({ description: 'Mật khẩu đăng nhập' })
+  @IsOptional()
+  @IsString()
+  @MinLength(6, { message: 'Mật khẩu phải từ 6 ký tự trở lên' })
+  password?: string;
 }
 
 export class PatientResponseDto {
@@ -166,4 +188,7 @@ export class PatientResponseDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty({ required: false })
+  username?: string | null;
 }

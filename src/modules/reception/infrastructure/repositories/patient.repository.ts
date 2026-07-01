@@ -64,6 +64,11 @@ export class PatientRepository implements IPatientRepository {
     return entity ? this.mapToDomain(entity) : null;
   }
 
+  async findByCccd(cccd: string): Promise<Patient | null> {
+    const entity = await this.ormRepository.findOneBy({ cccd });
+    return entity ? this.mapToDomain(entity) : null;
+  }
+
   async save(patient: Omit<Patient, 'id'> & { id?: string }): Promise<Patient> {
     const entity = this.ormRepository.create(patient);
     const saved = await this.ormRepository.save(entity);

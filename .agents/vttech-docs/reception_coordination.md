@@ -1,4 +1,4 @@
-﻿# Tài liệu nghiệp vụ VTTech: Đón tiếp & Điều phối khách hàng (Reception & Coordination)
+# Tài liệu nghiệp vụ VTTech: Đón tiếp & Điều phối khách hàng (Reception & Coordination)
 
 Tài liệu này tổng hợp chi tiết nghiệp vụ từ các trang hướng dẫn của VTTech Solution liên quan đến Quy trình nhận bệnh, tạo lịch hẹn, đặt phòng khám và theo dõi lịch hẹn.
 
@@ -194,5 +194,13 @@ Xem m&agrave;n h&igrave;nh n&agrave;y tại: menu "Lịch hẹn" -> Chọn "M&ag
 
 
 ---
+
+## [Yêu cầu Bổ sung] Kiểm tra tính duy nhất của số CCCD bệnh nhân
+
+Để tránh tình trạng trùng lặp hồ sơ hành chính của khách hàng tại hệ thống y tế DAO CARE:
+1. **Ràng buộc duy nhất**: Mỗi số Căn cước công dân (CCCD) chỉ được gắn với một ID bệnh nhân (ID hồ sơ) duy nhất.
+2. **Kiểm tra khi Tạo mới**: Khi Lễ tân hoặc hệ thống tự động tạo mới hồ sơ bệnh nhân, nếu CCCD đã tồn tại trong hệ thống, hệ thống phải từ chối và hiển thị thông báo lỗi: `Số CCCD bệnh nhân đã tồn tại trong hệ thống`.
+3. **Kiểm tra khi Cập nhật**: Khi Lễ tân cập nhật hồ sơ bệnh nhân, nếu thay đổi số CCCD và số CCCD mới trùng với bệnh nhân khác, hệ thống phải báo lỗi tương ứng.
+
 
 

@@ -4,7 +4,9 @@ import { JwtAuthGuard } from '../../../../auth/presentation/http/guards/jwt-auth
 import { PermissionsGuard } from '../../../../auth/presentation/http/guards/permissions.guard';
 import { RequirePermissions } from '../../../../auth/presentation/http/decorators/require-permissions.decorator';
 import { ListPatientsUseCase, GetPatientUseCase, CreatePatientUseCase, UpdatePatientUseCase } from '../../../application/use-cases/patient.use-cases';
+import { ResetPatientPasswordUseCase } from '../../../application/use-cases/reset-patient-password.use-case';
 import { CreatePatientDto, UpdatePatientDto, PatientResponseDto } from '../../../application/dtos/patient.dto';
+import { ResetPasswordDto } from '../../../../auth/application/dtos/user-admin.dto';
 
 @ApiTags('Patient Profile Management (Lễ tân)')
 @Controller('patients')
@@ -16,6 +18,7 @@ export class PatientController {
     private readonly getPatientUseCase: GetPatientUseCase,
     private readonly createPatientUseCase: CreatePatientUseCase,
     private readonly updatePatientUseCase: UpdatePatientUseCase,
+    private readonly resetPatientPasswordUseCase: ResetPatientPasswordUseCase,
   ) {}
 
   @Get()
@@ -49,5 +52,17 @@ export class PatientController {
   @ApiResponse({ status: 200, type: PatientResponseDto })
   async update(@Param('id') id: string, @Body() dto: UpdatePatientDto): Promise<PatientResponseDto> {
     return await this.updatePatientUseCase.execute(id, dto);
+  }
+
+  @Post(':id/reset-password')
+  @RequirePermissions('org:write')
+  @ApiOperation({ summary: 'Reset mật khẩu hoặc cấp tài khoản mới cho bệnh nhân' })
+  @ApiResponse({ status: 200, description: 'Reset mật khẩu thành công' })
+  async resetPassword(
+    @Param('id') id: string,
+    @Body() dto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.resetPatientPasswordUseCase.execute(id, dto.password);
+    return { message: 'Reset mật khẩu thành công' };
   }
 }
