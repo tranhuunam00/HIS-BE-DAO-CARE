@@ -9,7 +9,7 @@ export class Staff {
     public readonly gender: string,
     public readonly identityNumber: string,
     public readonly phone: string,
-    public readonly email: string,
+    public readonly email: string | null,
     public readonly address: string | null,
     public readonly staffCode: string,
     public readonly joinDate: Date,

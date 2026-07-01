@@ -21,9 +21,11 @@ export class CreateStaffUseCase {
       throw new ConflictException(`Mã nhân viên "${dto.staffCode}" đã được sử dụng.`);
     }
 
-    const existingEmail = await this.staffRepository.findByEmail(dto.email);
-    if (existingEmail) {
-      throw new ConflictException(`Email "${dto.email}" đã được sử dụng.`);
+    if (dto.email) {
+      const existingEmail = await this.staffRepository.findByEmail(dto.email);
+      if (existingEmail) {
+        throw new ConflictException(`Email "${dto.email}" đã được sử dụng.`);
+      }
     }
 
     const existingIdNumber = await this.staffRepository.findByIdentityNumber(dto.identityNumber);
@@ -36,7 +38,7 @@ export class CreateStaffUseCase {
 
     const userId = await ensureStaffUser(
       this.dataSource,
-      dto.email,
+      dto.email || null,
       dto.phone,
       dto.username,
       dto.password,
@@ -51,7 +53,7 @@ export class CreateStaffUseCase {
       dto.gender,
       dto.identityNumber,
       dto.phone,
-      dto.email,
+      dto.email || null,
       dto.address || null,
       dto.staffCode,
       new Date(dto.joinDate),

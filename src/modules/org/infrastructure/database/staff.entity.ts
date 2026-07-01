@@ -23,8 +23,8 @@ export class StaffOrmEntity {
   @Column()
   phone: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ unique: true, nullable: true })
+  email: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   address: string | null;

@@ -8,7 +8,7 @@ import { PASSWORD_HASH_ROUNDS, BranchScopeMode } from '../../../auth/domain/cons
 
 export async function ensureStaffUser(
   dataSource: DataSource,
-  email: string,
+  email: string | null,
   phone: string,
   username?: string,
   password?: string,

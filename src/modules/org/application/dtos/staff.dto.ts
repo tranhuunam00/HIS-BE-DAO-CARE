@@ -34,10 +34,10 @@ export class CreateStaffDto {
   @IsNotEmpty()
   phone: string;
 
-  @ApiProperty({ example: 'namth@daocare.vn' })
+  @ApiProperty({ example: 'namth@daocare.vn', required: false })
   @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({ example: 'Hà Nội, Việt Nam', required: false })
   @IsOptional()
@@ -324,7 +324,7 @@ export class StaffResponseDto {
   phone: string;
 
   @ApiProperty()
-  email: string;
+  email: string | null;
 
   @ApiProperty()
   address: string | null;

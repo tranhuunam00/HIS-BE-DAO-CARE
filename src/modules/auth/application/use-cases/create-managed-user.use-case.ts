@@ -30,7 +30,7 @@ export class CreateManagedUserUseCase {
     await ensureUsernameAvailable(this.dataSource, dto.username);
     await ensureIdentityNumberAvailable(this.dataSource, dto.identityNumber, dto.staffId);
 
-    const email = dto.email || staff.email;
+    const email = dto.email || staff.email || `${staff.phone}@hisdaocare.com`;
     await ensureEmailAvailable(this.dataSource, email);
 
     const scope = await normalizeBranchScope(
