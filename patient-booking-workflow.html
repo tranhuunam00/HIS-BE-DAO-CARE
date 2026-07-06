@@ -40,6 +40,48 @@
     .mermaid {
       background: transparent;
     }
+    .info-section {
+      max-width: 1200px;
+      margin: 30px auto 0 auto;
+      background: #272828;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .info-title {
+      color: #fff;
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-left: 4px solid #059669;
+      padding-left: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background-color: #1f2020;
+      color: #fff;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .badge-booked { background-color: #1d4ed8; color: #fff; }
+    .badge-confirmed { background-color: #d97706; color: #fff; }
+    .badge-checkedin { background-color: #059669; color: #fff; }
+    .badge-cancelled { background-color: #dc2626; color: #fff; }
   </style>
   <!-- Load Mermaid Library from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
@@ -107,6 +149,41 @@
           FillFullProfile --> CreateVisit
           CreateVisit --> ADMITTED["Bệnh nhân chính thức vào luồng khám:<br>Trạng thái: ADMITTED"]
     </div>
+  </div>
+
+  <div class="info-section">
+    <h2 class="info-title">Các trạng thái của Lịch hẹn khám (Appointment Status)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Mã Trạng Thái</th>
+          <th>Tên Trạng Thái</th>
+          <th>Đặc điểm / Luồng Xử lý</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-badge badge-booked">BOOKED</span></td>
+          <td>Chờ xác nhận</td>
+          <td>Lịch hẹn vừa được tạo trực tuyến hoặc vãng lai, chờ lễ tân duyệt thông tin.</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge badge-confirmed">CONFIRMED</span></td>
+          <td>Đã xác nhận</td>
+          <td>Lịch hẹn hợp lệ, đã được hệ thống hoặc nhân viên y tế xác nhận lịch khám.</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge badge-checkedin">CHECKED_IN</span></td>
+          <td>Đã đón tiếp</td>
+          <td>Bệnh nhân đã đến phòng khám và được lễ tân tiếp nhận thành công. Trạng thái này sẽ khởi tạo một <b>Lượt khám (Patient Visit)</b> mới vào hàng đợi.</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge badge-cancelled">CANCELLED</span></td>
+          <td>Đã hủy lịch</td>
+          <td>Lịch hẹn bị hủy (do bệnh nhân yêu cầu hoặc phòng khám chủ động hủy).</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </body>
