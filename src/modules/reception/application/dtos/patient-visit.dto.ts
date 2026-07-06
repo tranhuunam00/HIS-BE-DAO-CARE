@@ -202,6 +202,9 @@ export class PatientVisitResponseDto {
   @ApiProperty({ required: false })
   prescriptions?: any[];
 
+  @ApiProperty({ required: false })
+  appointment?: any;
+
   @ApiPropertyOptional({ description: 'Đơn dịch vụ chỉ định liên quan' })
   order?: any;
 

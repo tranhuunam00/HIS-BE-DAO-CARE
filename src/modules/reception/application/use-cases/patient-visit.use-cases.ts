@@ -64,6 +64,7 @@ export function mapVisitToDto(model: PatientVisit): PatientVisitResponseDto {
     branchId: model.branchId,
     branch: model.branch,
     appointmentId: model.appointmentId,
+    appointment: (model as any).appointment,
     currentRoomId: model.currentRoomId,
     currentRoom: model.currentRoom,
     currentDoctorId: model.currentDoctorId,

@@ -44,6 +44,7 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       entity.currentNurse,
     );
     (domain as any).order = (entity as any).order;
+    (domain as any).appointment = entity.appointment;
     return domain;
   }
 
@@ -64,6 +65,9 @@ export class PatientVisitRepository implements IPatientVisitRepository {
       .leftJoinAndSelect('visit.currentDoctor', 'currentDoctor')
       .leftJoinAndSelect('visit.currentNurse', 'currentNurse')
       .leftJoinAndSelect('visit.branch', 'branch')
+      .leftJoinAndSelect('visit.appointment', 'appointment')
+      .leftJoinAndSelect('appointment.service', 'appointmentService')
+      .leftJoinAndSelect('appointment.doctor', 'appointmentDoctor')
       .leftJoin(OrderOrmEntity, 'doctorOrder', 'doctorOrder.visitId = visit.id')
       .leftJoin(OrderItemOrmEntity, 'doctorItem', 'doctorItem.orderId = doctorOrder.id')
       .distinct(true);
