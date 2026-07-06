@@ -12,6 +12,8 @@ export class Appointment {
     public readonly endTime: string,
     public readonly status: string, // 'BOOKED' | 'CONFIRMED' | 'CHECKED_IN' | 'CANCELLED'
     public readonly notes: string | null,
+    public readonly phone: string | null,
+    public readonly isGuest: boolean,
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
     public readonly patient?: any,

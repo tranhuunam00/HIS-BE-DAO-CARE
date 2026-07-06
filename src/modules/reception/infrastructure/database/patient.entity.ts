@@ -11,8 +11,8 @@ export class PatientOrmEntity {
   @Column({ name: 'full_name' })
   fullName: string;
 
-  @Column({ type: 'date' })
-  dob: string;
+  @Column({ type: 'date', nullable: true })
+  dob: string | null;
 
   @Column()
   gender: string; // 'MALE' | 'FEMALE' | 'OTHER'

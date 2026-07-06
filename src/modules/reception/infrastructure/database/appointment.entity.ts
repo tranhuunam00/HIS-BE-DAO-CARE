@@ -63,6 +63,12 @@ export class AppointmentOrmEntity {
   @Column({ type: 'text', nullable: true })
   notes: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  phone: string | null;
+
+  @Column({ name: 'is_guest', type: 'boolean', default: false })
+  isGuest: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

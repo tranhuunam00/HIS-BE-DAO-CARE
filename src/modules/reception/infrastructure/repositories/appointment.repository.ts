@@ -26,6 +26,8 @@ export class AppointmentRepository implements IAppointmentRepository {
       entity.endTime,
       entity.status,
       entity.notes,
+      entity.phone,
+      entity.isGuest,
       entity.createdAt,
       entity.updatedAt,
       entity.patient,
@@ -35,7 +37,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     );
   }
 
-  async findAll(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string }): Promise<Appointment[]> {
+  async findAll(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string; startDate?: string; endDate?: string }): Promise<Appointment[]> {
     const query = this.ormRepository.createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor')
@@ -50,6 +52,13 @@ export class AppointmentRepository implements IAppointmentRepository {
     }
     if (filters.date) {
       query.andWhere('appointment.appointmentDate = :date', { date: filters.date });
+    } else {
+      if (filters.startDate) {
+        query.andWhere('appointment.appointmentDate >= :startDate', { startDate: filters.startDate });
+      }
+      if (filters.endDate) {
+        query.andWhere('appointment.appointmentDate <= :endDate', { endDate: filters.endDate });
+      }
     }
     if (filters.status) {
       query.andWhere('appointment.status = :status', { status: filters.status });

@@ -8,8 +8,6 @@ import { CreateAppointmentDto, UpdateAppointmentDto, AppointmentResponseDto } fr
 
 @ApiTags('Appointment Management (Lịch hẹn)')
 @Controller('appointments')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth()
 export class AppointmentController {
   constructor(
     private readonly listAppointmentsUseCase: ListAppointmentsUseCase,
@@ -19,6 +17,8 @@ export class AppointmentController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('org:read')
   @ApiOperation({ summary: 'Lấy danh sách lịch hẹn đặt trước' })
   @ApiQuery({ name: 'branchId', required: false })
@@ -26,6 +26,8 @@ export class AppointmentController {
   @ApiQuery({ name: 'date', required: false, description: 'Lọc ngày hẹn (YYYY-MM-DD)' })
   @ApiQuery({ name: 'status', required: false, description: 'Lọc trạng thái' })
   @ApiQuery({ name: 'phone', required: false, description: 'Lọc theo SĐT bệnh nhân' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Lọc từ ngày (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Lọc đến ngày (YYYY-MM-DD)' })
   @ApiResponse({ status: 200, type: [AppointmentResponseDto] })
   async getAll(
     @Query('branchId') branchId?: string,
@@ -33,11 +35,15 @@ export class AppointmentController {
     @Query('date') date?: string,
     @Query('status') status?: string,
     @Query('phone') phone?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ): Promise<AppointmentResponseDto[]> {
-    return await this.listAppointmentsUseCase.execute({ branchId, doctorId, date, status, phone });
+    return await this.listAppointmentsUseCase.execute({ branchId, doctorId, date, status, phone, startDate, endDate });
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('org:read')
   @ApiOperation({ summary: 'Xem chi tiết lịch hẹn' })
   @ApiResponse({ status: 200, type: AppointmentResponseDto })
@@ -46,14 +52,15 @@ export class AppointmentController {
   }
 
   @Post()
-  @RequirePermissions('org:write')
-  @ApiOperation({ summary: 'Tạo lịch hẹn mới' })
+  @ApiOperation({ summary: 'Tạo lịch hẹn mới (Public - hỗ trợ đặt lịch không login)' })
   @ApiResponse({ status: 201, type: AppointmentResponseDto })
   async create(@Body() dto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
     return await this.createAppointmentUseCase.execute(dto);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('org:write')
   @ApiOperation({ summary: 'Chỉnh sửa thông tin lịch hẹn (chỉ khi chưa check-in/hủy)' })
   @ApiResponse({ status: 200, type: AppointmentResponseDto })

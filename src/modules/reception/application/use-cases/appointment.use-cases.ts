@@ -1,6 +1,9 @@
 import { Inject, Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { Appointment } from '../../domain/entities/appointment.model';
 import type { IAppointmentRepository } from '../../domain/repositories/appointment.repository.interface';
+import type { IPatientRepository } from '../../domain/repositories/patient.repository.interface';
+import { IPatientRepositoryToken } from './patient.use-cases';
 import { CreateAppointmentDto, UpdateAppointmentDto, AppointmentResponseDto } from '../dtos/appointment.dto';
 import { APPOINTMENT_STATUS } from '../../../../common/constants/workflow.constants';
 
@@ -13,7 +16,7 @@ export class ListAppointmentsUseCase {
     private readonly repository: IAppointmentRepository,
   ) {}
 
-  async execute(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string }): Promise<AppointmentResponseDto[]> {
+  async execute(filters: { branchId?: string; doctorId?: string; date?: string; status?: string; phone?: string; startDate?: string; endDate?: string }): Promise<AppointmentResponseDto[]> {
     const list = await this.repository.findAll(filters);
     return list.map(this.mapToDto);
   }
@@ -36,6 +39,8 @@ export class ListAppointmentsUseCase {
       endTime: model.endTime,
       status: model.status,
       notes: model.notes,
+      phone: model.phone,
+      isGuest: model.isGuest,
       createdAt: model.createdAt!,
       updatedAt: model.updatedAt!,
     };
@@ -75,6 +80,8 @@ export class GetAppointmentUseCase {
       endTime: model.endTime,
       status: model.status,
       notes: model.notes,
+      phone: model.phone,
+      isGuest: model.isGuest,
       createdAt: model.createdAt!,
       updatedAt: model.updatedAt!,
     };
@@ -86,9 +93,48 @@ export class CreateAppointmentUseCase {
   constructor(
     @Inject(IAppointmentRepositoryToken)
     private readonly repository: IAppointmentRepository,
+    @Inject(IPatientRepositoryToken)
+    private readonly patientRepository: IPatientRepository,
   ) {}
 
   async execute(dto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
+    let patientId = dto.patientId;
+    const isGuest = !patientId;
+
+    // Resolve patientId if not provided (guest booking flow)
+    if (!patientId) {
+      if (!dto.phone) {
+        throw new ConflictException('Số điện thoại liên hệ là bắt buộc khi đặt lịch vãng lai');
+      }
+
+      // Check if patient with this phone number already exists
+      const existingPatient = await this.patientRepository.findByPhone(dto.phone);
+      if (existingPatient) {
+        patientId = existingPatient.id;
+      } else {
+        // Auto-create a new patient profile
+        const countPatients = await this.patientRepository.countAll();
+        const nextSeqPatient = (countPatients + 1).toString().padStart(4, '0');
+        const patientCode = `BN-2026-${nextSeqPatient}`;
+
+        const newPatient = await this.patientRepository.save({
+          patientCode,
+          fullName: dto.patientFullName || 'Khách vãng lai',
+          dob: dto.patientDob || null,
+          gender: 'OTHER',
+          phone: dto.phone,
+          email: null,
+          address: null,
+          cccd: null,
+          guardianName: null,
+          guardianPhone: null,
+          guardianRelation: null,
+          avatarUrl: null,
+        });
+        patientId = newPatient.id;
+      }
+    }
+
     // Auto-generate appointment code
     const count = await this.repository.countAll();
     const dateStr = dto.appointmentDate.replace(/-/g, '').slice(2);
@@ -97,7 +143,7 @@ export class CreateAppointmentUseCase {
 
     const newAppointment = await this.repository.save({
       appointmentCode,
-      patientId: dto.patientId,
+      patientId,
       branchId: dto.branchId,
       doctorId: dto.doctorId || null,
       roomId: dto.roomId || null,
@@ -107,6 +153,8 @@ export class CreateAppointmentUseCase {
       endTime: dto.endTime,
       status: APPOINTMENT_STATUS.BOOKED,
       notes: dto.notes || null,
+      phone: dto.phone || null,
+      isGuest,
     });
 
     return this.mapToDto(newAppointment);
@@ -130,6 +178,8 @@ export class CreateAppointmentUseCase {
       endTime: model.endTime,
       status: model.status,
       notes: model.notes,
+      phone: model.phone,
+      isGuest: model.isGuest,
       createdAt: model.createdAt!,
       updatedAt: model.updatedAt!,
     };
@@ -179,6 +229,8 @@ export class UpdateAppointmentUseCase {
       endTime: model.endTime,
       status: model.status,
       notes: model.notes,
+      phone: model.phone,
+      isGuest: model.isGuest,
       createdAt: model.createdAt!,
       updatedAt: model.updatedAt!,
     };

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Sơ đồ quy trình đăng ký khám nhanh - HIS-DAO-CARE</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #1f2020;
+      color: #ccc;
+    }
+    .header {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      border-bottom: 1px solid #444;
+    }
+    h1 {
+      color: #fff;
+      font-size: 24px;
+      margin: 0 0 10px 0;
+    }
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #aaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #272828;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid {
+      background: transparent;
+    }
+  </style>
+  <!-- Load Mermaid Library from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+  </script>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Sơ đồ Quy trình Đăng ký khám nhanh trên App Bệnh nhân (Patient Quick Booking Flow)</h1>
+    <p>💡 Sơ đồ dưới đây mô tả luồng đăng ký khám tối giản (Quick Booking Form): Chỉ yêu cầu Cơ sở và Lý do khám. Tự động xử lý SĐT và hồ sơ bệnh nhân.</p>
+  </div>
+
+  <div class="container">
+    <div class="mermaid">
+      flowchart TD
+          %% Khởi đầu
+          Start([1. Bệnh nhân mở màn hình Đặt Lịch trên App]) --> CheckLogin{Bệnh nhân đã đăng nhập?}
+          
+          %% Nhánh đã đăng nhập
+          CheckLogin -->|Đã đăng nhập| AutoFillUser["2A. Hệ thống tự động lấy:<br>- patientId từ Token<br>- fullName từ Profile<br>- phone từ Profile (Chỉ đọc)"]
+          AutoFillUser --> FormInput
+          
+          %% Nhánh chưa đăng nhập
+          CheckLogin -->|Chưa đăng nhập / Khách vãng lai| RequirePhone["2B. Hiển thị ô nhập Số Điện Thoại (Bắt buộc)"]
+          RequirePhone --> CheckDBPhone{SĐT đã tồn tại trong DB?}
+          CheckDBPhone -->|Có tài khoản| LinkAccount["Gán patientId = ID hồ sơ cũ"]
+          CheckDBPhone -->|Chưa có tài khoản| CreateTempProfile["Tạo nhanh Hồ sơ nháp (Draft Patient)<br>chỉ có Số điện thoại"]
+          LinkAccount --> FormInput
+          CreateTempProfile --> FormInput
+          
+          %% Form nhập liệu
+          subgraph FormInput [Màn hình đặt lịch khám nhanh - 1 Bước duy nhất]
+              SelectBranch["3. Chọn Cơ sở khám (Bắt buộc)"]
+              InputReason["4. Nhập Triệu chứng / Lý do khám (Bắt buộc)"]
+              
+              subgraph OptionalFields [Các trường tùy chọn - Option]
+                  SelectSpec["Chọn Chuyên Khoa<br>(Mặc định: Khám đa khoa/Khám chung nếu trống)"]
+                  SelectSrv["Chọn Gói Dịch Vụ<br>(Chỉ hiện khi chọn Chuyên Khoa)"]
+                  SelectDoc["Chọn Bác Sĩ khám<br>(Mặc định: Sắp xếp tự động)"]
+                  SelectDateTime["Chọn Ngày & Giờ khám<br>(Mặc định: Ngày hôm nay/ngày mai gần nhất)"]
+              end
+          end
+          
+          SelectBranch --> SubmitBooking
+          InputReason --> SubmitBooking
+          OptionalFields --> SubmitBooking
+          
+          %% Gửi dữ liệu
+          SubmitBooking["5. Bấm nút 'Xác nhận đặt lịch'"] --> CreateAppointment["6. Backend tạo lịch hẹn (Appointment)<br>Trạng thái: PENDING (Chờ duyệt)<br>Nếu chưa đăng nhập: Gán cờ isGuest = true"]
+          
+          %% Lễ tân tiếp nhận
+          CreateAppointment --> PatientArrive["7. Bệnh nhân đến phòng khám theo lịch đặt"]
+          PatientArrive --> ReceptionConfirm["8. Lễ tân nhập SĐT xác nhận lịch hẹn"]
+          ReceptionConfirm --> VerifyInfo{"Hồ sơ bệnh nhân là nháp (draft)?"}
+          
+          VerifyInfo -->|Đúng - khách mới| FillFullProfile["Lễ tân thu thập bổ sung:<br>Họ tên, Ngày sinh, Giới tính, Địa chỉ"]
+          VerifyInfo -->|Sai - khách cũ| CreateVisit["Lễ tân bấm Tiếp nhận và in số thứ tự phòng khám"]
+          
+          FillFullProfile --> CreateVisit
+          CreateVisit --> ADMITTED["Bệnh nhân chính thức vào luồng khám:<br>Trạng thái: ADMITTED"]
+    </div>
+  </div>
+
+</body>
+</html>

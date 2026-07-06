@@ -6,10 +6,10 @@ import {
 } from '../../../../common/constants/workflow.constants';
 
 export class CreateAppointmentDto {
-  @ApiProperty({ description: 'ID của bệnh nhân' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'ID của bệnh nhân (nếu đã đăng nhập)' })
+  @IsOptional()
   @IsUUID()
-  patientId: string;
+  patientId?: string;
 
   @ApiProperty({ description: 'ID của chi nhánh' })
   @IsNotEmpty()
@@ -50,6 +50,21 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({ description: 'Số điện thoại liên hệ' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({ description: 'Họ tên bệnh nhân (dành cho đặt lịch không login)' })
+  @IsOptional()
+  @IsString()
+  patientFullName?: string;
+
+  @ApiPropertyOptional({ description: 'Ngày sinh bệnh nhân YYYY-MM-DD (dành cho đặt lịch không login)' })
+  @IsOptional()
+  @IsString()
+  patientDob?: string;
 }
 
 export class UpdateAppointmentDto {
@@ -93,6 +108,11 @@ export class UpdateAppointmentDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }
 
 export class AppointmentResponseDto {
@@ -146,6 +166,12 @@ export class AppointmentResponseDto {
 
   @ApiProperty({ required: false })
   notes: string | null;
+
+  @ApiProperty({ required: false })
+  phone: string | null;
+
+  @ApiProperty()
+  isGuest: boolean;
 
   @ApiProperty()
   createdAt: Date;

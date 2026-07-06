@@ -153,8 +153,8 @@ export class PatientResponseDto {
   @ApiProperty()
   fullName: string;
 
-  @ApiProperty()
-  dob: string;
+  @ApiProperty({ required: false })
+  dob: string | null;
 
   @ApiProperty()
   gender: string;

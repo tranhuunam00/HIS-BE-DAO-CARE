@@ -3,7 +3,7 @@ export class Patient {
     public readonly id: string,
     public readonly patientCode: string,
     public readonly fullName: string,
-    public readonly dob: string,
+    public readonly dob: string | null,
     public readonly gender: string,
     public readonly phone: string,
     public readonly email: string | null,

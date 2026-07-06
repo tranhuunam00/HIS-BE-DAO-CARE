@@ -15,8 +15,6 @@ import { CreateStaffDto, UpdateStaffDto, UpdatePracticingCertificateDto, AssignS
 
 @ApiTags('Staff & HR Management')
 @Controller('staff')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth()
 export class StaffController {
   constructor(
     private readonly listStaffUseCase: ListStaffUseCase,
@@ -29,8 +27,7 @@ export class StaffController {
   ) {}
 
   @Get()
-  @RequirePermissions('staff:read')
-  @ApiOperation({ summary: 'Tìm kiếm và lấy danh sách hồ sơ nhân sự' })
+  @ApiOperation({ summary: 'Tìm kiếm và lấy danh sách hồ sơ nhân sự (Public)' })
   @ApiQuery({ name: 'branchId', required: false, description: 'Lọc nhân viên theo ID chi nhánh' })
   @ApiQuery({ name: 'title', required: false, enum: STAFF_TITLE, description: 'Lọc theo chức danh' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Lọc trạng thái hoạt động' })
@@ -48,6 +45,8 @@ export class StaffController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:read')
   @ApiOperation({ summary: 'Xem chi tiết hồ sơ nhân sự kèm chứng chỉ và phân công' })
   @ApiResponse({ status: 200, type: StaffResponseDto, description: 'Trả về chi tiết hồ sơ' })
@@ -57,6 +56,8 @@ export class StaffController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:write')
   @ApiOperation({ summary: 'Tạo hồ sơ nhân sự mới' })
   @ApiResponse({ status: 201, type: StaffResponseDto, description: 'Tạo thành công' })
@@ -67,6 +68,8 @@ export class StaffController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:write')
   @ApiOperation({ summary: 'Cập nhật thông tin hồ sơ nhân sự' })
   @ApiResponse({ status: 200, type: StaffResponseDto, description: 'Cập nhật thành công' })
@@ -76,6 +79,8 @@ export class StaffController {
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:write')
   @ApiOperation({ summary: 'Bật/tắt trạng thái hoạt động của nhân sự' })
   @ApiResponse({ status: 200, type: StaffResponseDto, description: 'Cập nhật trạng thái thành công' })
@@ -88,6 +93,8 @@ export class StaffController {
   }
 
   @Put(':id/certificate')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:write')
   @ApiOperation({ summary: 'Cấu hình/Cập nhật Chứng chỉ hành nghề cho nhân sự' })
   @ApiResponse({ status: 200, type: PracticingCertificateResponseDto, description: 'Lưu thông tin thành công' })
@@ -100,6 +107,8 @@ export class StaffController {
   }
 
   @Post(':id/assignments')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('staff:write')
   @ApiOperation({ summary: 'Phân công công tác cho nhân sự vào Chi nhánh & Phòng ban' })
   @ApiResponse({ status: 200, type: StaffAssignmentResponseDto, description: 'Phân công thành công' })

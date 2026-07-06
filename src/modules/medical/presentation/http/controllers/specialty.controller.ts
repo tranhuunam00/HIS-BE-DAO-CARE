@@ -16,8 +16,6 @@ import {
 
 @ApiTags('Medical - Specialties')
 @Controller('specialties')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth()
 export class SpecialtyController {
   constructor(
     private readonly listSpecialtiesUseCase: ListSpecialtiesUseCase,
@@ -28,14 +26,15 @@ export class SpecialtyController {
   ) {}
 
   @Get()
-  @RequirePermissions('specialty:read')
-  @ApiOperation({ summary: 'Lấy danh sách chuyên khoa' })
+  @ApiOperation({ summary: 'Lấy danh sách chuyên khoa (Public)' })
   @ApiResponse({ status: 200, description: 'Danh sách chuyên khoa' })
   async getAll(): Promise<SpecialtyResponseDto[]> {
     return await this.listSpecialtiesUseCase.execute();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('specialty:read')
   @ApiOperation({ summary: 'Xem chi tiết chuyên khoa' })
   @ApiResponse({ status: 200, description: 'Chi tiết chuyên khoa' })
@@ -45,6 +44,8 @@ export class SpecialtyController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('specialty:write')
   @ApiOperation({ summary: 'Tạo mới chuyên khoa' })
   @ApiResponse({ status: 201, description: 'Tạo chuyên khoa thành công' })
@@ -54,6 +55,8 @@ export class SpecialtyController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('specialty:write')
   @ApiOperation({ summary: 'Cập nhật chuyên khoa' })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
@@ -66,6 +69,8 @@ export class SpecialtyController {
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('specialty:write')
   @ApiOperation({ summary: 'Bật/tắt trạng thái hoạt động chuyên khoa' })
   @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành công' })

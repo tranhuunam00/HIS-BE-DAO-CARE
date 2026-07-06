@@ -19,8 +19,6 @@ import {
 
 @ApiTags('Medical - Services')
 @Controller('services')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth()
 export class ServiceController {
   constructor(
     private readonly listServicesUseCase: ListServicesUseCase,
@@ -32,8 +30,7 @@ export class ServiceController {
   ) {}
 
   @Get()
-  @RequirePermissions('service:read')
-  @ApiOperation({ summary: 'Lấy danh sách dịch vụ y tế' })
+  @ApiOperation({ summary: 'Lấy danh sách dịch vụ y tế (Public)' })
   @ApiQuery({ name: 'specialtyId', required: false, description: 'Lọc theo chuyên khoa' })
   @ApiQuery({ name: 'category', required: false, description: 'Lọc theo loại dịch vụ' })
   @ApiResponse({ status: 200, description: 'Danh sách dịch vụ kèm bảng giá' })
@@ -45,6 +42,8 @@ export class ServiceController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('service:read')
   @ApiOperation({ summary: 'Xem chi tiết dịch vụ' })
   @ApiResponse({ status: 200, description: 'Chi tiết dịch vụ kèm bảng giá' })
@@ -54,6 +53,8 @@ export class ServiceController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('service:write')
   @ApiOperation({ summary: 'Tạo mới dịch vụ y tế' })
   @ApiResponse({ status: 201, description: 'Tạo dịch vụ thành công' })
@@ -63,6 +64,8 @@ export class ServiceController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('service:write')
   @ApiOperation({ summary: 'Cập nhật thông tin dịch vụ' })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
@@ -75,6 +78,8 @@ export class ServiceController {
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('service:write')
   @ApiOperation({ summary: 'Bật/tắt trạng thái dịch vụ' })
   @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành công' })
@@ -84,6 +89,8 @@ export class ServiceController {
   }
 
   @Put(':id/prices')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('service:write')
   @ApiOperation({ summary: 'Cập nhật bảng giá dịch vụ (upsert theo loại giá)' })
   @ApiResponse({ status: 200, description: 'Cập nhật bảng giá thành công' })

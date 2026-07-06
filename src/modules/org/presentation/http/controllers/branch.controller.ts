@@ -12,8 +12,6 @@ import { CreateBranchDto, UpdateBranchDto, BranchResponseDto } from '../../../ap
 
 @ApiTags('Branch Management')
 @Controller('branches')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth()
 export class BranchController {
   constructor(
     private readonly listBranchesUseCase: ListBranchesUseCase,
@@ -24,14 +22,15 @@ export class BranchController {
   ) {}
 
   @Get()
-  @RequirePermissions('branch:read')
-  @ApiOperation({ summary: 'Lấy danh sách tất cả các chi nhánh' })
+  @ApiOperation({ summary: 'Lấy danh sách tất cả các chi nhánh (Public)' })
   @ApiResponse({ status: 200, type: [BranchResponseDto], description: 'Trả về danh sách chi nhánh' })
   async getAll(): Promise<BranchResponseDto[]> {
     return await this.listBranchesUseCase.execute();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('branch:read')
   @ApiOperation({ summary: 'Xem chi tiết một chi nhánh' })
   @ApiResponse({ status: 200, type: BranchResponseDto, description: 'Trả về chi tiết chi nhánh' })
@@ -41,6 +40,8 @@ export class BranchController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('branch:create')
   @ApiOperation({ summary: 'Tạo mới một chi nhánh' })
   @ApiResponse({ status: 201, type: BranchResponseDto, description: 'Chi nhánh được tạo thành công' })
@@ -51,6 +52,8 @@ export class BranchController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('branch:update')
   @ApiOperation({ summary: 'Cập nhật thông tin chi nhánh' })
   @ApiResponse({ status: 200, type: BranchResponseDto, description: 'Cập nhật thành công' })
@@ -60,6 +63,8 @@ export class BranchController {
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('branch:update')
   @ApiOperation({ summary: 'Bật/tắt trạng thái hoạt động của chi nhánh' })
   @ApiResponse({ status: 200, type: BranchResponseDto, description: 'Cập nhật trạng thái thành công' })
