@@ -31,6 +31,11 @@ export class CreateAppointmentDto {
   @IsUUID()
   serviceId?: string;
 
+  @ApiPropertyOptional({ description: 'ID của chuyên khoa khám' })
+  @IsOptional()
+  @IsUUID()
+  specialtyId?: string;
+
   @ApiProperty({ description: 'Ngày hẹn (YYYY-MM-DD)' })
   @IsNotEmpty()
   @IsDateString()
@@ -82,6 +87,11 @@ export class UpdateAppointmentDto {
   @IsOptional()
   @IsUUID()
   serviceId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  specialtyId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -151,6 +161,9 @@ export class AppointmentResponseDto {
 
   @ApiProperty({ required: false })
   service?: any;
+
+  @ApiProperty({ required: false })
+  specialtyId: string | null;
 
   @ApiProperty()
   appointmentDate: string;

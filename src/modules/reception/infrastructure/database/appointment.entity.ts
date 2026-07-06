@@ -44,6 +44,9 @@ export class AppointmentOrmEntity {
   @Column({ name: 'service_id', type: 'varchar', nullable: true })
   serviceId: string | null;
 
+  @Column({ name: 'specialty_id', type: 'varchar', nullable: true })
+  specialtyId: string | null;
+
   @ManyToOne(() => ServiceOrmEntity, { nullable: true })
   @JoinColumn({ name: 'service_id' })
   service: ServiceOrmEntity | null;

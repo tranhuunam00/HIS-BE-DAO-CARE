@@ -34,6 +34,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       entity.doctor,
       entity.room,
       entity.service,
+      entity.specialtyId,
     );
   }
 
